@@ -1,0 +1,77 @@
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint-scripts:
+    name: Lint shell scripts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install shellcheck
+        run: sudo apt-get install -y shellcheck
+
+      - name: Check scripts are executable
+        run: |
+          find scripts -type f -name '*.sh' -print | while read -r file; do
+            test -x "$file" || { echo "Not executable: $file"; exit 1; }
+          done
+
+      - name: Run shellcheck
+        run: |
+          find scripts -type f -name '*.sh' -print0 | \
+            xargs -0 shellcheck --severity=warning || true
+
+  lint-c:
+    name: Lint C code
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cppcheck
+        run: sudo apt-get install -y cppcheck
+
+      - name: Run cppcheck on userspace code
+        run: |
+          cppcheck --enable=warning,style,performance \
+            --suppress=missingIncludeSystem \
+            --error-exitcode=1 \
+            tools/kdality/ \
+            tests/userspace/ \
+            tests/integration/ \
+            examples/
+
+  style-check:
+    name: Kernel style check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make checkpatch script executable
+        run: chmod +x scripts/ci/checkpatch.sh
+
+      - name: Run style check
+        run: ./scripts/ci/checkpatch.sh
+
+  doc-links:
+    name: Check documentation links
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check internal doc links
+        run: |
+          errors=0
+          grep -roh '\[.*\](\([^)]*\.md\))' docs/ README.md | \
+            grep -oP '\(\K[^)]+' | sort -u | while read -r link; do
+              if [ ! -f "$link" ] && [ ! -f "docs/$link" ]; then
+                echo "Broken link: $link"
+                errors=$((errors + 1))
+              fi
+            done
+          exit $errors

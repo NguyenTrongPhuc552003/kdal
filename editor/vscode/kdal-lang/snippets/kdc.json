@@ -1,0 +1,105 @@
+{
+    "Driver skeleton": {
+        "prefix": "driver",
+        "description": "New .kdc driver implementation",
+        "body": [
+            "use \"${1:device}.kdh\";",
+            "",
+            "driver ${2:mydriver} for ${1:device} {",
+            "",
+            "    on probe {",
+            "        ${3:reg_write(CTRL, 0x01);}",
+            "        log(\"${2:mydriver} probed\");",
+            "    }",
+            "",
+            "    on remove {",
+            "        ${4:reg_write(CTRL, 0x00);}",
+            "    }",
+            "",
+            "    on read {",
+            "        return reg_read(${5:DATA});",
+            "    }",
+            "",
+            "    on write {",
+            "        reg_write(${5:DATA}, input);",
+            "    }",
+            "}",
+            ""
+        ]
+    },
+    "Handler: probe": {
+        "prefix": "onprobe",
+        "description": "Probe event handler",
+        "body": [
+            "on probe {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Handler: remove": {
+        "prefix": "onremove",
+        "description": "Remove event handler",
+        "body": [
+            "on remove {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Handler: read": {
+        "prefix": "onread",
+        "description": "Read event handler",
+        "body": [
+            "on read {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Handler: write": {
+        "prefix": "onwrite",
+        "description": "Write event handler",
+        "body": [
+            "on write {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Handler: signal": {
+        "prefix": "onsignal",
+        "description": "Signal event handler",
+        "body": [
+            "on signal ${1:name} {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Handler: power": {
+        "prefix": "onpower",
+        "description": "Power state handler",
+        "body": [
+            "on power ${1|off,on,suspend|} {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Register read": {
+        "prefix": "rr",
+        "description": "reg_read(REGISTER)",
+        "body": [
+            "reg_read(${1:REGISTER})"
+        ]
+    },
+    "Register write": {
+        "prefix": "rw",
+        "description": "reg_write(REGISTER, value)",
+        "body": [
+            "reg_write(${1:REGISTER}, ${2:value});"
+        ]
+    },
+    "Log message": {
+        "prefix": "log",
+        "description": "log(\"message\")",
+        "body": [
+            "log(\"${1:message}\");"
+        ]
+    }
+}

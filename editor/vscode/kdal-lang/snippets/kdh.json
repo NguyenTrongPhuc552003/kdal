@@ -1,0 +1,45 @@
+{
+    "Device skeleton": {
+        "prefix": "device",
+        "description": "New .kdh device declaration",
+        "body": [
+            "device ${1:mydevice} {",
+            "    class ${2|uart,i2c,spi,gpio,gpu,npu|};",
+            "    compatible \"${3:vendor},${1:mydevice}\";",
+            "",
+            "    register_map {",
+            "        ${4:CTRL}   ${5:0x00} ${6|rw,ro,wo|};",
+            "        ${7:STATUS} ${8:0x04} ro;",
+            "    }",
+            "",
+            "    signals {",
+            "        ${9:irq};",
+            "    }",
+            "",
+            "    capabilities {",
+            "        ${10:dma} ${11|false,true|};",
+            "    }",
+            "",
+            "    power_states {",
+            "        off;",
+            "        on;",
+            "    }",
+            "}",
+            ""
+        ]
+    },
+    "Register entry": {
+        "prefix": "reg",
+        "description": "Register map entry",
+        "body": [
+            "${1:NAME} ${2:0x00} ${3|rw,ro,wo|};"
+        ]
+    },
+    "Signal entry": {
+        "prefix": "sig",
+        "description": "Signal declaration",
+        "body": [
+            "${1:signal_name};"
+        ]
+    }
+}

@@ -1,0 +1,152 @@
+/*
+ * KDAL Standard Library — i2c.kdh
+ * I2C controller interface (DesignWare DW_apb_i2c compatible).
+ *
+ * This interface covers the DesignWare IP that is present in many
+ * SoCs (Intel, Synopsys, ARM reference designs). The register layout
+ * matches DW_apb_i2c v2.x (used in Linux i2c-designware driver).
+ *
+ * Usage:
+ *   import "kdal/stdlib/i2c.kdh" as I2C;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class I2cController {
+
+    registers {
+        /* Control register */
+        CON : bitfield  @ 0x000  rw {
+            master_mode     : 0   = true;
+            speed           : 1..2 = 2;   /* 1=std 2=fast 3=high */
+            ic_10bitaddr_slave  : 3   = false;
+            ic_10bitaddr_master : 4   = false;
+            ic_restart_en   : 5   = true;
+            ic_slave_disable: 6   = true;
+            stop_det_ifaddr : 7   = false;
+            tx_empty_ctrl   : 8   = false;
+            rx_fifo_full_hld: 9   = false;
+        };
+
+        /* Target address register */
+        TAR : bitfield  @ 0x004  rw {
+            ic_tar          : 0..9  = 0x000;  /* 7- or 10-bit address */
+            gc_or_start     : 10   = false;
+            special         : 11   = false;
+            ic_10bitaddr_master: 12 = false;
+        };
+
+        /* Slave address register */
+        SAR : u16  @ 0x008  rw  = 0x0055;
+
+        /* Data buffer and command register */
+        DATA_CMD : bitfield  @ 0x010  rw {
+            dat     : 0..7  = 0x00;
+            cmd     : 8     = false;   /* 0=write 1=read */
+            stop    : 9     = false;
+            restart : 10    = false;
+        };
+
+        /* Standard speed clock SCL low/high count registers */
+        SS_SCL_HCNT : u16  @ 0x014  rw  = 0x0190;
+        SS_SCL_LCNT : u16  @ 0x018  rw  = 0x01D6;
+
+        /* Fast mode SCL low/high count registers */
+        FS_SCL_HCNT : u16  @ 0x01C  rw  = 0x003C;
+        FS_SCL_LCNT : u16  @ 0x020  rw  = 0x0082;
+
+        /* Interrupt status register (read-only) */
+        INTR_STAT : bitfield  @ 0x02C  ro {
+            rx_under    : 0   = false;
+            rx_over     : 1   = false;
+            rx_full     : 2   = false;
+            tx_over     : 3   = false;
+            tx_empty    : 4   = false;
+            rd_req      : 5   = false;
+            tx_abrt     : 6   = false;
+            rx_done     : 7   = false;
+            activity    : 8   = false;
+            stop_det    : 9   = false;
+            start_det   : 10  = false;
+            gen_call    : 11  = false;
+        };
+
+        /* Interrupt mask register */
+        INTR_MASK : u16  @ 0x030  rw  = 0x08FF;
+
+        /* Raw interrupt status (read-only) */
+        RAW_INTR_STAT : u16  @ 0x034  ro  = 0x0000;
+
+        /* RX / TX FIFO threshold levels */
+        RX_TL : u8  @ 0x038  rw  = 0x00;
+        TX_TL : u8  @ 0x03C  rw  = 0x00;
+
+        /* Combined and individual interrupt clear registers (read-only) */
+        CLR_INTR    : u32  @ 0x040  rc  = 0x00;
+        CLR_TX_ABRT : u32  @ 0x054  rc  = 0x00;
+        CLR_STOP_DET: u32  @ 0x060  rc  = 0x00;
+
+        /* Enable register */
+        ENABLE : bitfield  @ 0x06C  rw {
+            enable      : 0   = false;
+            abort       : 1   = false;
+        };
+
+        /* Status register (read-only) */
+        STATUS : bitfield  @ 0x070  ro {
+            activity        : 0   = false;
+            tfnf            : 1   = true;    /* TX FIFO not full */
+            tfe             : 2   = true;    /* TX FIFO empty */
+            rfne            : 3   = false;   /* RX FIFO not empty */
+            rff             : 4   = false;   /* RX FIFO full */
+            mst_activity    : 5   = false;
+            slv_activity    : 6   = false;
+        };
+
+        /* TX/RX FIFO level registers (read-only) */
+        TXFLR : u8  @ 0x074  ro  = 0x00;
+        RXFLR : u8  @ 0x078  ro  = 0x00;
+
+        /* TX abort source register (read-only) */
+        TX_ABRT_SOURCE : u32  @ 0x080  ro  = 0x00000000;
+
+        /* TX / RX DMA level registers */
+        DMA_CR   : u8   @ 0x088  rw  = 0x00;
+        DMA_TDLR : u8   @ 0x08C  rw  = 0x00;
+        DMA_RDLR : u8   @ 0x090  rw  = 0x00;
+    }
+
+    signals {
+        rx_full     : in  edge(rising);     /* RX FIFO above threshold */
+        tx_empty    : in  edge(rising);     /* TX FIFO below threshold */
+        tx_abort    : in  level(high);     /* TX abort condition */
+        stop_det    : in  edge(rising);     /* STOP condition detected */
+        start_det   : in  edge(rising);     /* START condition detected */
+    }
+
+    capabilities {
+        standard_mode = 100000;    /* 100 kHz */
+        fast_mode     = 400000;    /* 400 kHz */
+        fast_plus     = 1000000;   /* 1 MHz */
+        tx_fifo_depth = 32;
+        rx_fifo_depth = 32;
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : on;
+    }
+
+    config {
+        bus_freq_hz   : u32  = 400000  in 100000..1000000;
+        slave_addr    : u16  = 0x00    in 0x00..0x7F;
+        addr_10bit    : bool = false;
+        retry_count   : u8   = 3       in 0..10;
+    }
+}

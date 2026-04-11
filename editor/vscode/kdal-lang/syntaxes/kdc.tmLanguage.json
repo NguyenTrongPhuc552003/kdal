@@ -1,0 +1,133 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "KDAL Driver Code",
+    "scopeName": "source.kdc",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#use-statement"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#handlers"
+        },
+        {
+            "include": "#builtins"
+        },
+        {
+            "include": "#operators"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.kdc",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.kdc",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.kdc",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.kdc",
+                            "match": "\\\\."
+                        }
+                    ]
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.hex.kdc",
+                    "match": "\\b0x[0-9a-fA-F]+\\b"
+                },
+                {
+                    "name": "constant.numeric.decimal.kdc",
+                    "match": "\\b[0-9]+\\b"
+                }
+            ]
+        },
+        "use-statement": {
+            "patterns": [
+                {
+                    "name": "keyword.control.import.kdc",
+                    "match": "\\buse\\b"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.kdc",
+                    "match": "\\b(driver|for|if|else|while|return)\\b"
+                },
+                {
+                    "name": "keyword.other.handler.kdc",
+                    "match": "\\b(on)\\b"
+                },
+                {
+                    "name": "keyword.other.event.kdc",
+                    "match": "\\b(probe|remove|read|write|signal|power)\\b"
+                },
+                {
+                    "name": "keyword.other.power-state.kdc",
+                    "match": "\\b(off|on|suspend)\\b"
+                },
+                {
+                    "name": "variable.language.input.kdc",
+                    "match": "\\b(input)\\b"
+                }
+            ]
+        },
+        "handlers": {
+            "patterns": [
+                {
+                    "name": "entity.name.function.handler.kdc",
+                    "match": "(?<=on\\s)(probe|remove|read|write|signal|power)"
+                },
+                {
+                    "name": "entity.name.type.driver.kdc",
+                    "match": "(?<=driver\\s)\\w+"
+                }
+            ]
+        },
+        "builtins": {
+            "patterns": [
+                {
+                    "name": "support.function.builtin.kdc",
+                    "match": "\\b(reg_read|reg_write|log)\\b"
+                }
+            ]
+        },
+        "operators": {
+            "patterns": [
+                {
+                    "name": "keyword.operator.kdc",
+                    "match": "[&|~^!<>=+\\-*/%]+"
+                }
+            ]
+        }
+    }
+}

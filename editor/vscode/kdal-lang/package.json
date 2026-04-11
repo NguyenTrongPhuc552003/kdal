@@ -1,0 +1,73 @@
+{
+    "name": "kdal-lang",
+    "displayName": "KDAL Language Support",
+    "description": "Syntax highlighting and snippets for KDAL device headers (.kdh) and driver files (.kdc)",
+    "version": "0.1.0",
+    "publisher": "kdal-project",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Programming Languages",
+        "Snippets"
+    ],
+    "keywords": [
+        "kdal",
+        "kernel",
+        "driver",
+        "embedded",
+        "linux"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/NguyenTrongPhuc552003/kdal"
+    },
+    "contributes": {
+        "languages": [
+            {
+                "id": "kdh",
+                "aliases": [
+                    "KDAL Device Header",
+                    "kdh"
+                ],
+                "extensions": [
+                    ".kdh"
+                ],
+                "configuration": "./language-configuration.json"
+            },
+            {
+                "id": "kdc",
+                "aliases": [
+                    "KDAL Driver Code",
+                    "kdc"
+                ],
+                "extensions": [
+                    ".kdc"
+                ],
+                "configuration": "./language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "kdh",
+                "scopeName": "source.kdh",
+                "path": "./syntaxes/kdh.tmLanguage.json"
+            },
+            {
+                "language": "kdc",
+                "scopeName": "source.kdc",
+                "path": "./syntaxes/kdc.tmLanguage.json"
+            }
+        ],
+        "snippets": [
+            {
+                "language": "kdh",
+                "path": "./snippets/kdh.json"
+            },
+            {
+                "language": "kdc",
+                "path": "./snippets/kdc.json"
+            }
+        ]
+    }
+}

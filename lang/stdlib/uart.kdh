@@ -1,0 +1,146 @@
+/*
+ * KDAL Standard Library — uart.kdh
+ * UART 16550 / ARM PL011 compatible device interface.
+ *
+ * Register layout matches ARM PrimeCell PL011 UART (DDI0183G) which
+ * is the device exposed by QEMU's virt machine on aarch64.
+ *
+ * Usage:
+ *   import "kdal/stdlib/uart.kdh" as UART;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class UartDevice {
+
+    registers {
+        /* Data register — write to TX FIFO, read from RX FIFO */
+        DR   : u32  @ 0x000  rw  = 0x00000000;
+
+        /* Receive status / error clear register */
+        RSR  : bitfield  @ 0x004  rw {
+            framing_err : 0   = false;
+            parity_err  : 1   = false;
+            break_err   : 2   = false;
+            overrun_err : 3   = false;
+        };
+
+        /* Flag register (read-only) */
+        FR   : bitfield  @ 0x018  ro {
+            cts         : 0   = false;
+            dsr         : 1   = false;
+            dcd         : 2   = false;
+            busy        : 3   = false;
+            rx_empty    : 4   = true;
+            tx_full     : 5   = false;
+            rx_full     : 6   = false;
+            tx_empty    : 7   = true;
+            ri          : 8   = false;
+        };
+
+        /* IrDA low-power counter register */
+        ILPR : u8   @ 0x020  rw  = 0x00;
+
+        /* Integer baud rate register */
+        IBRD : u16  @ 0x024  rw  = 0x0000;
+
+        /* Fractional baud rate register */
+        FBRD : u8   @ 0x028  rw  = 0x00;
+
+        /* Line control register */
+        LCRH : bitfield  @ 0x02C  rw {
+            brk         : 0   = false;
+            pen         : 1   = false;   /* parity enable */
+            eps         : 2   = false;   /* even parity select */
+            stp2        : 3   = false;   /* two stop bits */
+            fen         : 4   = false;   /* FIFO enable */
+            wlen        : 5..6 = 3;      /* word length (0=5,1=6,2=7,3=8) */
+            sps         : 7   = false;
+        };
+
+        /* Control register */
+        CR   : bitfield  @ 0x030  rw {
+            uarten      : 0   = false;   /* UART enable */
+            siren       : 1   = false;
+            sirlp       : 2   = false;
+            lbe         : 7   = false;   /* loopback enable */
+            txe         : 8   = true;    /* TX enable */
+            rxe         : 9   = true;    /* RX enable */
+            dtr         : 10  = false;
+            rts         : 11  = false;
+            out1        : 12  = false;
+            out2        : 13  = false;
+            rtsen       : 14  = false;
+            ctsen       : 15  = false;
+        };
+
+        /* Interrupt FIFO level select */
+        IFLS : bitfield  @ 0x034  rw {
+            txiflsel    : 0..2 = 2;    /* TX FIFO ≤ 1/2 full */
+            rxiflsel    : 3..5 = 2;    /* RX FIFO ≥ 1/2 full */
+        };
+
+        /* Interrupt mask set/clear */
+        IMSC : bitfield  @ 0x038  rw {
+            rimim       : 0   = false;
+            ctsmim      : 1   = false;
+            dcdmim      : 2   = false;
+            dsrmim      : 3   = false;
+            rxim        : 4   = false;
+            txim        : 5   = false;
+            rtim        : 6   = false;
+            feim        : 7   = false;
+            peim        : 8   = false;
+            beim        : 9   = false;
+            oeim        : 10  = false;
+        };
+
+        /* Raw interrupt status (read-only) */
+        RIS  : u16  @ 0x03C  ro  = 0x0000;
+
+        /* Masked interrupt status (read-only) */
+        MIS  : u16  @ 0x040  ro  = 0x0000;
+
+        /* Interrupt clear register (write-only) */
+        ICR  : u16  @ 0x044  wo  = 0x0000;
+
+        /* DMA control register */
+        DMACR : bitfield  @ 0x048  rw {
+            rxdmae      : 0   = false;
+            txdmae      : 1   = false;
+            dmaonerr    : 2   = false;
+        };
+    }
+
+    signals {
+        rx_ready  : in  edge(rising);    /* RX FIFO above threshold */
+        tx_empty  : in  edge(rising);    /* TX FIFO below threshold */
+        rx_timeout: in  edge(rising);    /* RX idle timeout */
+        error     : in  level(high);     /* Framing / parity / overrun */
+    }
+
+    capabilities {
+        fifo_depth  = 16;
+        dma_capable = 1;
+        loopback    = 1;
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : on;
+    }
+
+    config {
+        baud_rate  : u32  = 115200  in 1200..4000000;
+        data_bits  : u8   = 8       in 5..9;
+        stop_bits  : u8   = 1       in 1..2;
+        parity     : u8   = 0       in 0..2;   /* 0=none 1=odd 2=even */
+        fifo_enable: bool = true;
+    }
+}

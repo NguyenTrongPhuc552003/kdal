@@ -1,0 +1,180 @@
+(* KDAL Driver Implementation Grammar — .kdc files *)
+(* Version 0.1 — EBNF (ISO 14977 extended) *)
+(*
+ * A .kdc file implements a driver for a device class declared in a .kdh.
+ * It is composed of:
+ *   - a version declaration
+ *   - imports of .kdh device interfaces
+ *   - an optional backend annotation (mmio, platdev, soc, …)
+ *   - a driver block containing:
+ *       config   — bind compile-time parameters
+ *       probe    — mandatory one-shot init handler
+ *       remove   — optional tear-down handler
+ *       on read  — register-read event handler
+ *       on write — register-write event handler
+ *       on signal — asynchronous signal handler
+ *       on power  — power-state transition handler
+ *       on timeout — periodic / one-shot timer handler
+ *
+ * The KDAL compiler translates a .kdc file into a kernel-compatible C
+ * translation unit plus a Kbuild Makefile fragment, which is then
+ * compiled into a Linux kernel module (.ko) by the host kbuild toolchain.
+ *
+ * Design constraints (intentional — keeps the language auditable):
+ *   - No recursion, no heap allocation, no dynamic dispatch
+ *   - No unannotated loops — only range-for over register arrays
+ *   - No pointers — all memory access goes through typed register paths
+ *   - No inline assembly
+ *)
+
+(* ── Top-level ───────────────────────────────────────────────────── *)
+
+kdc_file =
+    version_decl
+    { import_decl }
+    [ backend_decl ]
+    driver_block
+    ;
+
+version_decl = "kdal_version" ":" string_lit ";" ;
+
+import_decl  = "import" string_lit [ "as" ident ] ";" ;
+
+(* ── Backend annotation ──────────────────────────────────────────── *)
+
+backend_decl = "backend" ident [ "{" { backend_option } "}" ] ";" ;
+
+backend_option = ident ":" literal ";" ;
+
+(* ── Driver block ────────────────────────────────────────────────── *)
+
+driver_block =
+    "driver" ident
+    [ "for" ident ]          (* device class from imported .kdh *)
+    "{"
+        [ config_bind_block ]
+        probe_block
+        [ remove_block ]
+        { event_handler }
+    "}"
+    ;
+
+(* ── Config bind block ───────────────────────────────────────────── *)
+
+config_bind_block = "config" "{" { config_bind_stmt } "}" ;
+
+config_bind_stmt  = ident "=" expr ";" ;
+
+(* ── Probe / remove blocks ───────────────────────────────────────── *)
+
+probe_block  = "probe"  "{" { statement } "}" ;
+remove_block = "remove" "{" { statement } "}" ;
+
+(* ── Event handlers ──────────────────────────────────────────────── *)
+
+event_handler =
+    on_read_handler
+    | on_write_handler
+    | on_signal_handler
+    | on_power_handler
+    | on_timeout_handler
+    ;
+
+on_read_handler    = "on" "read"    "(" reg_path ")"       "{" { statement } "}" ;
+on_write_handler   = "on" "write"   "(" reg_path "," ident ")" "{" { statement } "}" ;
+on_signal_handler  = "on" "signal"  "(" ident ")"          "{" { statement } "}" ;
+on_power_handler   = "on" "power"   "(" power_transition ")" "{" { statement } "}" ;
+on_timeout_handler = "on" "timeout" "(" ident ")"          "{" { statement } "}" ;
+
+power_transition =
+    ( "on" | "off" | "suspend" | ident )
+    [ "->" ( "on" | "off" | "suspend" | ident ) ]
+    ;
+
+(* ── Statements ──────────────────────────────────────────────────── *)
+
+statement =
+    let_stmt
+    | assign_stmt
+    | reg_write_stmt
+    | emit_stmt
+    | wait_stmt
+    | arm_timeout_stmt
+    | cancel_timeout_stmt
+    | if_stmt
+    | for_stmt
+    | return_stmt
+    | log_stmt
+    ;
+
+let_stmt           = "let" ident [ ":" type_name ] "=" expr ";" ;
+assign_stmt        = lvalue "=" expr ";" ;
+reg_write_stmt     = "write" "(" reg_path "," expr ")" ";" ;
+emit_stmt          = "emit" "(" ident [ "," expr ] ")" ";" ;
+wait_stmt          = "wait" "(" ident "," expr ")" ";" ;
+arm_timeout_stmt   = "arm" "(" ident "," expr ")" ";" ;
+cancel_timeout_stmt= "cancel" "(" ident ")" ";" ;
+return_stmt        = "return" [ expr ] ";" ;
+log_stmt           = "log" "(" string_lit { "," expr } ")" ";" ;
+
+if_stmt =
+    "if" "(" expr ")" "{" { statement } "}"
+    { "elif" "(" expr ")" "{" { statement } "}" }
+    [ "else" "{" { statement } "}" ]
+    ;
+
+for_stmt =
+    "for" ident "in" expr ".." expr "{" { statement } "}"
+    ;
+
+lvalue = ident | reg_path ;
+
+reg_path = ident "." ident { "." ident } ;   (* device.register[.bitfield] *)
+
+(* ── Expressions ─────────────────────────────────────────────────── *)
+
+expr =
+    literal
+    | ident
+    | reg_path
+    | "read" "(" reg_path ")"
+    | expr binary_op expr
+    | unary_op expr
+    | "(" expr ")"
+    ;
+
+binary_op =
+    "+"  | "-"  | "*"  | "/"  | "%"
+    | "<<" | ">>"
+    | "&"  | "|"  | "^"
+    | "==" | "!=" | "<"  | "<=" | ">"  | ">="
+    | "&&" | "||"
+    ;
+
+unary_op = "-" | "~" | "!" ;
+
+(* ── Types ───────────────────────────────────────────────────────── *)
+
+type_name =
+    "u8" | "u16" | "u32" | "u64"
+    | "i8" | "i16" | "i32" | "i64"
+    | "bool" | "str"
+    | "buf" "[" type_name "]"
+    | "timeout"
+    | ident
+    ;
+
+(* ── Literals ────────────────────────────────────────────────────── *)
+
+literal     = integer_lit | hex_lit | bool_lit | string_lit ;
+integer_lit = digit { digit } ;
+hex_lit     = "0x" hex_digit { hex_digit } ;
+bool_lit    = "true" | "false" ;
+string_lit  = '"' { any_char_except_dquote } '"' ;
+
+(* ── Identifiers ─────────────────────────────────────────────────── *)
+
+ident     = letter { letter | digit | "_" } ;
+letter    = "a" .. "z" | "A" .. "Z" | "_" ;
+digit     = "0" .. "9" ;
+hex_digit = digit | "a" .. "f" | "A" .. "F" ;

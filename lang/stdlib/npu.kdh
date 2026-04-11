@@ -1,0 +1,151 @@
+/*
+ * KDAL Standard Library — npu.kdh
+ * Abstract NPU (Neural Processing Unit) inference-engine interface.
+ *
+ * Designed for edge AI accelerators such as:
+ *   - Arm Ethos-U55 / U65
+ *   - Qualcomm Hexagon DSP
+ *   - Google Edge TPU
+ *   - Custom FPGA inference accelerators
+ *
+ * The register map provides a unified model-load → infer → result
+ * workflow, decoupled from the underlying transport (PCIe, AXI, MMIO).
+ *
+ * Usage:
+ *   import "kdal/stdlib/npu.kdh" as NPU;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class NpuDevice {
+
+    registers {
+        /*
+         * ── Control ──────────────────────────────────────────────── */
+
+        /* NPU control register */
+        CTRL : bitfield  @ 0x000  rw {
+            enable      : 0   = false;   /* NPU clock gate */
+            infer_start : 1   = false;   /* Write 1 to start inference */
+            model_load  : 2   = false;   /* Write 1 to load model */
+            soft_reset  : 3   = false;   /* Self-clearing soft reset */
+            irq_enable  : 4   = false;
+            secure_mode : 5   = false;
+        };
+
+        /* NPU status register (read-only) */
+        STATUS : bitfield  @ 0x004  ro {
+            idle        : 0   = true;
+            busy        : 1   = false;
+            error       : 2   = false;
+            model_ready : 3   = false;
+            result_valid: 4   = false;
+            watchdog_exp: 5   = false;
+        };
+
+        /*
+         * ── Model loading ─────────────────────────────────────────── */
+
+        /* Physical address of model binary (low/high 32 bits) */
+        MODEL_ADDR_LO : u32  @ 0x010  rw  = 0x00000000;
+        MODEL_ADDR_HI : u32  @ 0x014  rw  = 0x00000000;
+
+        /* Size of model binary in bytes */
+        MODEL_SIZE    : u32  @ 0x018  rw  = 0x00000000;
+
+        /* Model format identifier (0=TFLite 1=ONNX 2=custom) */
+        MODEL_FORMAT  : u8   @ 0x01C  rw  = 0;
+
+        /*
+         * ── Inference command ──────────────────────────────────────── */
+
+        /* Physical address of input tensor buffer */
+        INPUT_ADDR_LO : u32  @ 0x020  rw  = 0x00000000;
+        INPUT_ADDR_HI : u32  @ 0x024  rw  = 0x00000000;
+
+        /* Size of input tensor in bytes */
+        INPUT_SIZE    : u32  @ 0x028  rw  = 0x00000000;
+
+        /* Physical address of output tensor buffer */
+        OUTPUT_ADDR_LO: u32  @ 0x030  rw  = 0x00000000;
+        OUTPUT_ADDR_HI: u32  @ 0x034  rw  = 0x00000000;
+
+        /* Size of output buffer in bytes */
+        OUTPUT_SIZE   : u32  @ 0x038  rw  = 0x00000000;
+
+        /*
+         * ── Result / diagnostics ──────────────────────────────────── */
+
+        /* Number of bytes written to output buffer (read-only) */
+        RESULT_BYTES  : u32  @ 0x040  ro  = 0x00000000;
+
+        /* Inference latency in microseconds (read-only) */
+        INFER_USEC    : u32  @ 0x044  ro  = 0x00000000;
+
+        /* Error code on STATUS.error (read-only) */
+        ERROR_CODE    : u8   @ 0x048  ro  = 0x00;
+
+        /* IRQ status register (read-only) */
+        IRQ_STATUS : bitfield  @ 0x050  ro {
+            infer_done  : 0   = false;
+            load_done   : 1   = false;
+            error_irq   : 2   = false;
+            watchdog    : 3   = false;
+        };
+
+        /* IRQ clear register (write-only) */
+        IRQ_CLEAR : u8  @ 0x054  wo  = 0x00;
+
+        /*
+         * ── Capabilities ──────────────────────────────────────────── */
+
+        /* NPU capability flags (read-only) */
+        CAPS : bitfield  @ 0x060  ro {
+            int8_support    : 0  = false;
+            fp16_support    : 1  = false;
+            fp32_support    : 2  = false;
+            batch_support   : 3  = false;
+            secure_os_ready : 4  = false;
+            num_cores       : 8..11 = 1;
+        };
+
+        /* NPU TOPS (tera-ops per second × 10, read-only) */
+        TOPS_X10 : u16  @ 0x064  ro  = 0;
+
+        /* NPU on-chip SRAM size in KiB (read-only) */
+        SRAM_KIB : u16  @ 0x066  ro  = 0;
+    }
+
+    signals {
+        infer_done  : in  completion;      /* Inference completed */
+        load_done   : in  completion;      /* Model load completed */
+        npu_error   : in  level(high);    /* Hardware error or fault */
+        watchdog    : in  edge(rising);    /* Watchdog timer expired */
+    }
+
+    capabilities {
+        tflite_support  = 1;
+        onnx_support    = 1;
+        max_model_mb    = 128;
+        max_io_mb       = 64;
+        secure_world    = 0;
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : off;       /* NPU starts powered-off — load model before use */
+    }
+
+    config {
+        timeout_ms     : u32  = 10000  in 100..60000;
+        max_batch_size : u8   = 1      in 1..32;
+        secure_mode    : bool = false;
+        dma_mask_bits  : u8   = 39     in 32..48;
+    }
+}

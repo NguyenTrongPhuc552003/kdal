@@ -1,0 +1,110 @@
+{
+    "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+    "name": "KDAL Device Header",
+    "scopeName": "source.kdh",
+    "patterns": [
+        {
+            "include": "#comments"
+        },
+        {
+            "include": "#strings"
+        },
+        {
+            "include": "#numbers"
+        },
+        {
+            "include": "#keywords"
+        },
+        {
+            "include": "#types"
+        },
+        {
+            "include": "#access-modes"
+        },
+        {
+            "include": "#blocks"
+        }
+    ],
+    "repository": {
+        "comments": {
+            "patterns": [
+                {
+                    "name": "comment.line.double-slash.kdh",
+                    "match": "//.*$"
+                },
+                {
+                    "name": "comment.block.kdh",
+                    "begin": "/\\*",
+                    "end": "\\*/"
+                }
+            ]
+        },
+        "strings": {
+            "patterns": [
+                {
+                    "name": "string.quoted.double.kdh",
+                    "begin": "\"",
+                    "end": "\"",
+                    "patterns": [
+                        {
+                            "name": "constant.character.escape.kdh",
+                            "match": "\\\\."
+                        }
+                    ]
+                }
+            ]
+        },
+        "numbers": {
+            "patterns": [
+                {
+                    "name": "constant.numeric.hex.kdh",
+                    "match": "\\b0x[0-9a-fA-F]+\\b"
+                },
+                {
+                    "name": "constant.numeric.decimal.kdh",
+                    "match": "\\b[0-9]+\\b"
+                }
+            ]
+        },
+        "keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.control.kdh",
+                    "match": "\\b(device|class|compatible)\\b"
+                },
+                {
+                    "name": "keyword.other.section.kdh",
+                    "match": "\\b(register_map|signals|capabilities|power_states)\\b"
+                },
+                {
+                    "name": "constant.language.boolean.kdh",
+                    "match": "\\b(true|false)\\b"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "name": "support.type.device-class.kdh",
+                    "match": "\\b(uart|i2c|spi|gpio|gpu|npu)\\b"
+                }
+            ]
+        },
+        "access-modes": {
+            "patterns": [
+                {
+                    "name": "storage.modifier.access.kdh",
+                    "match": "\\b(ro|wo|rw)\\b"
+                }
+            ]
+        },
+        "blocks": {
+            "patterns": [
+                {
+                    "name": "entity.name.type.device.kdh",
+                    "match": "(?<=device\\s)\\w+"
+                }
+            ]
+        }
+    }
+}

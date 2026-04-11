@@ -1,0 +1,150 @@
+(* KDAL Device Header Grammar — .kdh files *)
+(* Version 0.1 — EBNF (ISO 14977 extended) *)
+(*
+ * A .kdh file declares a device CLASS: the register map, signal set,
+ * capability flags, and power-state contract for one class of hardware.
+ * It is the equivalent of a C header file but expressed at the
+ * device-hardware level, not the software-API level.
+ *
+ * The KDAL compiler resolves imports and validates that a .kdc driver
+ * correctly uses only the registers and signals declared in its .kdh.
+ *)
+
+(* ── Top-level ───────────────────────────────────────────────────── *)
+
+kdh_file     = [ version_decl ]
+               { import_decl }
+               device_class_decl
+               ;
+
+version_decl = "kdal_version" ":" string_lit ";" ;
+
+import_decl  = "import" string_lit [ "as" ident ] ";" ;
+
+(* ── Device class declaration ────────────────────────────────────── *)
+
+device_class_decl =
+    "device" "class" ident "{"
+        [ registers_block ]
+        [ signals_block ]
+        [ capabilities_block ]
+        [ power_block ]
+        [ config_block ]
+    "}"
+    ;
+
+(* ── Registers block ─────────────────────────────────────────────── *)
+
+registers_block = "registers" "{" { register_decl } "}" ;
+
+register_decl =
+    ident ":"
+    reg_type
+    [ "@" hex_lit ]          (* optional fixed MMIO offset *)
+    [ access_qualifier ]
+    [ "=" literal ]          (* reset value *)
+    ";"
+    ;
+
+reg_type =
+    "u8" | "u16" | "u32" | "u64"
+    | "bitfield" "{" { bit_field_member } "}"
+    ;
+
+bit_field_member = ident ":" bit_range [ "=" literal ] ";" ;
+
+bit_range = integer_lit ".." integer_lit | integer_lit ;
+
+access_qualifier = "ro" | "wo" | "rw" | "rc" (* clear on read *) ;
+
+(* ── Signals block ───────────────────────────────────────────────── *)
+
+signals_block = "signals" "{" { signal_decl } "}" ;
+
+signal_decl =
+    ident ":"
+    signal_direction
+    signal_trigger
+    ";"
+    ;
+
+signal_direction = "in" | "out" | "inout" ;
+
+signal_trigger =
+    "edge" "(" edge_type ")"
+    | "level" "(" level_type ")"
+    | "completion"
+    | "timeout" "(" expr ")"
+    ;
+
+edge_type  = "rising" | "falling" | "any" ;
+level_type = "high" | "low" ;
+
+(* ── Capabilities block ──────────────────────────────────────────── *)
+
+capabilities_block = "capabilities" "{" { capability_decl } "}" ;
+
+capability_decl = ident [ "=" integer_lit ] ";" ;
+
+(* ── Power block ─────────────────────────────────────────────────── *)
+
+power_block = "power" "{" { power_state_decl } "}" ;
+
+power_state_decl = power_state_name ":" power_state_spec ";" ;
+
+power_state_name = "on" | "off" | "suspend" | ident ;
+
+power_state_spec = "allowed" | "forbidden" | "default" ;
+
+(* ── Config block ────────────────────────────────────────────────── *)
+
+config_block = "config" "{" { config_field_decl } "}" ;
+
+config_field_decl =
+    ident ":" type_name
+    [ "=" literal ]
+    [ "in" range_expr ]
+    ";"
+    ;
+
+range_expr = literal ".." literal ;
+
+(* ── Types ───────────────────────────────────────────────────────── *)
+
+type_name =
+    "u8" | "u16" | "u32" | "u64"
+    | "i8" | "i16" | "i32" | "i64"
+    | "bool" | "str"
+    | "buf" "[" type_name "]"
+    | "timeout"
+    | ident
+    ;
+
+(* ── Expressions (used in reset values, ranges, timeouts) ────────── *)
+
+expr =
+    literal
+    | ident
+    | ident "." ident
+    | expr binary_op expr
+    | unary_op expr
+    | "(" expr ")"
+    ;
+
+binary_op = "+" | "-" | "*" | "/" | "%" | "<<" | ">>" | "&" | "|" | "^" ;
+unary_op  = "-" | "~" | "!" ;
+
+(* ── Literals ────────────────────────────────────────────────────── *)
+
+literal      = integer_lit | hex_lit | bool_lit | string_lit ;
+integer_lit  = digit { digit } ;
+hex_lit      = "0x" hex_digit { hex_digit } ;
+bool_lit     = "true" | "false" ;
+string_lit   = '"' { any_char_except_dquote } '"' ;
+
+(* ── Identifiers ─────────────────────────────────────────────────── *)
+
+ident       = letter { letter | digit | "_" } ;
+letter      = "a" .. "z" | "A" .. "Z" | "_" ;
+digit       = "0" .. "9" ;
+hex_digit   = digit | "a" .. "f" | "A" .. "F" ;

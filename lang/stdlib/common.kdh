@@ -1,0 +1,63 @@
+/*
+ * KDAL Standard Library — common.kdh
+ * Primitive types, universal constants, and shared capability flags.
+ *
+ * Every KDAL file implicitly imports this file; explicit import is not
+ * required but is permitted and idempotent.
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+/*
+ * ── Fundamental numeric limits ─────────────────────────────────────
+ */
+device class KdalCommon {
+    config {
+        U8_MAX  : u8  = 0xFF;
+        U16_MAX : u16 = 0xFFFF;
+        U32_MAX : u32 = 0xFFFFFFFF;
+        U64_MAX : u64 = 0xFFFFFFFFFFFFFFFF;
+
+        I8_MIN  : i8  = -128;
+        I8_MAX  : i8  =  127;
+        I16_MIN : i16 = -32768;
+        I16_MAX : i16 =  32767;
+        I32_MIN : i32 = -2147483648;
+        I32_MAX : i32 =  2147483647;
+
+        /*
+         * Timeout sentinels — pass to wait() / arm()
+         * TIMEOUT_NONE means no timeout (wait forever)
+         * TIMEOUT_NOW  means poll once, do not block
+         */
+        TIMEOUT_NONE : u32 = 0;
+        TIMEOUT_NOW  : u32 = 0xFFFFFFFF;
+
+        /* Page size (assumed 4 KiB for kernel-space operations) */
+        PAGE_SIZE : u32 = 0x1000;
+
+        /* DMA alignment requirement (cache line) */
+        DMA_ALIGN : u32 = 64;
+    }
+
+    capabilities {
+        /* Standard capability flags — may be imported by device classes */
+        CAP_DMA         = 0x01;
+        CAP_FIFO        = 0x02;
+        CAP_LOOPBACK    = 0x04;
+        CAP_ERROR_CORR  = 0x08;
+        CAP_POWER_MGMT  = 0x10;
+        CAP_HOTPLUG     = 0x20;
+        CAP_MSI         = 0x40;
+        CAP_IOMMU       = 0x80;
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : on;
+    }
+}

@@ -1,0 +1,21 @@
+# KDAL kernel configuration entry.
+
+menu "KDAL"
+
+config KDAL
+	tristate "Kernel Device Abstraction Layer"
+	default m
+	help
+	  Build the KDAL out-of-tree abstraction layer.
+
+config KDAL_QEMU_BACKEND
+	bool "Enable QEMU backend support"
+	depends on KDAL
+	default y
+
+config KDAL_EXAMPLE_DRIVERS
+	bool "Enable example drivers"
+	depends on KDAL
+	default y
+
+endmenu

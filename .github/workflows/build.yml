@@ -1,0 +1,94 @@
+name: build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-tool:
+    name: Build kdality (runtime CLI + compiler)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build kdality
+        run: make -C tools/kdality
+
+      - name: Verify binary
+        run: |
+          test -x tools/kdality/kdality
+          file tools/kdality/kdality
+
+      - name: Build compiler
+        run: make -C compiler
+
+      - name: Upload kdality artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: kdality-linux-x86_64
+          path: tools/kdality/kdality
+
+  build-tests:
+    name: Build userspace tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build test programs
+        run: |
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o testapp tests/userspace/testapp.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o benchmark tests/userspace/benchmark.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o kdaltest tests/integration/kdaltest.c
+
+      - name: Verify binaries
+        run: |
+          test -x testapp
+          test -x benchmark
+          test -x kdaltest
+
+  build-examples:
+    name: Build example programs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build GPU demo
+        run: cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c
+
+      - name: Build NPU demo
+        run: cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c
+
+  structure-check:
+    name: Verify repository structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check required files exist
+        run: |
+          for f in Makefile README.md LICENSE CONTRIBUTING.md CHANGELOG.md \
+                   SECURITY.md CITATION.cff .clang-format .editorconfig; do
+            test -f "$f" || { echo "Missing: $f"; exit 1; }
+          done
+
+      - name: Check required directories exist
+        run: |
+          for d in include/kdal src/core src/drivers src/backends \
+                   tests/kunit tests/userspace tests/integration \
+                   tools/kdality compiler lang docs scripts examples cmake; do
+            test -d "$d" || { echo "Missing: $d"; exit 1; }
+          done
+
+      - name: Check headers
+        run: |
+          for h in include/kdal/core/kdal.h include/kdal/core/version.h \
+                   include/kdal/types.h include/kdal/ioctl.h \
+                   include/kdal/backend.h include/kdal/api/driver.h \
+                   include/kdal/api/accel.h; do
+            test -f "$h" || { echo "Missing header: $h"; exit 1; }
+          done

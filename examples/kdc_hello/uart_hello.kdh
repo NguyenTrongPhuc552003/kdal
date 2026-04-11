@@ -1,0 +1,63 @@
+/*
+ * KDAL Example — uart_hello.kdh
+ * Minimal custom UART device header for the QEMU virt PL011 UART.
+ *
+ * This .kdh file defines the UartHello device class used by
+ * uart_hello.kdc in this example directory. It is a simplified
+ * subset of lang/stdlib/uart.kdh intended to be easy to read
+ * when learning KDAL.
+ *
+ * Compile driver:
+ *   kdality compile uart_hello.kdc -K /path/to/kernel/build
+ */
+
+kdal_version: "0.1";
+
+device class UartHello {
+
+    registers {
+        /* Receive/transmit data register */
+        DATA   : u32  @ 0x000  rw  = 0x00;
+
+        /* Flag register — busy/full/empty signals */
+        FLAGS  : bitfield  @ 0x018  ro {
+            rx_empty : 4 = true;
+            tx_full  : 5 = false;
+            tx_empty : 7 = true;
+        };
+
+        /* Line control — baud divisors and frame format */
+        IBRD   : u16  @ 0x024  rw  = 0x0027;   /* integer baud-rate divisor */
+        FBRD   : u8   @ 0x028  rw  = 0x09;     /* fractional baud-rate divisor */
+
+        /* Control register */
+        CTRL   : bitfield  @ 0x030  rw {
+            enable : 0  = false;
+            tx_en  : 8  = true;
+            rx_en  : 9  = true;
+        };
+
+        /* Interrupt mask */
+        IMSC   : u16  @ 0x038  rw  = 0x0000;
+    }
+
+    signals {
+        rx_ready  : in  edge(rising);   /* byte available in RX FIFO */
+        tx_empty  : in  edge(rising);   /* TX FIFO drained */
+        error     : in  level(high);   /* framing / parity error */
+    }
+
+    capabilities {
+        fifo_depth = 16;
+    }
+
+    power {
+        on  : allowed;
+        off : allowed;
+        default : on;
+    }
+
+    config {
+        baud_rate : u32 = 115200  in 9600..1000000;
+    }
+}

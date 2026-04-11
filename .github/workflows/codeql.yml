@@ -1,0 +1,49 @@
+name: codeql
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '0 6 * * 1'
+
+jobs:
+  analyze:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ['c-cpp']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-and-quality
+
+      - name: Build userspace code
+        run: |
+          make -C tools/kdality
+          cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -o testapp tests/userspace/testapp.c
+          cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -o benchmark tests/userspace/benchmark.c
+          cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -o kdaltest tests/integration/kdaltest.c
+          cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c
+          cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"

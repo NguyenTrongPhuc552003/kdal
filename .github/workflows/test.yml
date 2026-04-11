@@ -1,0 +1,52 @@
+name: test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  ci-test-suite:
+    name: CI test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod +x scripts/ci/*.sh
+
+      - name: Run CI test suite
+        run: ./scripts/ci/test.sh
+
+  dry-run-tests:
+    name: Dry-run test programs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build test programs
+        run: |
+          make -C tools/kdality
+          make -C compiler
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o testapp tests/userspace/testapp.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o benchmark tests/userspace/benchmark.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o kdaltest tests/integration/kdaltest.c
+
+      - name: Dry-run testapp
+        run: |
+          ./testapp || true
+          echo "testapp dry-run completed (module not loaded, errors expected)"
+
+      - name: Dry-run benchmark
+        run: |
+          ./benchmark 2>/dev/null || true
+          echo "benchmark dry-run completed"
+
+      - name: Dry-run kdaltest
+        run: |
+          ./kdaltest || true
+          echo "kdaltest dry-run completed"

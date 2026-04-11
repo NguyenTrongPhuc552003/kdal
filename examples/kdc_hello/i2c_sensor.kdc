@@ -1,0 +1,133 @@
+/*
+ * KDAL Example — i2c_sensor.kdc
+ * I2C temperature sensor driver (BME280-style register map).
+ *
+ * Demonstrates:
+ *   - importing the standard I2C device header
+ *   - multi-step probe sequence (configure → start measurement)
+ *   - a periodic polling loop via arm() / on timeout
+ *   - reading a multi-byte result at an offset
+ *   - structured error handling with if/elif/else
+ *
+ * Compile:
+ *   kdality compile i2c_sensor.kdc -K /path/to/kernel/build -o build/
+ */
+
+kdal_version: "0.1";
+
+import "kdal/stdlib/i2c.kdh" as I2C;
+
+backend platdev {
+    /* Resolved from device tree: compatible = "kdal,i2c-sensor" */
+}
+
+driver I2cTempSensor for I2C.I2cController {
+
+    config {
+        bus_freq_hz = 400000;   /* fast mode */
+        slave_addr  = 0x76;     /* BME280 default address */
+    }
+
+    /*
+     * probe — initialise the sensor.
+     *   1. Write config register (oversampling × 1 for T)
+     *   2. Write mode register (forced mode)
+     *   3. Arm a 500 ms polling timer
+     */
+    probe {
+        /* Target the sensor slave address */
+        write(I2C.TAR.ic_tar, 0x76);
+
+        /* Enable I2C controller */
+        write(I2C.ENABLE.enable, true);
+        wait(I2C.stop_det, 10);
+
+        /* Write sensor config: osrs_t=1 (×1 oversampling), osrs_p=0, mode=01 (forced) */
+        write(I2C.DATA_CMD.dat,  0xF4);    /* register address */
+        write(I2C.DATA_CMD.cmd,  false);    /* write */
+        write(I2C.DATA_CMD.dat,  0x25);    /* osrs_t=001, osrs_p=000, mode=01 */
+        write(I2C.DATA_CMD.stop, true);
+
+        wait(I2C.stop_det, 100);
+        log("I2cTempSensor: sensor configured\n");
+
+        arm(I2C.stop_det, 500);   /* poll every 500 ms */
+    }
+
+    remove {
+        cancel(I2C.stop_det);
+        write(I2C.ENABLE.enable, false);
+        log("I2cTempSensor: removed\n");
+    }
+
+    /*
+     * on read — userspace reads the current temperature.
+     * Kick a forced-mode measurement and wait for the result.
+     */
+    on read(I2C.DATA_CMD) {
+        /* Trigger forced measurement */
+        write(I2C.DATA_CMD.dat,  0xF4);
+        write(I2C.DATA_CMD.cmd,  false);
+        write(I2C.DATA_CMD.dat,  0x25);
+        write(I2C.DATA_CMD.stop, true);
+
+        /* Wait for measurement to complete (≤ 2 ms at ×1 oversampling) */
+        wait(I2C.stop_det, 10);
+
+        /* Point to result register 0xFA (temp MSB) */
+        write(I2C.DATA_CMD.dat,  0xFA);
+        write(I2C.DATA_CMD.cmd,  false);
+        write(I2C.DATA_CMD.stop, false);
+
+        /* Issue 3-byte read */
+        write(I2C.DATA_CMD.cmd,  true);
+        write(I2C.DATA_CMD.cmd,  true);
+        write(I2C.DATA_CMD.stop, true);
+        write(I2C.DATA_CMD.cmd,  true);
+
+        wait(I2C.rx_full, 50);
+    }
+
+    /*
+     * on signal(tx_abort) — I2C abort (NACK, arbitration lost, etc.)
+     */
+    on signal(I2C.tx_abort) {
+        let reason = read(I2C.TX_ABRT_SOURCE);
+        if (reason == 0x0001) {
+            log("I2cTempSensor: NACK on address — sensor not present?\n");
+        } elif (reason == 0x0004) {
+            log("I2cTempSensor: arbitration lost\n");
+        } else {
+            log("I2cTempSensor: TX abort, source=0x%x\n", reason);
+        }
+    }
+
+    /*
+     * on timeout — periodic forced measurement kick (every 500 ms).
+     * After the measurement is available, re-arm the timer.
+     */
+    on timeout(I2C.stop_det) {
+        /* Trigger forced mode again */
+        write(I2C.DATA_CMD.dat,  0xF4);
+        write(I2C.DATA_CMD.cmd,  false);
+        write(I2C.DATA_CMD.dat,  0x25);
+        write(I2C.DATA_CMD.stop, true);
+
+        arm(I2C.stop_det, 500);
+    }
+
+    /*
+     * on power — suspend: cancel polling, disable controller.
+     */
+    on power(on -> suspend) {
+        cancel(I2C.stop_det);
+        write(I2C.ENABLE.enable, false);
+        log("I2cTempSensor: suspended\n");
+    }
+
+    on power(suspend -> on) {
+        write(I2C.ENABLE.enable, true);
+        arm(I2C.stop_det, 500);
+        log("I2cTempSensor: resumed\n");
+    }
+}

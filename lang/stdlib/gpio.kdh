@@ -1,0 +1,83 @@
+/*
+ * KDAL Standard Library — gpio.kdh
+ * Generic GPIO bank interface (ARM PL061 / TI TPS65xxx compatible).
+ *
+ * Covers the ARM PrimeCell PL061 GPIO controller register layout,
+ * which is the GPIO controller exposed by QEMU's virt machine and
+ * found in many Cortex-A SoCs. All registers are 8-bit wide.
+ *
+ * Usage:
+ *   import "kdal/stdlib/gpio.kdh" as GPIO;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class GpioBank {
+
+    registers {
+        /*
+         * Data register — bits [7:2] are the address mask applied by
+         * the hardware. Only bits where ADDR[9:2] is set are affected.
+         * Write 0xFF to the upper address bits to access all pins.
+         */
+        DATA : u8  @ 0x000  rw  = 0x00;
+
+        /* Data direction register: 0=input 1=output (per bit) */
+        DIR  : u8  @ 0x400  rw  = 0x00;
+
+        /* Interrupt sense register: 0=edge 1=level (per bit) */
+        IS   : u8  @ 0x404  rw  = 0x00;
+
+        /* Interrupt both-edges register: 1=both edges trigger IRQ */
+        IBE  : u8  @ 0x408  rw  = 0x00;
+
+        /* Interrupt event register: 0=falling/low 1=rising/high */
+        IEV  : u8  @ 0x40C  rw  = 0x00;
+
+        /* Interrupt mask register: 1=enable IRQ for that pin */
+        IE   : u8  @ 0x410  rw  = 0x00;
+
+        /* Raw interrupt status (read-only, before mask) */
+        RIS  : u8  @ 0x414  ro  = 0x00;
+
+        /* Masked interrupt status (read-only) */
+        MIS  : u8  @ 0x418  ro  = 0x00;
+
+        /* Interrupt clear register (write-only, clears edge interrupts) */
+        IC   : u8  @ 0x41C  wo  = 0x00;
+
+        /* Alternate function select (0=GPIO 1=alternate) */
+        AFSEL : u8  @ 0x420  rw  = 0x00;
+    }
+
+    signals {
+        pin_edge  : in  edge(any);       /* Any enabled edge on any pin */
+        pin_level : in  level(high);    /* Any asserted level on any pin */
+    }
+
+    capabilities {
+        pins_per_bank = 8;
+        open_drain    = 1;
+        pull_up       = 1;
+        pull_down     = 1;
+        drive_strength = 8;   /* mA */
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : on;
+    }
+
+    config {
+        bank_index : u8   = 0     in 0..7;
+        irq_type   : u8   = 0     in 0..3;   /* 0=edge-rising 1=edge-falling
+                                                  2=edge-both 3=level-high */
+        debounce_ms: u32  = 0     in 0..100;
+    }
+}

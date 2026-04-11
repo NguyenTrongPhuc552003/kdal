@@ -1,0 +1,78 @@
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g., v0.1.0)'
+        required: true
+
+jobs:
+  build-artifacts:
+    name: Build release artifacts
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build kdality
+        run: make -C tools/kdality
+
+      - name: Build test programs
+        run: |
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o testapp tests/userspace/testapp.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o benchmark tests/userspace/benchmark.c
+          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
+            -o kdaltest tests/integration/kdaltest.c
+
+      - name: Build example programs
+        run: |
+          cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c
+          cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c
+
+      - name: Create source archive
+        run: |
+          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
+          git archive --format=tar.gz --prefix="kdal-${VERSION}/" \
+            -o "kdal-${VERSION}.tar.gz" HEAD
+
+      - name: Generate changelog
+        run: |
+          chmod +x scripts/release/generate_changelog.sh
+          ./scripts/release/generate_changelog.sh > RELEASE_NOTES.md
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-artifacts
+          path: |
+            kdal-*.tar.gz
+            tools/kdality/kdality
+            RELEASE_NOTES.md
+
+  create-release:
+    name: Create GitHub release
+    needs: build-artifacts
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write
+    steps:
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: release-artifacts
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: RELEASE_NOTES.md
+          files: |
+            kdal-*.tar.gz
+            tools/kdality/kdality
+          draft: false
+          prerelease: ${{ contains(github.ref, '-rc') }}

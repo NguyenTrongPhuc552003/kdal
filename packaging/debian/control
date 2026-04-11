@@ -1,0 +1,10 @@
+Source: kdal
+Section: kernel
+Priority: optional
+Maintainer: Trong Phuc Nguyen
+Standards-Version: 4.7.0
+
+Package: kdal
+Architecture: any
+Description: Kernel Device Abstraction Layer
+ Initial Debian packaging placeholder for KDAL.

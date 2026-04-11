@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+title: KDAL
+message: Please cite KDAL using this metadata.
+type: software
+authors:
+  - family-names: Nguyen
+    given-names: Trong Phuc
+repository-code: https://github.com/NguyenTrongPhuc552003/kdal
+license: GPL-3.0-or-later
+abstract: >-
+  Kernel Device Abstraction Layer for portable embedded driver and accelerator
+  development on Linux.

@@ -1,0 +1,125 @@
+/*
+ * KDAL Example — uart_hello.kdc
+ * Simple UART driver for the QEMU virt PL011 UART.
+ *
+ * This is the smallest complete .kdc driver that:
+ *   - imports a device header (.kdh)
+ *   - declares a backend
+ *   - has a probe / remove handler
+ *   - handles read and write events
+ *   - handles RX-ready and error signals
+ *   - handles power transition
+ *
+ * Compile:
+ *   kdality compile uart_hello.kdc -K /path/to/kernel/build -o build/
+ *
+ * Then build the kernel module:
+ *   make -f build/Makefile.kbuild KDIR=/path/to/kernel/build
+ *
+ * Insert on QEMU:
+ *   insmod build/UartHelloDriver.ko
+ */
+
+kdal_version: "0.1";
+
+import "uart_hello.kdh" as DEV;
+
+backend mmio {
+    base_addr: 0x09000000;   /* QEMU virt UART0 */
+}
+
+driver UartHelloDriver for DEV.UartHello {
+
+    config {
+        baud_rate = 115200;
+    }
+
+    /*
+     * probe — called once when the driver is bound.
+     * Initialises the UART: set baud rate, enable TX+RX, unmask RX IRQ.
+     */
+    probe {
+        /* Disable UART before reconfiguring */
+        write(DEV.CTRL.enable, false);
+
+        /* Set 115200 baud for a 24 MHz reference clock:
+         *   IBRD = 13, FBRD = 1  → exactly 115384 baud (≈ 0.16% error) */
+        write(DEV.IBRD, 13);
+        write(DEV.FBRD, 1);
+
+        /* 8N1 line control would go in a bitfield write in a real driver;
+         * for this example we just enable and turn on TX+RX. */
+        write(DEV.CTRL.tx_en, true);
+        write(DEV.CTRL.rx_en, true);
+
+        /* Unmask RX-ready interrupt */
+        write(DEV.IMSC, 0x0010);
+
+        /* Enable UART */
+        write(DEV.CTRL.enable, true);
+
+        log("UartHello: probed at 115200 baud\n");
+    }
+
+    /*
+     * remove — called when the driver is unbound.
+     */
+    remove {
+        write(DEV.CTRL.enable, false);
+        write(DEV.IMSC, 0x0000);
+        log("UartHello: removed\n");
+    }
+
+    /*
+     * on read — userspace reads from /dev/kdal0.
+     * Wait for a byte to appear in the RX FIFO, then let the runtime
+     * copy the DR value to the userspace buffer.
+     */
+    on read(DEV.DATA) {
+        wait(DEV.rx_ready, 1000);
+    }
+
+    /*
+     * on write — userspace writes to /dev/kdal0.
+     * Wait until the TX FIFO has room before accepting the byte.
+     */
+    on write(DEV.DATA, val) {
+        wait(DEV.tx_empty, 1000);
+        write(DEV.DATA, val);
+    }
+
+    /*
+     * on signal(rx_ready) — IRQ: byte arrived in RX FIFO.
+     * The runtime will wake any blocked read() waiters automatically;
+     * this handler just logs the event.
+     */
+    on signal(DEV.rx_ready) {
+        let status = read(DEV.FLAGS);
+        if (status == 0) {
+            log("UartHello: rx_ready but FLAGS shows rx_empty?\n");
+        }
+    }
+
+    /*
+     * on signal(error) — framing/parity/overrun error.
+     */
+    on signal(DEV.error) {
+        log("UartHello: UART error (flags=0x%x)\n", read(DEV.FLAGS));
+    }
+
+    /*
+     * on power(on -> suspend) — entering suspend.
+     */
+    on power(on -> suspend) {
+        write(DEV.CTRL.enable, false);
+        log("UartHello: suspended\n");
+    }
+
+    /*
+     * on power(suspend -> on) — resuming from suspend.
+     */
+    on power(suspend -> on) {
+        write(DEV.CTRL.enable, true);
+        log("UartHello: resumed\n");
+    }
+}

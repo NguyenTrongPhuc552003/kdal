@@ -1,0 +1,110 @@
+/*
+ * KDAL Standard Library — spi.kdh
+ * SPI controller interface (ARM PrimeCell PL022 SSP compatible).
+ *
+ * Matches the ARM PL022 Synchronous Serial Port (SSP) which supports
+ * SPI, SSP, and Microwire frame formats. The PL022 is widely used in
+ * ARM Cortex-A evaluation boards and is supported by Linux's spi-pl022
+ * driver.
+ *
+ * Usage:
+ *   import "kdal/stdlib/spi.kdh" as SPI;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class SpiController {
+
+    registers {
+        /* Control register 0 */
+        CR0 : bitfield  @ 0x000  rw {
+            dss     : 0..3  = 7;    /* Data size select: 0011=4bit … 1111=16bit */
+            frf     : 4..5  = 0;    /* Frame format: 0=SPI 1=SSP 2=Microwire */
+            spo     : 6     = false; /* Clock polarity */
+            sph     : 7     = false; /* Clock phase */
+            scr     : 8..15 = 0;    /* Serial clock rate divider */
+        };
+
+        /* Control register 1 */
+        CR1 : bitfield  @ 0x004  rw {
+            lbm     : 0     = false; /* Loopback mode */
+            sse     : 1     = false; /* SSP enable */
+            ms      : 2     = false; /* Master/slave select (0=master) */
+            sod     : 3     = false; /* Slave output disable */
+        };
+
+        /* Data register — 16-bit TX/RX FIFO access */
+        DR  : u16  @ 0x008  rw  = 0x0000;
+
+        /* Status register (read-only) */
+        SR  : bitfield  @ 0x00C  ro {
+            tfe : 0 = true;    /* TX FIFO empty */
+            tnf : 1 = true;    /* TX FIFO not full */
+            rne : 2 = false;   /* RX FIFO not empty */
+            rff : 3 = false;   /* RX FIFO full */
+            bsy : 4 = false;   /* Bus busy */
+        };
+
+        /* Clock prescale register (must be even, 2–254) */
+        CPSR : u8  @ 0x010  rw  = 0x02;
+
+        /* Interrupt mask set and clear register */
+        IMSC : bitfield  @ 0x014  rw {
+            rorim   : 0 = false;   /* RX overrun interrupt mask */
+            rtim    : 1 = false;   /* RX timeout interrupt mask */
+            rxim    : 2 = false;   /* RX FIFO at least half full */
+            txim    : 3 = false;   /* TX FIFO at least half empty */
+        };
+
+        /* Raw interrupt status (read-only) */
+        RIS : u8  @ 0x018  ro  = 0x08;
+
+        /* Masked interrupt status (read-only) */
+        MIS : u8  @ 0x01C  ro  = 0x00;
+
+        /* Interrupt clear register (write-only) */
+        ICR : bitfield  @ 0x020  wo {
+            roric : 0 = false;
+            rtic  : 1 = false;
+        };
+
+        /* DMA control register */
+        DMACR : bitfield  @ 0x024  rw {
+            rxdmae : 0 = false;
+            txdmae : 1 = false;
+        };
+    }
+
+    signals {
+        rx_half_full : in  edge(rising);   /* RX FIFO ≥ half full */
+        tx_half_empty: in  edge(rising);   /* TX FIFO ≤ half full */
+        rx_timeout   : in  edge(rising);   /* RX idle timeout */
+        rx_overrun   : in  level(high);   /* RX FIFO overrun */
+    }
+
+    capabilities {
+        tx_fifo_depth = 8;
+        rx_fifo_depth = 8;
+        dma_capable   = 1;
+        loopback      = 1;
+        max_freq_hz   = 50000000;   /* 50 MHz */
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : on;
+    }
+
+    config {
+        freq_hz    : u32  = 1000000  in 1000..50000000;
+        bits_per_word: u8 = 8        in 4..16;
+        mode       : u8  = 0         in 0..3;   /* CPOL | CPHA */
+        cs_gpio    : u8  = 0;
+    }
+}

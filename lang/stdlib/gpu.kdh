@@ -1,0 +1,121 @@
+/*
+ * KDAL Standard Library — gpu.kdh
+ * Abstract GPU command-queue interface.
+ *
+ * This is an abstraction layer over GPU command submission and
+ * fence-based synchronization. It is intentionally device-agnostic:
+ * the concrete backend (e.g., virtio-gpu, Mali, Vivante) is selected
+ * by the `backend` annotation in the .kdc driver file.
+ *
+ * Register layout is based on a simplified virtio-gpu command ring,
+ * extended with KDAL-specific capability and status fields.
+ *
+ * Usage:
+ *   import "kdal/stdlib/gpu.kdh" as GPU;
+ *
+ * kdal_version: "0.1"
+ */
+
+kdal_version: "0.1";
+
+import "common.kdh";
+
+device class GpuDevice {
+
+    registers {
+        /* Command queue head pointer (write-only: advance head to submit) */
+        CMD_SUBMIT  : u32  @ 0x000  wo  = 0x00000000;
+
+        /* Command queue tail pointer (read-only: hardware consumer position) */
+        CMD_TAIL    : u32  @ 0x004  ro  = 0x00000000;
+
+        /* Device status register */
+        STATUS : bitfield  @ 0x008  ro {
+            ready       : 0   = false;
+            busy        : 1   = false;
+            error       : 2   = false;
+            fault       : 3   = false;
+            suspended   : 4   = false;
+            init_done   : 5   = false;
+        };
+
+        /* Soft reset register (write 1 to trigger, self-clearing) */
+        RESET : bitfield  @ 0x00C  rw {
+            soft_reset  : 0   = false;
+            hard_reset  : 1   = false;
+        };
+
+        /* IRQ status register (read-only) */
+        IRQ_STATUS : bitfield  @ 0x010  ro {
+            cmd_done    : 0   = false;
+            page_fault  : 1   = false;
+            channel_err : 2   = false;
+            power_evt   : 3   = false;
+        };
+
+        /* IRQ enable register */
+        IRQ_ENABLE : bitfield  @ 0x014  rw {
+            cmd_done    : 0   = false;
+            page_fault  : 1   = false;
+            channel_err : 2   = false;
+            power_evt   : 3   = false;
+        };
+
+        /* Fence insert (write fence seqno to insert into command stream) */
+        FENCE_INSERT : u32  @ 0x018  wo  = 0x00000000;
+
+        /* Fence completed value (last fence reached by GPU, read-only) */
+        FENCE_DONE   : u32  @ 0x01C  ro  = 0x00000000;
+
+        /* GPU capabilities register (read-only) */
+        CAPABILITIES : bitfield  @ 0x020  ro {
+            has_compute     : 0  = false;
+            has_3d          : 1  = false;
+            has_video_dec   : 2  = false;
+            has_video_enc   : 3  = false;
+            has_display     : 4  = false;
+            num_engines     : 8..11 = 1;
+            num_queues      : 12..15 = 1;
+        };
+
+        /* Command ring base address (low 32 bits of physical address) */
+        RING_BASE_LO : u32  @ 0x030  rw  = 0x00000000;
+        RING_BASE_HI : u32  @ 0x034  rw  = 0x00000000;
+
+        /* Command ring size in pages */
+        RING_SIZE    : u32  @ 0x038  rw  = 4;
+
+        /* GPU clock frequency in MHz (read-only) */
+        CLOCK_MHZ    : u16  @ 0x040  ro  = 0;
+
+        /* GPU temperature sensor (read-only, degrees C × 10) */
+        TEMP_CDEG    : u16  @ 0x044  ro  = 0;
+    }
+
+    signals {
+        cmd_done    : in  edge(rising);     /* Command queue batch complete */
+        page_fault  : in  level(high);     /* GPU MMU page fault */
+        channel_err : in  level(high);     /* Channel error / hang */
+        power_event : in  completion;       /* Power state transition done */
+    }
+
+    capabilities {
+        cmd_ring_depth  = 1024;
+        max_alloc_pages = 65536;
+        iommu_capable   = 1;
+        64bit_addresses = 1;
+    }
+
+    power {
+        on      : allowed;
+        off     : allowed;
+        suspend : allowed;
+        default : off;       /* GPU starts powered-off */
+    }
+
+    config {
+        ring_size_pages : u32  = 4   in 1..64;
+        dma_mask_bits   : u8   = 39  in 32..48;
+        timeout_ms      : u32  = 5000;
+    }
+}
