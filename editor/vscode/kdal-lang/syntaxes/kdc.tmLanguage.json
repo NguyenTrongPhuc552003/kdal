@@ -13,10 +13,16 @@
             "include": "#numbers"
         },
         {
-            "include": "#use-statement"
+            "include": "#version-decl"
+        },
+        {
+            "include": "#import-decl"
         },
         {
             "include": "#keywords"
+        },
+        {
+            "include": "#types"
         },
         {
             "include": "#handlers"
@@ -69,11 +75,19 @@
                 }
             ]
         },
-        "use-statement": {
+        "version-decl": {
+            "patterns": [
+                {
+                    "name": "keyword.other.version.kdc",
+                    "match": "\\bkdal_version\\b"
+                }
+            ]
+        },
+        "import-decl": {
             "patterns": [
                 {
                     "name": "keyword.control.import.kdc",
-                    "match": "\\buse\\b"
+                    "match": "\\b(import|use|as)\\b"
                 }
             ]
         },
@@ -81,7 +95,7 @@
             "patterns": [
                 {
                     "name": "keyword.control.kdc",
-                    "match": "\\b(driver|for|if|else|while|return)\\b"
+                    "match": "\\b(driver|for|if|elif|else|while|return|let)\\b"
                 },
                 {
                     "name": "keyword.other.handler.kdc",
@@ -89,15 +103,35 @@
                 },
                 {
                     "name": "keyword.other.event.kdc",
-                    "match": "\\b(probe|remove|read|write|signal|power)\\b"
+                    "match": "\\b(probe|remove|read|write|signal|power|timeout)\\b"
+                },
+                {
+                    "name": "keyword.other.backend.kdc",
+                    "match": "\\b(backend|config)\\b"
                 },
                 {
                     "name": "keyword.other.power-state.kdc",
                     "match": "\\b(off|on|suspend)\\b"
                 },
                 {
+                    "name": "keyword.other.loop.kdc",
+                    "match": "\\b(in)\\b"
+                },
+                {
                     "name": "variable.language.input.kdc",
                     "match": "\\b(input)\\b"
+                },
+                {
+                    "name": "constant.language.boolean.kdc",
+                    "match": "\\b(true|false)\\b"
+                }
+            ]
+        },
+        "types": {
+            "patterns": [
+                {
+                    "name": "storage.type.primitive.kdc",
+                    "match": "\\b(u8|u16|u32|u64|i8|i16|i32|i64|bool|str|buf)\\b"
                 }
             ]
         },
@@ -105,7 +139,7 @@
             "patterns": [
                 {
                     "name": "entity.name.function.handler.kdc",
-                    "match": "(?<=on\\s)(probe|remove|read|write|signal|power)"
+                    "match": "(?<=on\\s)(probe|remove|read|write|signal|power|timeout)"
                 },
                 {
                     "name": "entity.name.type.driver.kdc",
@@ -117,7 +151,7 @@
             "patterns": [
                 {
                     "name": "support.function.builtin.kdc",
-                    "match": "\\b(reg_read|reg_write|log)\\b"
+                    "match": "\\b(reg_read|reg_write|read|write|log|emit|wait|arm|cancel)\\b"
                 }
             ]
         },

@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — gpio.kdh
+ * KDAL Standard Library - gpio.kdh
  * Generic GPIO bank interface (ARM PL061 / TI TPS65xxx compatible).
  *
  * Covers the ARM PrimeCell PL061 GPIO controller register layout,
@@ -20,7 +20,7 @@ device class GpioBank {
 
     registers {
         /*
-         * Data register — bits [7:2] are the address mask applied by
+         * Data register - bits [7:2] are the address mask applied by
          * the hardware. Only bits where ADDR[9:2] is set are affected.
          * Write 0xFF to the upper address bits to access all pins.
          */

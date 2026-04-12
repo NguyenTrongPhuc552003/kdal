@@ -7,37 +7,41 @@
 
 set -eu
 
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+PRESET="ci-release"
+BUILD_DIR="${REPO_ROOT}/build/ci/release"
+
 echo "=== KDAL smoke tests ==="
+
+# 0. Ensure CMake build directory exists
+if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
+	echo "[0/5] Configuring CMake build..."
+	cmake --preset "${PRESET}"
+fi
 
 # 1. Build kdality (KDAL utility: runtime CLI + language toolchain)
 echo "[1/5] Building kdality..."
-make -C tools/kdality clean
-make -C tools/kdality
+cmake --build --preset "${PRESET}" --target kdality
 
 echo "[2/5] Checking kdality version..."
-./tools/kdality/kdality version >/dev/null
+"${BUILD_DIR}/kdality" version >/dev/null
 
 # 3. Build compiler
 echo "[3/5] Building KDAL compiler..."
-if [ -f compiler/Makefile ]; then
-    make -C compiler
-else
-    echo "  (compiler not yet built — skipping)"
-fi
+cmake --build --preset "${PRESET}" --target kdalc
 
 # 4. Build userspace test programs
 echo "[4/5] Building userspace test programs..."
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
 
-cc -std=c99 -Wall -Wextra -pedantic -D_DEFAULT_SOURCE \
-   -o "$TMPDIR/testapp" tests/userspace/testapp.c
+CFLAGS="-std=c99 -Wall -Wextra -pedantic -Wno-gnu-zero-variadic-macro-arguments -D_DEFAULT_SOURCE"
 
-cc -std=c99 -Wall -Wextra -pedantic -D_DEFAULT_SOURCE \
-   -o "$TMPDIR/benchmark" tests/userspace/benchmark.c
+cc $CFLAGS -o "$TMPDIR/testapp" "${REPO_ROOT}/tests/userspace/testapp.c"
 
-cc -std=c99 -Wall -Wextra -pedantic -D_DEFAULT_SOURCE \
-   -o "$TMPDIR/kdaltest" tests/integration/kdaltest.c
+cc $CFLAGS -o "$TMPDIR/benchmark" "${REPO_ROOT}/tests/userspace/benchmark.c"
+
+cc $CFLAGS -o "$TMPDIR/kdaltest" "${REPO_ROOT}/tests/integration/kdaltest.c"
 
 # 5. Run offline / dry-run tests
 echo "[5/5] Running offline smoke tests..."

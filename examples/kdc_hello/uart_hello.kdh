@@ -1,5 +1,5 @@
 /*
- * KDAL Example — uart_hello.kdh
+ * KDAL Example - uart_hello.kdh
  * Minimal custom UART device header for the QEMU virt PL011 UART.
  *
  * This .kdh file defines the UartHello device class used by
@@ -19,14 +19,14 @@ device class UartHello {
         /* Receive/transmit data register */
         DATA   : u32  @ 0x000  rw  = 0x00;
 
-        /* Flag register — busy/full/empty signals */
+        /* Flag register - busy/full/empty signals */
         FLAGS  : bitfield  @ 0x018  ro {
             rx_empty : 4 = true;
             tx_full  : 5 = false;
             tx_empty : 7 = true;
         };
 
-        /* Line control — baud divisors and frame format */
+        /* Line control - baud divisors and frame format */
         IBRD   : u16  @ 0x024  rw  = 0x0027;   /* integer baud-rate divisor */
         FBRD   : u8   @ 0x028  rw  = 0x09;     /* fractional baud-rate divisor */
 

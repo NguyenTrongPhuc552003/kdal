@@ -68,7 +68,7 @@ make -f build/Makefile.kbuild \
 
 ## Running on QEMU
 
-See [scripts/setupqemu/run.sh](../../scripts/setupqemu/run.sh) to start the QEMU aarch64 virt machine.
+See [scripts/env/run.sh](../../scripts/env/run.sh) to start the QEMU aarch64 virt machine.
 
 Once booted:
 ```sh
@@ -92,17 +92,17 @@ kdality read /dev/kdal0
 - `backend mmio` with explicit base address
 - `config` bind block
 - `probe` / `remove` handlers
-- `on write(reg, val)` — value parameter
-- `on read(reg)` — blocking wait
-- `on signal(sig)` — IRQ handler
-- `on power(A -> B)` — state transition
+- `on write(reg, val)` - value parameter
+- `on read(reg)` - blocking wait
+- `on signal(sig)` - IRQ handler
+- `on power(A -> B)` - state transition
 - `wait()`, `write()`, `read()`, `log()`
 
 ### i2c_sensor.kdc
 - `import` of standard library `.kdh`
 - `backend platdev` (device tree resolved)
-- `arm()` / `cancel()` — periodic timer
-- `on timeout(t)` — recurring callback
+- `arm()` / `cancel()` - periodic timer
+- `on timeout(t)` - recurring callback
 - Multi-step probe sequence
 - `if` / `elif` / `else` control flow
 - Multi-register read sequence
@@ -121,8 +121,8 @@ build/
 
 The generated C file contains:
 - `struct UartHelloDriver_ctx { struct kdal_driver kdal; void __iomem *base; }`
-- `UartHelloDriver_read()` / `UartHelloDriver_write()` — file operations
-- `UartHelloDriver_irq()` — IRQ handler for signals
-- `UartHelloDriver_probe()` / `UartHelloDriver_remove()` — platform_driver ops
-- `OF device ID table` — `compatible = "kdal,UartHelloDriver"`
-- `module_platform_driver(UartHelloDriver_driver)` — module registration
+- `UartHelloDriver_read()` / `UartHelloDriver_write()` - file operations
+- `UartHelloDriver_irq()` - IRQ handler for signals
+- `UartHelloDriver_probe()` / `UartHelloDriver_remove()` - platform_driver ops
+- `OF device ID table` - `compatible = "kdal,UartHelloDriver"`
+- `module_platform_driver(UartHelloDriver_driver)` - module registration

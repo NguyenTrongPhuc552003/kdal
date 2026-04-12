@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * KDAL Compiler — sema.c
+ * KDAL Compiler - sema.c
  * Semantic analysis pass: type checking + register access verification.
  *
  * Runs after parsing on the annotated AST produced by parser.c.
@@ -92,7 +92,7 @@ static void sema_check_expr(sema_t *sema, const kdal_ast_t *expr,
 			if (sym->access == KDAL_ACCESS_RO) {
 				kdal_error(
 					sema->filename, expr->line, expr->col,
-					"register '%s' is declared 'ro' — cannot write",
+					"register '%s' is declared 'ro' - cannot write",
 					e->u.path.parts[e->u.path.nparts - 1]);
 				sema->errors++;
 			}
@@ -101,7 +101,7 @@ static void sema_check_expr(sema_t *sema, const kdal_ast_t *expr,
 			if (sym->access == KDAL_ACCESS_WO) {
 				kdal_error(
 					sema->filename, expr->line, expr->col,
-					"register '%s' is declared 'wo' — cannot read",
+					"register '%s' is declared 'wo' - cannot read",
 					e->u.path.parts[e->u.path.nparts - 1]);
 				sema->errors++;
 			}
@@ -194,6 +194,132 @@ static void sema_check_stmts(sema_t *sema, const kdal_ast_t *stmt)
 	}
 }
 
+/* ── Device class validation ─────────────────────────────────────── */
+
+/* Populate global symbol table from device class registers/signals/etc. */
+static void sema_populate_device(sema_t *sema, const kdal_device_node_t *dev)
+{
+	/* Walk registers */
+	if (dev->registers) {
+		for (const kdal_ast_t *r = dev->registers->child; r;
+		     r = r->next) {
+			const kdal_reg_decl_node_t *reg =
+				(const kdal_reg_decl_node_t *)r;
+			/* Check for duplicate */
+			if (symtab_find(&sema->globals, reg->name)) {
+				kdal_error(sema->filename, r->line, r->col,
+					   "duplicate register name '%s'",
+					   reg->name);
+				sema->errors++;
+				continue;
+			}
+			symtab_push(&sema->globals, reg->name, SYM_REGISTER,
+				    reg->width, reg->access);
+
+			/* Check offset overlaps with prior registers */
+			if (reg->offset != UINT64_MAX &&
+			    dev->registers->child) {
+				for (const kdal_ast_t *p =
+					     dev->registers->child;
+				     p != r; p = p->next) {
+					const kdal_reg_decl_node_t *pr =
+						(const kdal_reg_decl_node_t *)p;
+					if (pr->offset == UINT64_MAX)
+						continue;
+					int pw = pr->width ? pr->width / 8 : 4;
+					int rw = reg->width ? reg->width / 8 :
+							      4;
+					uint64_t pend =
+						pr->offset + (uint64_t)pw;
+					uint64_t rend =
+						reg->offset + (uint64_t)rw;
+					if (reg->offset < pend &&
+					    pr->offset < rend) {
+						kdal_warn(
+							sema->filename, r->line,
+							r->col,
+							"register '%s' @ 0x%llx overlaps with '%s' @ 0x%llx",
+							reg->name,
+							(unsigned long long)
+								reg->offset,
+							pr->name,
+							(unsigned long long)
+								pr->offset);
+					}
+				}
+			}
+
+			/* Validate bitfield members */
+			if (reg->is_bitfield && reg->members) {
+				for (const kdal_ast_t *m = reg->members; m;
+				     m = m->next) {
+					const kdal_bf_member_node_t *bf =
+						(const kdal_bf_member_node_t *)m;
+					if (bf->bit_lo > bf->bit_hi) {
+						kdal_error(
+							sema->filename, m->line,
+							m->col,
+							"bitfield '%s' has invalid range %d..%d",
+							bf->name, bf->bit_lo,
+							bf->bit_hi);
+						sema->errors++;
+					}
+				}
+			}
+		}
+	}
+
+	/* Walk signals */
+	if (dev->signals) {
+		for (const kdal_ast_t *s = dev->signals->child; s;
+		     s = s->next) {
+			const kdal_signal_node_t *sig =
+				(const kdal_signal_node_t *)s;
+			if (symtab_find(&sema->globals, sig->name)) {
+				kdal_error(sema->filename, s->line, s->col,
+					   "duplicate signal name '%s'",
+					   sig->name);
+				sema->errors++;
+				continue;
+			}
+			symtab_push(&sema->globals, sig->name, SYM_SIGNAL, 0,
+				    KDAL_ACCESS_RW);
+		}
+	}
+
+	/* Walk capabilities */
+	if (dev->capabilities) {
+		for (const kdal_ast_t *c = dev->capabilities->child; c;
+		     c = c->next) {
+			const kdal_cap_node_t *cap = (const kdal_cap_node_t *)c;
+			if (symtab_find(&sema->globals, cap->name)) {
+				kdal_warn(sema->filename, c->line, c->col,
+					  "duplicate capability '%s'",
+					  cap->name);
+			}
+			symtab_push(&sema->globals, cap->name, SYM_CAPABILITY,
+				    0, KDAL_ACCESS_RW);
+		}
+	}
+
+	/* Walk config fields */
+	if (dev->config) {
+		for (const kdal_ast_t *f = dev->config->child; f; f = f->next) {
+			const kdal_config_field_node_t *cf =
+				(const kdal_config_field_node_t *)f;
+			if (symtab_find(&sema->globals, cf->name)) {
+				kdal_error(sema->filename, f->line, f->col,
+					   "duplicate config field '%s'",
+					   cf->name);
+				sema->errors++;
+				continue;
+			}
+			symtab_push(&sema->globals, cf->name, SYM_CONFIG, 0,
+				    KDAL_ACCESS_RW);
+		}
+	}
+}
+
 /* ── Public entry point ──────────────────────────────────────────── */
 
 int kdal_sema(kdal_file_node_t *file, const char *filename)
@@ -201,15 +327,17 @@ int kdal_sema(kdal_file_node_t *file, const char *filename)
 	sema_t sema = { .filename = filename };
 
 	/* Build global symbol table from device class (if present) */
-	/* In a full implementation this would walk the register/signal
-     * declarations in file->device and populate sema.globals.
-     * For the thesis skeleton, the table starts empty and register-
-     * access checks are silently skipped for unresolved names. */
+	if (file->device) {
+		const kdal_device_node_t *dev =
+			(const kdal_device_node_t *)file->device;
+		sema_populate_device(&sema, dev);
+	}
 
 	if (!file->driver)
-		return 0; /* .kdh only — nothing to check */
+		return 0; /* .kdh only - nothing to check */
 
-	kdal_driver_node_t *drv = (kdal_driver_node_t *)file->driver;
+	const kdal_driver_node_t *drv =
+		(const kdal_driver_node_t *)file->driver;
 
 	/* Check probe handler */
 	if (drv->probe) {

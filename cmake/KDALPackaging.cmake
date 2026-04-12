@@ -2,9 +2,9 @@
 # CPack configuration for building KDAL distribution packages.
 #
 # Produces:
-#   kdal-<version>-Linux-x86_64.tar.gz   — generic tarball
-#   kdal_<version>_amd64.deb             — Debian/Ubuntu package
-#   kdal-<version>-1.x86_64.rpm         — Red Hat/SUSE package (if rpmbuild available)
+#   kdal-<version>-Linux-x86_64.tar.gz   - generic tarball
+#   kdal_<version>_amd64.deb             - Debian/Ubuntu package
+#   kdal-<version>-1.x86_64.rpm         - Red Hat/SUSE package (if rpmbuild available)
 #
 # Usage:
 #   cmake --build build --target package
@@ -22,7 +22,7 @@ include(GNUInstallDirs)
 
 set(CPACK_PACKAGE_NAME              "kdal")
 set(CPACK_PACKAGE_VENDOR            "KDAL Project")
-set(CPACK_PACKAGE_CONTACT           "kdal-dev@example.com")
+set(CPACK_PACKAGE_CONTACT           "trongphuc.nguyen5520@gmail.com")
 set(CPACK_PACKAGE_DESCRIPTION_SHORT "Kernel Device Abstraction Layer")
 set(CPACK_PACKAGE_DESCRIPTION
     "KDAL is an open-source Linux kernel framework for writing device drivers "
@@ -102,31 +102,29 @@ set(CPACK_DEBIAN_PACKAGE_SUGGESTS
 # ── RPM-specific settings ─────────────────────────────────────────────
 
 set(CPACK_RPM_PACKAGE_GROUP     "Development/Tools")
-set(CPACK_RPM_PACKAGE_LICENSE   "GPL v2")
+set(CPACK_RPM_PACKAGE_LICENSE   "GPL-3.0-or-later")
 set(CPACK_RPM_PACKAGE_REQUIRES  "glibc >= 2.17")
 set(CPACK_RPM_PACKAGE_SUMMARY   "${CPACK_PACKAGE_DESCRIPTION_SHORT}")
-set(CPACK_RPM_PACKAGE_URL       "https://github.com/kdal-project/kdal")
+set(CPACK_RPM_PACKAGE_URL       "https://github.com/NguyenTrongPhuc552003/kdal")
 
 # ── Install layout ────────────────────────────────────────────────────
 # Follows GNUInstallDirs conventions.
 #
 # Installed layout:
-#   ${CMAKE_INSTALL_BINDIR}/kdality           — unified toolchain binary
-#   ${CMAKE_INSTALL_BINDIR}/kdalc             — standalone compiler
-#   ${CMAKE_INSTALL_LIBDIR}/libkdal.a         — runtime library
-#   ${CMAKE_INSTALL_LIBDIR}/libkdalc.a        — compiler library
-#   ${CMAKE_INSTALL_INCLUDEDIR}/kdal/         — public headers
-#   ${CMAKE_INSTALL_DATADIR}/kdal/stdlib/     — .kdh standard library
-#   ${CMAKE_INSTALL_LIBDIR}/cmake/KDAL/       — CMake package files
-#   ${CMAKE_INSTALL_MANDIR}/man1/kdality.1    — man page (future)
+#   ${CMAKE_INSTALL_BINDIR}/kdality           - unified toolchain binary
+#   ${CMAKE_INSTALL_BINDIR}/kdalc             - standalone compiler
+#   ${CMAKE_INSTALL_LIBDIR}/libkdalc.a        - compiler library
+#   ${CMAKE_INSTALL_INCLUDEDIR}/kdal/         - public headers
+#   ${CMAKE_INSTALL_DATADIR}/kdal/stdlib/     - .kdh standard library
+#   ${CMAKE_INSTALL_DATADIR}/kdal/vim/        - Vim/Neovim syntax files
+#   ${CMAKE_INSTALL_LIBDIR}/cmake/KDAL/       - CMake package files
+#   ${CMAKE_INSTALL_MANDIR}/man1/kdality.1    - man page (future)
 
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/lang/stdlib/"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/kdal/stdlib"
-    FILES_MATCHING PATTERN "*.kdh")
-
-install(DIRECTORY "${CMAKE_SOURCE_DIR}/cmake/"
-    DESTINATION "${CMAKE_INSTALL_LIBDIR}/cmake/KDAL"
-    FILES_MATCHING PATTERN "*.cmake")
+# NOTE: stdlib and cmake module install rules live in the top-level
+# CMakeLists.txt with a curated file list.  Do NOT duplicate them here.
 
 # ── Activate CPack ────────────────────────────────────────────────────
-include(CPack)
+
+if(NOT CPack_CMake_INCLUDED)
+    include(CPack)
+endif()

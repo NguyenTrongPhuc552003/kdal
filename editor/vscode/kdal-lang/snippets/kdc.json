@@ -101,5 +101,32 @@
         "body": [
             "log(\"${1:message}\");"
         ]
+    },
+    "If statement": {
+        "prefix": "if",
+        "description": "Conditional block",
+        "body": [
+            "if (${1:condition}) {",
+            "    $0",
+            "}"
+        ]
+    },
+    "For loop": {
+        "prefix": "for",
+        "description": "Loop statement",
+        "body": [
+            "for (${1:i} = ${2:0}; ${1:i} < ${3:count}; ${1:i} = ${1:i} + 1) {",
+            "    $0",
+            "}"
+        ]
+    },
+    "Backend selector": {
+        "prefix": "backend",
+        "description": "Backend-specific block",
+        "body": [
+            "backend ${1|qemu,generic,platform|} {",
+            "    $0",
+            "}"
+        ]
     }
 }

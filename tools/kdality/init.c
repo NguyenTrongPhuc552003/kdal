@@ -1,14 +1,14 @@
 /*
- * init.c — kdality init subcommand.
+ * init.c - kdality init subcommand.
  *
  * Scaffolds a new KDAL driver project:
  *   kdality init <name> [--class <class>] [--vendor <vendor>]
  *
  * Creates a directory with:
- *   <name>.kdh          — device header
- *   <name>_driver.kdc   — driver stub
- *   Makefile             — build orchestration
- *   README.md            — project documentation
+ *   <name>.kdh          - device header
+ *   <name>_driver.kdc   - driver stub
+ *   Makefile             - build orchestration
+ *   README.md            - project documentation
  */
 
 #include <errno.h>
@@ -92,7 +92,7 @@ static void init_help(void)
 
 /* ── main entry ──────────────────────────────────────────────────── */
 
-int kdality_init(int argc, char *argv[])
+int kdality_init(int argc, char *const argv[])
 {
 	const char *name = NULL;
 	const char *class = "gpio";

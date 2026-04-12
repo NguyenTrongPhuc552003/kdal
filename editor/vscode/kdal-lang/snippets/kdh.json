@@ -41,5 +41,28 @@
         "body": [
             "${1:signal_name};"
         ]
+    },
+    "Bitfield entry": {
+        "prefix": "bitfield",
+        "description": "Bitfield register entry",
+        "body": [
+            "bitfield ${1:FIELD} {",
+            "    ${2:bit_name} [${3:7}:${4:0}];",
+            "}"
+        ]
+    },
+    "Import header": {
+        "prefix": "import",
+        "description": "Import a stdlib header",
+        "body": [
+            "import \"${1|uart,i2c,spi,gpio,gpu,npu,common|}.kdh\";"
+        ]
+    },
+    "Config entry": {
+        "prefix": "config",
+        "description": "Configuration option",
+        "body": [
+            "config ${1:OPTION} ${2|true,false|};"
+        ]
     }
 }

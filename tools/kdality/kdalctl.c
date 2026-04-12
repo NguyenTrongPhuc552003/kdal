@@ -2,13 +2,13 @@
  * Userspace control-plane tool for KDAL.
  *
  * Opens /dev/kdal and performs ioctl operations to manage devices:
- *   version    — query kernel module version
- *   list       — list all registered devices
- *   info NAME  — show detailed info for a device
- *   power NAME STATE — set power state (on/off/suspend)
- *   select NAME      — select a device for I/O
- *   read NAME COUNT  — read data from a device
- *   write NAME DATA  — write data to a device
+ *   version    - query kernel module version
+ *   list       - list all registered devices
+ *   info NAME  - show detailed info for a device
+ *   power NAME STATE - set power state (on/off/suspend)
+ *   select NAME      - select a device for I/O
+ *   read NAME COUNT  - read data from a device
+ *   write NAME DATA  - write data to a device
  *
  * Compiles as a standalone C99 userspace program, no kernel headers
  * required (the ioctl definitions are duplicated below so the tool

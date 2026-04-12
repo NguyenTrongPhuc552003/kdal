@@ -1,5 +1,5 @@
-(* KDAL Driver Implementation Grammar — .kdc files *)
-(* Version 0.1 — EBNF (ISO 14977 extended) *)
+(* KDAL Driver Implementation Grammar - .kdc files *)
+(* Version 0.1 - EBNF (ISO 14977 extended) *)
 (*
  * A .kdc file implements a driver for a device class declared in a .kdh.
  * It is composed of:
@@ -7,23 +7,23 @@
  *   - imports of .kdh device interfaces
  *   - an optional backend annotation (mmio, platdev, soc, …)
  *   - a driver block containing:
- *       config   — bind compile-time parameters
- *       probe    — mandatory one-shot init handler
- *       remove   — optional tear-down handler
- *       on read  — register-read event handler
- *       on write — register-write event handler
- *       on signal — asynchronous signal handler
- *       on power  — power-state transition handler
- *       on timeout — periodic / one-shot timer handler
+ *       config   - bind compile-time parameters
+ *       probe    - mandatory one-shot init handler
+ *       remove   - optional tear-down handler
+ *       on read  - register-read event handler
+ *       on write - register-write event handler
+ *       on signal - asynchronous signal handler
+ *       on power  - power-state transition handler
+ *       on timeout - periodic / one-shot timer handler
  *
  * The KDAL compiler translates a .kdc file into a kernel-compatible C
  * translation unit plus a Kbuild Makefile fragment, which is then
  * compiled into a Linux kernel module (.ko) by the host kbuild toolchain.
  *
- * Design constraints (intentional — keeps the language auditable):
+ * Design constraints (intentional - keeps the language auditable):
  *   - No recursion, no heap allocation, no dynamic dispatch
- *   - No unannotated loops — only range-for over register arrays
- *   - No pointers — all memory access goes through typed register paths
+ *   - No unannotated loops - only range-for over register arrays
+ *   - No pointers - all memory access goes through typed register paths
  *   - No inline assembly
  *)
 
@@ -42,7 +42,7 @@ import_decl  = "import" string_lit [ "as" ident ] ";" ;
 
 (* ── Backend annotation ──────────────────────────────────────────── *)
 
-backend_decl = "backend" ident [ "{" { backend_option } "}" ] ";" ;
+backend_decl = "backend" ident [ "{" { backend_option } "}" ] ;
 
 backend_option = ident ":" literal ";" ;
 
@@ -50,7 +50,7 @@ backend_option = ident ":" literal ";" ;
 
 driver_block =
     "driver" ident
-    [ "for" ident ]          (* device class from imported .kdh *)
+    [ "for" qualified_ident ] (* device class from imported .kdh, e.g. DEV.UartDevice *)
     "{"
         [ config_bind_block ]
         probe_block
@@ -174,7 +174,8 @@ string_lit  = '"' { any_char_except_dquote } '"' ;
 
 (* ── Identifiers ─────────────────────────────────────────────────── *)
 
-ident     = letter { letter | digit | "_" } ;
+ident           = letter { letter | digit | "_" } ;
+qualified_ident = ident { "." ident } ;
 letter    = "a" .. "z" | "A" .. "Z" | "_" ;
 digit     = "0" .. "9" ;
 hex_digit = digit | "a" .. "f" | "A" .. "F" ;

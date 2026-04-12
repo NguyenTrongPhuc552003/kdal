@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — uart.kdh
+ * KDAL Standard Library - uart.kdh
  * UART 16550 / ARM PL011 compatible device interface.
  *
  * Register layout matches ARM PrimeCell PL011 UART (DDI0183G) which
@@ -18,7 +18,7 @@ import "common.kdh";
 device class UartDevice {
 
     registers {
-        /* Data register — write to TX FIFO, read from RX FIFO */
+        /* Data register - write to TX FIFO, read from RX FIFO */
         DR   : u32  @ 0x000  rw  = 0x00000000;
 
         /* Receive status / error clear register */

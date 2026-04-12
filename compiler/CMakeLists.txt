@@ -1,11 +1,11 @@
 # SPDX-License-Identifier: GPL-2.0-only
 #
-# KDAL compiler (kdalc) — CMake build
+# KDAL compiler (kdalc) - CMake build
 #
 # Mirrors compiler/Makefile for CMake-based builds.
 # Produces:
-#   kdalc_lib  — static library (lexer + parser + sema + codegen)
-#   kdalc      — standalone compiler binary
+#   kdalc_lib  - static library (lexer + parser + sema + codegen)
+#   kdalc      - standalone compiler binary
 
 cmake_minimum_required(VERSION 3.20)
 
@@ -60,3 +60,9 @@ set_target_properties(kdalc PROPERTIES
     C_STANDARD 99
     C_STANDARD_REQUIRED ON
 )
+
+# ── Install rules ─────────────────────────────────────────────────────
+include(GNUInstallDirs)
+
+install(TARGETS kdalc     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS kdalc_lib ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR})

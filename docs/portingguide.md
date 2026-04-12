@@ -3,7 +3,7 @@
 ## Overview
 
 Porting KDAL to a new platform involves implementing a backend adapter. The
-driver layer and userspace interface remain unchanged — this is the core value
+driver layer and userspace interface remain unchanged - this is the core value
 proposition of the abstraction.
 
 ## Step-by-Step
@@ -98,10 +98,10 @@ The QEMU backend (`src/backends/qemu/qemubackend.c`) serves as the reference
 implementation. It uses a software ring buffer to emulate hardware I/O and
 demonstrates the full lifecycle:
 
-1. `init()` — log initialization
-2. `enumerate()` — (devices created by drivers in first milestone)
-3. `read()`/`write()` — route through `qemu_dev_ring`
-4. `exit()` — cleanup
+1. `init()` - log initialization
+2. `enumerate()` - (devices created by drivers in first milestone)
+3. `read()`/`write()` - route through `qemu_dev_ring`
+4. `exit()` - cleanup
 
 ## Future: Radxa Orion O6
 

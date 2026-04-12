@@ -1,3 +1,4 @@
+# ── Compiler / linker artifacts ───────────────────────────────────
 *.o
 *.ko
 *.mod
@@ -9,24 +10,49 @@
 *.a
 *.so
 *.out
+*.dtso
 *.log
 *.tmp
 *.swp
 *.dSYM/
 .DS_Store
 
+# ── Build output (all variants live under build/) ────────────────
+# Structured: build/release/, build/debug/, build/asan/, build/nightly/
 build/
+# Legacy / ad-hoc staging dirs from local validation
+nightly-stage/
+
 dist/
 out/
 coverage/
 htmlcov/
 
+# ── Tool / IDE caches ───────────────────────────────────────────
 .cache/
 .kunit/
+.prompt/
+.vscode/
+.idea/
+.kconfig*
+*.code-workspace
+compile_commands.json
 
+# ── External / fetched trees ─────────────────────────────────────
 qemu-images/
 rootfs/
 linux-build/
 linux-src/
 
-compile_commands.json
+# ── VS Code extension build artifacts ────────────────────────────
+editor/vscode/kdal-lang/out/
+editor/vscode/kdal-lang/node_modules/
+*.vsix
+
+# ── Generated kdalc output ───────────────────────────────────────
+UartHelloDriver.c
+I2cTempSensor.c
+
+# ── Miscellaneous ────────────────────────────────────────────────
+unknown.*
+*.kbuild

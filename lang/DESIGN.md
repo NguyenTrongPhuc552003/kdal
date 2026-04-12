@@ -1,7 +1,7 @@
 # KDAL Language Design Document
 
 **Version:** 0.1  
-**Status:** Draft — Internal Design Notes
+**Status:** Draft - Internal Design Notes
 
 ---
 
@@ -41,11 +41,11 @@ hardware engineers think: "the device has these registers; when this event occur
 ### 2.2 Intentionally not Turing-complete
 
 KDAL rejects:
-- **Recursion** — call depth is bounded at 1 (event handler calls built-ins only)
-- **Heap allocation** — all driver state lives in a C struct allocated once by `probe`
-- **Unbounded loops** — only `for i in 0..N` is allowed (N must be a compile-time constant)
-- **Pointer arithmetic** — register access goes through typed paths; the compiler generates `ioread32` / `iowrite32` calls
-- **Inline assembly** — no escape hatch to machine code
+- **Recursion** - call depth is bounded at 1 (event handler calls built-ins only)
+- **Heap allocation** - all driver state lives in a C struct allocated once by `probe`
+- **Unbounded loops** - only `for i in 0..N` is allowed (N must be a compile-time constant)
+- **Pointer arithmetic** - register access goes through typed paths; the compiler generates `ioread32` / `iowrite32` calls
+- **Inline assembly** - no escape hatch to machine code
 
 This keeps the generated code auditable and eliminates entire classes of kernel bugs
 (memory corruption, double-free, stack overflow, IRQ reentrancy).
@@ -79,8 +79,8 @@ The KDAL compiler (`kdalc`) is written in C. This is intentional:
 ### 4.1 Why `.kdh` and `.kdc` (not `.kdal`)?
 
 The two-file split separates concerns:
-- `.kdh` is shareable — once written, it describes a hardware class (e.g., `uart_pl011`) and can be reused by many drivers
-- `.kdc` is the implementation — one per driver, imports one or more `.kdh` files
+- `.kdh` is shareable - once written, it describes a hardware class (e.g., `uart_pl011`) and can be reused by many drivers
+- `.kdc` is the implementation - one per driver, imports one or more `.kdh` files
 - This mirrors the C `.h` / `.c` split but makes the semantic difference explicit in the extension
 
 The `.kdal` extension (used in earlier drafts) was ambiguous about which type of file it was.
@@ -113,8 +113,8 @@ The decision to target C for KDAL 0.x is pragmatic:
 
 ```
 .kdc file
-    │
-    ▼
+       │
+       ▼
 ┌─────────────┐
 │   Lexer     │  characters → token stream
 │ (lexer.c)   │
@@ -182,7 +182,7 @@ The KDAL standard library lives in `lang/stdlib/` and provides `.kdh` interfaces
 
 | File         | Device class                  | Notable registers                                       |
 | ------------ | ----------------------------- | ------------------------------------------------------- |
-| `common.kdh` | Primitive types and constants | —                                                       |
+| `common.kdh` | Primitive types and constants | -                                                       |
 | `uart.kdh`   | UART 16550-compatible         | DR, FR, IBRD, FBRD, LCRH, CR, IFLS, IMSC, RIS, MIS, ICR |
 | `i2c.kdh`    | I2C controller (DesignWare)   | CON, TAR, SAR, DATA_CMD, SS/FS_SCL, ISR, IMR, CLR_INTR  |
 | `spi.kdh`    | SPI controller (PL022)        | CR0, CR1, DR, SR, CPSR, IMSC, RIS, MIS, ICR, DMACR      |
@@ -194,17 +194,17 @@ The KDAL standard library lives in `lang/stdlib/` and provides `.kdh` interfaces
 
 ## 7. Future Work
 
-- **v0.2** — `async` event handlers (work-queue dispatch instead of IRQ context)
-- **v0.3** — KDAL debugfs integration (auto-generate `/sys/kernel/debug/kdal/<driver>/` from register declarations)
-- **v0.4** — KUnit test generation (generate KUnit test scaffold from `.kdh` type information)
-- **v0.5** — Rust codegen target (`codegen_rust.c`)
-- **v1.0** — Stable ABI, Language Conformance Test Suite
+- **v0.2** - `async` event handlers (work-queue dispatch instead of IRQ context)
+- **v0.3** - KDAL debugfs integration (auto-generate `/sys/kernel/debug/kdal/<driver>/` from register declarations)
+- **v0.4** - KUnit test generation (generate KUnit test scaffold from `.kdh` type information)
+- **v0.5** - Rust codegen target (`codegen_rust.c`)
+- **v1.0** - Stable ABI, Language Conformance Test Suite
 
 ---
 
 ## 8. Non-Goals
 
-- **General-purpose programming language** — KDAL is not Python, not Go, not a scripting language
-- **Bare-metal / RTOS support** — KDAL targets Linux kernel modules only
-- **Bytecode / VM** — generated output is always C, never bytecode
-- **IDE language server** — planned but out of scope for v0.1
+- **General-purpose programming language** - KDAL is not Python, not Go, not a scripting language
+- **Bare-metal / RTOS support** - KDAL targets Linux kernel modules only
+- **Bytecode / VM** - generated output is always C, never bytecode
+- **IDE language server** - planned but out of scope for v0.1

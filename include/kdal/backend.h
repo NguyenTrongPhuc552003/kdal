@@ -15,9 +15,9 @@ struct kdal_backend_ops {
 	int (*enumerate)(struct kdal_backend *backend);
 	ssize_t (*read)(struct kdal_device *device, char *buf, size_t count);
 	ssize_t (*write)(struct kdal_device *device, const char *buf,
-	                 size_t count);
+			 size_t count);
 	long (*ioctl)(struct kdal_device *device, unsigned int cmd,
-	              unsigned long arg);
+		      unsigned long arg);
 };
 
 struct kdal_backend {

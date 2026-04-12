@@ -24,33 +24,33 @@ info ""
 # If running inside a QEMU guest with gcov data:
 GCOV_DIR="/sys/kernel/debug/gcov"
 if [ -d "$GCOV_DIR" ]; then
-    info "Extracting gcov data..."
-    OUTDIR="$WORK_DIR/coverage/$(date +%Y%m%d-%H%M%S)"
-    mkdir -p "$OUTDIR"
+	info "Extracting gcov data..."
+	OUTDIR="$WORK_DIR/coverage/$(date +%Y%m%d-%H%M%S)"
+	mkdir -p "$OUTDIR"
 
-    # Extract .gcda files
-    find "$GCOV_DIR" -name '*.gcda' -exec sh -c '
+	# Extract .gcda files
+	find "$GCOV_DIR" -name '*.gcda' -exec sh -c '
         dir=$(dirname "$1" | sed "s|^/sys/kernel/debug/gcov||")
         mkdir -p "'"$OUTDIR"'$dir"
         cat "$1" > "'"$OUTDIR"'$dir/$(basename $1)"
     ' _ {} \;
 
-    # Extract .gcno files
-    find "$GCOV_DIR" -name '*.gcno' -exec sh -c '
+	# Extract .gcno files
+	find "$GCOV_DIR" -name '*.gcno' -exec sh -c '
         dir=$(dirname "$1" | sed "s|^/sys/kernel/debug/gcov||")
         mkdir -p "'"$OUTDIR"'$dir"
         cat "$1" > "'"$OUTDIR"'$dir/$(basename $1)"
     ' _ {} \;
 
-    info "Data saved to $OUTDIR"
+	info "Data saved to $OUTDIR"
 
-    if command -v lcov >/dev/null 2>&1; then
-        info "Generating HTML report..."
-        lcov --capture --directory "$OUTDIR" --output-file "$OUTDIR/coverage.info" 2>/dev/null || true
-        genhtml "$OUTDIR/coverage.info" --output-directory "$OUTDIR/html" 2>/dev/null || true
-        info "Report: $OUTDIR/html/index.html"
-    fi
+	if command -v lcov >/dev/null 2>&1; then
+		info "Generating HTML report..."
+		lcov --capture --directory "$OUTDIR" --output-file "$OUTDIR/coverage.info" 2>/dev/null || true
+		genhtml "$OUTDIR/coverage.info" --output-directory "$OUTDIR/html" 2>/dev/null || true
+		info "Report: $OUTDIR/html/index.html"
+	fi
 else
-    info "No gcov data found at $GCOV_DIR"
-    info "Run this script inside the QEMU guest after loading kdal.ko"
+	info "No gcov data found at $GCOV_DIR"
+	info "Run this script inside the QEMU guest after loading kdal.ko"
 fi

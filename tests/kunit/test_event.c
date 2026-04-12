@@ -88,15 +88,14 @@ static void test_event_overflow(struct kunit *test)
 
 /* ── suite ──────────────────────────────────────────────────────── */
 
-static struct kunit_case kdal_event_cases[] = {
-	KUNIT_CASE(test_emit_event),
-	KUNIT_CASE(test_emit_null_device),
-	KUNIT_CASE(test_poll_event),
-	KUNIT_CASE(test_poll_null),
-	KUNIT_CASE(test_event_shutdown),
-	KUNIT_CASE(test_event_overflow),
-	{}
-};
+static struct kunit_case kdal_event_cases[] = { KUNIT_CASE(test_emit_event),
+						KUNIT_CASE(
+							test_emit_null_device),
+						KUNIT_CASE(test_poll_event),
+						KUNIT_CASE(test_poll_null),
+						KUNIT_CASE(test_event_shutdown),
+						KUNIT_CASE(test_event_overflow),
+						{} };
 
 static struct kunit_suite kdal_event_suite = {
 	.name = "kdal-event",

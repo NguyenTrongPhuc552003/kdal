@@ -177,8 +177,8 @@ static int kdal_cdev_release(struct inode *inode, struct file *filp)
 	return 0;
 }
 
-static ssize_t kdal_cdev_read(struct file *filp, char __user *buf, size_t count,
-			      loff_t *ppos)
+static ssize_t kdal_cdev_read(const struct file *filp, char __user *buf,
+			      size_t count, loff_t *ppos)
 {
 	struct kdal_file_ctx *fctx = filp->private_data;
 	struct kdal_device *dev;
@@ -194,7 +194,7 @@ static ssize_t kdal_cdev_read(struct file *filp, char __user *buf, size_t count,
 	return dev->driver->ops->read(dev, buf, count, ppos);
 }
 
-static ssize_t kdal_cdev_write(struct file *filp, const char __user *buf,
+static ssize_t kdal_cdev_write(const struct file *filp, const char __user *buf,
 			       size_t count, loff_t *ppos)
 {
 	struct kdal_file_ctx *fctx = filp->private_data;
@@ -211,7 +211,7 @@ static ssize_t kdal_cdev_write(struct file *filp, const char __user *buf,
 	return dev->driver->ops->write(dev, buf, count, ppos);
 }
 
-static long kdal_cdev_ioctl(struct file *filp, unsigned int cmd,
+static long kdal_cdev_ioctl(const struct file *filp, unsigned int cmd,
 			    unsigned long arg)
 {
 	struct kdal_file_ctx *fctx = filp->private_data;

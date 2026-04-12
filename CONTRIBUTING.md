@@ -4,14 +4,31 @@ KDAL is a master thesis project with production-grade engineering standards.
 Contributions must preserve API clarity, QEMU-first reproducibility, and
 Linux kernel coding discipline.
 
+## Prerequisites
+
+| Tool       | Minimum Version | Check                  |
+| ---------- | --------------- | ---------------------- |
+| GCC        | 11+             | `gcc --version`        |
+| CMake      | 3.20+           | `cmake --version`      |
+| Node.js    | 18+             | `node --version`       |
+| npm        | 8+              | `npm --version`        |
+| ShellCheck | any             | `shellcheck --version` |
+| cppcheck   | any             | `cppcheck --version`   |
+
+> **Tip:** Run `./scripts/env/dependencies.sh` to install everything automatically.
+
 ## Development Setup
 
 ```sh
 # Install build tools
-./scripts/devsetup/install_deps.sh
+./scripts/env/dependencies.sh
 
 # Build everything (compiler + tool)
-make all
+./scripts/dev/build.sh --variant debug all
+
+# Prepare the reproducible QEMU workspace when you need guest-side testing
+./scripts/env/prepare.sh
+./scripts/env/kernel.sh
 
 # Run CI suite
 ./scripts/ci/test.sh
@@ -63,10 +80,10 @@ Rules:
 ## Architecture Rules
 
 - **No backend-specific types in public headers** (`include/kdal/`)
-- **No direct hardware access in core or drivers** — always through backend ops
-- **No new ioctl without version bump** — see `bumpversion.sh`
-- **No `printk` spam** — use `pr_debug()` for development, `pr_info()` for lifecycle events
-- **No sleeping in registry iteration** — callbacks must be non-blocking
+- **No direct hardware access in core or drivers** - always through backend ops
+- **No new ioctl without version bump** - see `scripts/release/bump_version.sh`
+- **No `printk` spam** - use `pr_debug()` for development, `pr_info()` for lifecycle events
+- **No sleeping in registry iteration** - callbacks must be non-blocking
 
 ## Adding a New Driver
 
@@ -86,7 +103,7 @@ See [docs/portingguide.md](docs/portingguide.md).
 
 1. Create `lang/stdlib/<device>.kdh`
 2. Define `device`, `register_map`, `signals`, `capabilities`, `power_states`
-3. Follow existing patterns — see `lang/stdlib/uart.kdh` as reference
+3. Follow existing patterns - see `lang/stdlib/uart.kdh` as reference
 4. Create a matching example `.kdc` file in `examples/`
 5. Add a test case in `tests/userspace/` or extend `test.sh`
 6. Update `docs/language_guide.md` device reference table
@@ -102,17 +119,17 @@ compiler/
 ├── sema.c        # Symbol resolution, register validation
 ├── codegen.c     # C code generation + Kbuild emitter
 ├── main.c        # Standalone kdalc entry point
-├── Makefile      # Builds libkdalc.a and kdalc
+├── CMakeLists.txt # Builds libkdalc.a and kdalc
 └── include/      # token.h, ast.h, codegen.h
 ```
 
 Rules:
 - **All public API uses `kdal_` prefix** (e.g. `kdal_lex()`, `kdal_parse()`)
-- **AST nodes are arena-allocated** — never free individual nodes
-- **Codegen must emit kernel-style C** — tabs, 80-col, `/* C89 comments */`
+- **AST nodes are arena-allocated** - never free individual nodes
+- **Codegen must emit kernel-style C** - tabs, 80-col, `/* C89 comments */`
 - **New token types** → update `token.h` enum + lexer keyword table
 - **New AST nodes** → update `ast.h` union + parser + sema + codegen
-- Build with `make compiler` and test with `./kdalc <file>.kdc -o /tmp/out`
+- Build with `./scripts/dev/build.sh --variant debug kdalc` and test with `./build/debug/compiler/kdalc <file>.kdc -o /tmp/out`
 
 ## Testing Requirements
 

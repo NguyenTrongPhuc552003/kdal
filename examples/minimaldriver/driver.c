@@ -24,8 +24,8 @@
  * For this standalone example, we provide minimal forward declarations.
  */
 
-#define MY_DRIVER_NAME  "mydevice"
-#define MY_BUF_SIZE     256
+#define MY_DRIVER_NAME "mydevice"
+#define MY_BUF_SIZE 256
 
 struct my_priv {
 	char buf[MY_BUF_SIZE];
@@ -38,7 +38,7 @@ struct my_priv {
  */
 static int my_probe(void *device)
 {
-	struct my_priv *priv;
+	const struct my_priv *priv;
 
 	priv = kzalloc(sizeof(*priv), GFP_KERNEL);
 	if (!priv)

@@ -1,0 +1,11 @@
+build/
+website/node_modules/
+website/dist/
+website/.astro/
+website/.vercel/
+editor/vscode/kdal-lang/node_modules/
+editor/vscode/kdal-lang/out/
+.git/
+*.o
+*.ko
+*.a

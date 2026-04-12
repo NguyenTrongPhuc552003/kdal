@@ -13,6 +13,12 @@
             "include": "#numbers"
         },
         {
+            "include": "#version-decl"
+        },
+        {
+            "include": "#import-decl"
+        },
+        {
             "include": "#keywords"
         },
         {
@@ -20,6 +26,12 @@
         },
         {
             "include": "#access-modes"
+        },
+        {
+            "include": "#signal-keywords"
+        },
+        {
+            "include": "#power-keywords"
         },
         {
             "include": "#blocks"
@@ -66,6 +78,22 @@
                 }
             ]
         },
+        "version-decl": {
+            "patterns": [
+                {
+                    "name": "keyword.other.version.kdh",
+                    "match": "\\bkdal_version\\b"
+                }
+            ]
+        },
+        "import-decl": {
+            "patterns": [
+                {
+                    "name": "keyword.control.import.kdh",
+                    "match": "\\b(import|as)\\b"
+                }
+            ]
+        },
         "keywords": {
             "patterns": [
                 {
@@ -74,7 +102,11 @@
                 },
                 {
                     "name": "keyword.other.section.kdh",
-                    "match": "\\b(register_map|signals|capabilities|power_states)\\b"
+                    "match": "\\b(registers|register_map|signals|capabilities|power|power_states|config)\\b"
+                },
+                {
+                    "name": "keyword.other.bitfield.kdh",
+                    "match": "\\b(bitfield)\\b"
                 },
                 {
                     "name": "constant.language.boolean.kdh",
@@ -85,6 +117,10 @@
         "types": {
             "patterns": [
                 {
+                    "name": "storage.type.primitive.kdh",
+                    "match": "\\b(u8|u16|u32|u64)\\b"
+                },
+                {
                     "name": "support.type.device-class.kdh",
                     "match": "\\b(uart|i2c|spi|gpio|gpu|npu)\\b"
                 }
@@ -94,7 +130,35 @@
             "patterns": [
                 {
                     "name": "storage.modifier.access.kdh",
-                    "match": "\\b(ro|wo|rw)\\b"
+                    "match": "\\b(ro|wo|rw|rc)\\b"
+                }
+            ]
+        },
+        "signal-keywords": {
+            "patterns": [
+                {
+                    "name": "keyword.other.signal-direction.kdh",
+                    "match": "\\b(in|out|inout)\\b"
+                },
+                {
+                    "name": "keyword.other.signal-trigger.kdh",
+                    "match": "\\b(edge|level|completion|timeout)\\b"
+                },
+                {
+                    "name": "constant.language.edge.kdh",
+                    "match": "\\b(rising|falling|any|high|low)\\b"
+                }
+            ]
+        },
+        "power-keywords": {
+            "patterns": [
+                {
+                    "name": "constant.language.power-state.kdh",
+                    "match": "\\b(on|off|suspend)\\b"
+                },
+                {
+                    "name": "keyword.other.power-spec.kdh",
+                    "match": "\\b(allowed|forbidden|default)\\b"
                 }
             ]
         },
@@ -102,7 +166,7 @@
             "patterns": [
                 {
                     "name": "entity.name.type.device.kdh",
-                    "match": "(?<=device\\s)\\w+"
+                    "match": "(?<=class\\s)\\w+"
                 }
             ]
         }

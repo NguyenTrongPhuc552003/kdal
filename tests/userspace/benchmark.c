@@ -27,11 +27,13 @@ struct kdal_ioctl_devname {
 };
 
 #define KDAL_IOCTL_MAGIC 'K'
-#define KDAL_IOCTL_SELECT_DEV _IOW(KDAL_IOCTL_MAGIC, 0x05, struct kdal_ioctl_devname)
+#define KDAL_IOCTL_SELECT_DEV \
+	_IOW(KDAL_IOCTL_MAGIC, 0x05, struct kdal_ioctl_devname)
 
 /* ── timing ─────────────────────────────────────────────────────── */
 
-static double time_diff_ms(struct timespec *start, struct timespec *end)
+static double time_diff_ms(const struct timespec *start,
+			   const struct timespec *end)
 {
 	double s = (double)(end->tv_sec - start->tv_sec) * 1000.0;
 	double ns = (double)(end->tv_nsec - start->tv_nsec) / 1000000.0;
@@ -47,24 +49,26 @@ int main(int argc, char **argv)
 	struct timespec t0, t1;
 	char *wbuf, *rbuf;
 	double elapsed, throughput;
-	ssize_t n;
 	int fd, i;
 	long total_bytes = 0;
 
-	if (iterations <= 0) iterations = 1000;
-	if (block_size <= 0 || block_size > 4096) block_size = 256;
+	if (iterations <= 0)
+		iterations = 1000;
+	if (block_size <= 0 || block_size > 4096)
+		block_size = 256;
 
 	fd = open("/dev/kdal", O_RDWR);
 	if (fd < 0) {
 		fprintf(stderr, "Cannot open /dev/kdal: %s\n", strerror(errno));
-		puts("kdal benchmark 0.1.0 (offline — no module loaded)");
+		puts("kdal benchmark 0.1.0 (offline - no module loaded)");
 		return 0;
 	}
 
 	memset(&dn, 0, sizeof(dn));
 	strncpy(dn.name, devname, KDAL_NAME_MAX - 1);
 	if (ioctl(fd, KDAL_IOCTL_SELECT_DEV, &dn) < 0) {
-		fprintf(stderr, "SELECT_DEV '%s': %s\n", devname, strerror(errno));
+		fprintf(stderr, "SELECT_DEV '%s': %s\n", devname,
+			strerror(errno));
 		close(fd);
 		return 1;
 	}
@@ -86,21 +90,23 @@ int main(int argc, char **argv)
 	clock_gettime(CLOCK_MONOTONIC, &t0);
 
 	for (i = 0; i < iterations; i++) {
-		n = write(fd, wbuf, (size_t)block_size);
-		if (n <= 0) break;
+		ssize_t n = write(fd, wbuf, (size_t)block_size);
+		if (n <= 0)
+			break;
 		total_bytes += n;
 
 		n = read(fd, rbuf, (size_t)block_size);
-		if (n <= 0) break;
+		if (n <= 0)
+			break;
 		total_bytes += n;
 	}
 
 	clock_gettime(CLOCK_MONOTONIC, &t1);
 
 	elapsed = time_diff_ms(&t0, &t1);
-	throughput = (elapsed > 0.0)
-		? ((double)total_bytes / 1024.0) / (elapsed / 1000.0)
-		: 0.0;
+	throughput = (elapsed > 0.0) ? ((double)total_bytes / 1024.0) /
+					       (elapsed / 1000.0) :
+				       0.0;
 
 	printf("Results:\n");
 	printf("  completed:  %d / %d iterations\n", i, iterations);

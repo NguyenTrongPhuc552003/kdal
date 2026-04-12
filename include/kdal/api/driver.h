@@ -13,13 +13,13 @@ struct kdal_driver_ops {
 	int (*probe)(struct kdal_device *device);
 	void (*remove)(struct kdal_device *device);
 	ssize_t (*read)(struct kdal_device *device, char __user *buf,
-	                size_t count, loff_t *ppos);
+			size_t count, loff_t *ppos);
 	ssize_t (*write)(struct kdal_device *device, const char __user *buf,
-	                 size_t count, loff_t *ppos);
+			 size_t count, loff_t *ppos);
 	long (*ioctl)(struct kdal_device *device, unsigned int cmd,
-	              unsigned long arg);
+		      unsigned long arg);
 	int (*set_power_state)(struct kdal_device *device,
-	                       enum kdal_power_state state);
+			       enum kdal_power_state state);
 };
 
 struct kdal_driver {

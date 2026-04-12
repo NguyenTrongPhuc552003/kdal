@@ -17,7 +17,7 @@ set(PACKAGE_VERSION "0.1.0")
 # Check whether the requested PACKAGE_FIND_VERSION is compatible.
 if(PACKAGE_FIND_VERSION_MAJOR)
     if(NOT PACKAGE_FIND_VERSION_MAJOR EQUAL 0)
-        # Major version mismatch — always incompatible
+        # Major version mismatch - always incompatible
         set(PACKAGE_VERSION_COMPATIBLE FALSE)
         set(PACKAGE_VERSION_UNSUITABLE TRUE)
         return()
@@ -39,7 +39,7 @@ if(PACKAGE_FIND_VERSION)
             (PACKAGE_VERSION VERSION_EQUAL PACKAGE_FIND_VERSION))
     endif()
 else()
-    # No version requested — always compatible
+    # No version requested - always compatible
     set(PACKAGE_VERSION_COMPATIBLE TRUE)
 endif()
 

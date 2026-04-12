@@ -3,16 +3,34 @@
 All notable changes to this project are documented in this file.  
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
-## [0.1.0] — 2025-06-09
+## [0.1.0] - 2025-06-09
 
 ### Added
 
+#### Build System - CMake Migration
+- Migrated from GNU Make to **CMake 3.20+** as the unified build system
+- Added convenience scripts: `build.sh`, `run.sh`, `test.sh` under `scripts/dev/`
+- Build output organization: all artifacts collected under `build/` with subfolders
+- `build.sh` `collect_outputs()` copies website dist → `build/website/`, vsix → `build/editor/vscode/`
+- CMake `uninstall` target via `install_manifest.txt`
+- Vim/Neovim plugin install rule for editor/vim/vim-kdal/ subdirectories
+
+#### Development Test Script
+- `test.sh` with numbered `[N/M]` PASS/FAIL test cases across 10 targets
+- CI-mirroring tests: `cppcheck`, `shellcheck`, `structure` validation
+- Test report logging: saves results to `build/test/<target>_<YYYYMMDD_HHMMSS>.log`
+
+#### Compiler Improvements
+- Block-based arena allocator (`kdal_arena_t`) - linked-list of blocks, no `realloc`
+- Dotted name support in `driver ... for DEV.Name` clause (qualified identifiers)
+- Backend block no longer requires trailing semicolon (consistent with driver/device blocks)
+
 #### Toolchain Subcommands
-- `kdality init <name>` — scaffold new driver projects (.kdh + .kdc + Makefile + README)
-- `kdality dt-gen <file.kdh>` — generate Device Tree Source overlays from .kdh headers
-- `kdality simulate <file.kdc>` — dry-run interpreter with register trace (no kernel needed)
-- `kdality test-gen <file.kdc>` — auto-generate KUnit test stubs from driver handlers
-- `kdality lint <file>` — static analysis with 9 rules (W001–W009) and --strict mode
+- `kdality init <name>` - scaffold new driver projects (.kdh + .kdc + Makefile + README)
+- `kdality dt-gen <file.kdh>` - generate Device Tree Source overlays from .kdh headers
+- `kdality simulate <file.kdc>` - dry-run interpreter with register trace (no kernel needed)
+- `kdality test-gen <file.kdc>` - auto-generate KUnit test stubs from driver handlers
+- `kdality lint <file>` - static analysis with 9 rules (W001–W009) and --strict mode
 
 #### VS Code Extension
 - TextMate grammars for `.kdh` and `.kdc` syntax highlighting
@@ -73,7 +91,7 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 - GitHub Actions CI workflows (build, test, lint, CodeQL, release)
 
 #### Documentation
-- Architecture: 5-layer diagram, data flow, init cascade, design decisions
+- Architecture: 6-layer diagram, data flow, init cascade, design decisions
 - API Reference: all functions, ioctl table, types, contracts
 - Installation: macOS/Linux setup, build, verification, troubleshooting
 - Porting Guide: step-by-step backend implementation
@@ -100,13 +118,39 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ### Fixed
 
+#### Compiler - Critical Parser Bug
+- Fixed buffer overflow in `kdal_ast_new()` - LET_STMT and FOR_STMT now allocate `sizeof(kdal_expr_node_t)` (72 bytes) instead of `sizeof(kdal_ast_t)` (32 bytes)
+- Refactored arena allocator from single-buffer `realloc` to block-based linked list (pointers remain stable across allocations)
+- Removed incorrect trailing semicolon requirement after backend `{ }` block
+- Added dotted identifier consumption for `driver X for DEV.Name` syntax
+
+#### Static Analysis (cppcheck)
+- Fixed `constParameter` warnings in 6 kdality subcommand files (`argv[]` → `*const argv[]`)
+- Fixed `constVariablePointer` warnings for `strchr()` return values in dtgen.c, lint.c, simulate.c
+- Fixed `scanf` format specifier (`%li` → `%lu`) for `unsigned long` in simulate.c
+- Fixed `variableScope` warnings by moving declarations into narrower scopes
+- Fixed `constParameterPointer` in benchmark.c time_diff_ms function
+
 #### Build System
-- Created `compiler/CMakeLists.txt` — builds `kdalc_lib` static library and `kdalc` binary
-- Fixed top-level `CMakeLists.txt` — added all 8 kdality source files, linked kdalc_lib, removed broken `include(KDALConfig)`
+- Created `compiler/CMakeLists.txt` - builds `kdalc_lib` static library and `kdalc` binary
+- Fixed top-level `CMakeLists.txt` - added all 8 kdality source files, linked kdalc_lib, removed broken `include(KDALConfig)`
 - Fixed kdality CMake target include paths for both `include/` and `compiler/include/`
+
+#### E2E Test Fixes
+- Fixed `test_user_journey.sh` - corrected kdality binary path to `$BUILD_DIR/kdality`
+- Fixed `test_user_journey.sh` - replaced `make uninstall` with `install_manifest.txt`-based uninstall
+- Fixed CMake module count assertion (1 → 7)
+- Added shellcheck directive suppressions across 8 E2E scripts
+- Added trailing newlines to 8 C source files
 
 #### Stale References
 - Renamed all `kdaltool` references to `kdality` across CI workflows, docs, and source
 - Fixed stale `scripts/qemu/run.sh` path to `scripts/setupqemu/run.sh`
 - Replaced placeholder `blink.kdc`/`sensor.kdc` example paths with actual `uart_hello.kdc`/`i2c_sensor.kdc`
 - Updated `your-org/kdal` and `example/kdal` placeholder URLs to actual GitHub repository
+
+### Notes
+
+- **Tested on**: macOS aarch64 (host build + toolchain), QEMU aarch64 virt machine (kernel module)
+- **No real hardware validation** - SoC glue layer is `CONFIG_OF`-guarded and a no-op on QEMU
+- **QEMU/Docker VS Code integration** deferred to v0.2.0

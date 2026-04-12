@@ -1,0 +1,195 @@
+---
+title: Installation
+description: Install the KDAL SDK on Linux or macOS.
+---
+
+import { Tabs, TabItem, Aside } from "@astrojs/starlight/components";
+
+## Quick Install (Recommended)
+
+Install the KDAL SDK with one command:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
+```
+
+This downloads and runs **kdalup**, the KDAL version manager. It installs:
+
+| Component          | Path                         |
+| ------------------ | ---------------------------- |
+| `kdalc` compiler   | `~/.kdal/bin/kdalc`          |
+| `kdality` CLI tool | `~/.kdal/bin/kdality`        |
+| `kdalup` manager   | `~/.kdal/bin/kdalup`         |
+| Kernel headers     | `~/.kdal/include/kdal/`      |
+| Compiler headers   | `~/.kdal/include/kdalc/`     |
+| `libkdalc.a`       | `~/.kdal/lib/libkdalc.a`     |
+| Standard library   | `~/.kdal/share/kdal/stdlib/` |
+| CMake package      | `~/.kdal/lib/cmake/KDAL/`    |
+
+After install, restart your shell or run:
+
+```sh
+export PATH="$HOME/.kdal/bin:$PATH"
+```
+
+### Managing the SDK
+
+```sh
+kdalup version          # Show installed version
+kdalup list             # List all components
+kdalup update           # Update to latest release
+kdalup self-update      # Update kdalup itself
+kdalup install v0.2.0   # Install a specific version
+kdalup uninstall        # Remove everything
+```
+
+### Custom install location
+
+```sh
+KDAL_HOME=/opt/kdal curl -fsSL .../install.sh | sh
+```
+
+## Package Managers
+
+<Tabs>
+    <TabItem label="Homebrew">
+        ```sh
+        brew install kdal-project/tap/kdal
+        ```
+    </TabItem>
+    <TabItem label="Debian / Ubuntu">
+        ```sh
+        sudo apt install kdal
+        ```
+    </TabItem>
+    <TabItem label="Fedora / RHEL">
+        ```sh
+        sudo dnf install kdal
+        ```
+    </TabItem>
+</Tabs>
+
+## Build from Source
+
+### Prerequisites
+
+- **macOS** (M1/M2/M3/M4) or **Linux** (x86_64 or aarch64)
+- QEMU with aarch64 system emulation
+- Cross-compiler for aarch64 (if host is not aarch64)
+- Linux 6.6 LTS kernel source (for module build)
+
+### Platform Dependencies
+
+<Tabs>
+    <TabItem label="macOS (Apple Silicon)">
+        ```sh
+        brew install qemu aarch64-elf-gcc dtc cppcheck
+        ```
+    </TabItem>
+    <TabItem label="Debian / Ubuntu">
+        ```sh
+        sudo apt install build-essential bc flex bison libelf-dev libssl-dev \
+            gcc-aarch64-linux-gnu qemu-system-arm device-tree-compiler \
+            cppcheck sparse
+        ```
+    </TabItem>
+</Tabs>
+
+### Build Steps
+
+1. Install host dependencies:
+
+```sh
+./scripts/env/dependencies.sh
+```
+
+2. Prepare QEMU environment:
+
+```sh
+./scripts/env/prepare.sh
+```
+
+3. Build guest kernel with KUnit and module support:
+
+```sh
+./scripts/env/kernel.sh
+```
+
+4. Build compiler, CLI, docs, and editor artifacts:
+
+```sh
+./scripts/dev/build.sh --variant release all
+```
+
+5. Build the kernel module against your prepared kernel tree:
+
+```sh
+KDAL_KERNEL_DIR=$HOME/kdal-qemu/kernel/linux-6.6.80 \
+./scripts/dev/build.sh --variant debug module
+```
+
+6. Run smoke tests and local validation:
+
+```sh
+./scripts/ci/test.sh
+./scripts/dev/test.sh --variant release all
+```
+
+7. Launch QEMU and load module:
+
+```sh
+cp kdal.ko $HOME/kdal-qemu/shared/modules/
+./scripts/env/run.sh
+```
+
+Inside the QEMU guest:
+
+```sh
+mount -t 9p -o trans=virtio kdal-share /mnt
+insmod /mnt/modules/kdal.ko
+```
+
+## Build Commands Reference
+
+| Command                                            | Description                                        |
+| -------------------------------------------------- | -------------------------------------------------- |
+| `./scripts/dev/build.sh --variant release all`     | Build compiler + CLI + website + VS Code extension |
+| `./scripts/dev/build.sh --variant debug module`    | Build kernel module (requires `KDAL_KERNEL_DIR`)   |
+| `./scripts/dev/build.sh --variant debug kdalc`     | Build `kdalc` compiler with symbols                |
+| `./scripts/dev/build.sh --variant release kdality` | Build `kdality` CLI                                |
+| `./scripts/dev/test.sh --variant release all`      | Run local validation suite                         |
+| `./scripts/ci/test.sh`                             | Run the CI smoke-test contract locally             |
+| `./scripts/dev/build.sh --variant asan clean`      | Remove ASan build artifacts                        |
+
+For normal local development, prefer `--variant release|debug|asan`. Reserve `--preset` for automation-only trees such as `ci-release`, `nightly`, and `release-matrix`.
+
+## Verifying the Installation
+
+```sh
+# Check the compiler
+kdalc --version
+
+# Check the CLI tool
+kdality version
+
+# List installed components
+kdalup list
+```
+
+Once QEMU is running with the module loaded:
+
+```sh
+lsmod | grep kdal
+ls -la /dev/kdal
+cat /sys/kernel/debug/kdal/version
+cat /sys/kernel/debug/kdal/devices
+```
+
+## Troubleshooting
+
+| Problem                | Solution                                     |
+| ---------------------- | -------------------------------------------- |
+| `/dev/kdal` not found  | Check `dmesg \                               | grep kdal` for init errors |
+| Module won't load      | Verify kernel version matches build headers  |
+| `ENODEV` on device ops | Ensure backend initialized before drivers    |
+| Permission denied      | Use `sudo` or set udev rules for `/dev/kdal` |

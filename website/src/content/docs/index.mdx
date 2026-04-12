@@ -1,0 +1,98 @@
+---
+title: KDAL - Kernel Device Abstraction Layer
+description: Write portable Linux device drivers once, run on any embedded platform.
+template: splash
+hero:
+  title: |
+    Write drivers <strong>once</strong>,
+    run them <strong>everywhere</strong>.
+  tagline: >
+    KDAL is a hardware-agnostic abstraction framework for the Linux kernel.
+    Describe your device in .kdh, implement your driver in .kdc,
+    and let the compiler generate production-ready kernel modules.
+  actions:
+    - text: Get Started
+      link: /getting-started/introduction/
+      icon: right-arrow
+      variant: primary
+    - text: Install SDK
+      link: /getting-started/installation/
+      icon: external
+      variant: minimal
+    - text: View on GitHub
+      link: https://github.com/NguyenTrongPhuc552003/kdal
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+<CardGrid>
+    <Card title="Declarative Device Headers" icon="document">
+        Describe registers, signals, power states, and capabilities in `.kdh`
+        files - a purpose-built DSL that catches hardware misconfigurations at
+        compile time.
+    </Card>
+    <Card title="Imperative Driver Logic" icon="setting">
+        Write event handlers in `.kdc` files with familiar control flow.
+        The compiler generates correct, auditable Linux kernel C code.
+    </Card>
+    <Card title="Backend-Agnostic" icon="puzzle">
+        One driver works across QEMU, MMIO, platform devices, Device Tree, and
+        VirtIO - swap backends without touching driver code.
+    </Card>
+    <Card title="Full Toolchain" icon="rocket">
+        `kdalc` compiler, `kdality` CLI (init, lint, simulate, compile, dt-gen,
+        test-gen), VS Code extension, Vim plugin - everything you need.
+    </Card>
+</CardGrid>
+
+## Architecture
+
+```
+┌─────────────────────────────────────────┐
+│           Userspace (ioctl)             │
+├─────────────────────────────────────────┤
+│  chardev · debugfs · Control Plane      │
+├─────────────────────────────────────────┤
+│       Core Runtime (registry,           │
+│       event bus, power manager)         │
+├─────────────────────────────────────────┤
+│  Backend Adapters                       │
+│  (QEMU │ MMIO │ Platform │ DeviceTree)  │
+├─────────────────────────────────────────┤
+│       Device Drivers                    │
+│  (UART │ I2C │ SPI │ GPU │ NPU)         │
+├─────────────────────────────────────────┤
+│  KDAL Language Toolchain                │
+│  (.kdh/.kdc → kdalc → kernel module)    │
+└─────────────────────────────────────────┘
+```
+
+## Quick Install
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
+```
+
+Or with a package manager:
+
+```sh
+# Homebrew (macOS / Linux)
+brew install kdal-project/tap/kdal
+
+# Debian / Ubuntu
+sudo apt install kdal
+
+# Fedora / RHEL
+sudo dnf install kdal
+```
+
+## Target Platforms
+
+| Platform              | Architecture | Status           |
+| --------------------- | ------------ | ---------------- |
+| Linux (QEMU aarch64)  | ARM64        | Primary target   |
+| Linux (native x86_64) | x86_64       | Development host |
+| Linux (RISC-V)        | riscv64      | Planned          |
+| macOS (Apple Silicon) | ARM64        | Toolchain only   |

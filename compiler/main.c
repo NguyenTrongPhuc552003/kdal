@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * KDAL Compiler — main.c
+ * KDAL Compiler - main.c
  * Standalone `kdalc` entry point (used for testing the compiler directly).
  *
  * Usage: kdalc [options] <file.kdc>

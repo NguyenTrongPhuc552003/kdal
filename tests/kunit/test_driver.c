@@ -82,7 +82,7 @@ static void test_device_already_attached(struct kunit *test)
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, dev);
 	KUNIT_ASSERT_NOT_ERR_OR_NULL(test, drv);
 
-	/* Already attached during init — should return -EBUSY */
+	/* Already attached during init - should return -EBUSY */
 	ret = kdal_attach_driver(dev, drv);
 	KUNIT_EXPECT_EQ(test, ret, -EBUSY);
 }

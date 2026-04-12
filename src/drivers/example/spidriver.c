@@ -19,11 +19,11 @@
 int kdal_qemu_alloc_ring(struct kdal_device *device);
 void kdal_qemu_free_ring(struct kdal_device *device);
 
-#define SPI_KBUF_SIZE	4096
+#define SPI_KBUF_SIZE 4096
 
 struct spi_config {
-	u32 clock_hz;	/* bus clock speed */
-	u32 mode;	/* SPI mode 0–3 */
+	u32 clock_hz; /* bus clock speed */
+	u32 mode; /* SPI mode 0–3 */
 	u32 bits_per_word;
 	u64 tx_bytes;
 	u64 rx_bytes;
@@ -49,14 +49,14 @@ static int spi_probe(struct kdal_device *device)
 		return -ENOMEM;
 	}
 
-	cfg->clock_hz = 1000000;	/* 1 MHz default */
+	cfg->clock_hz = 1000000; /* 1 MHz default */
 	cfg->mode = 0;
 	cfg->bits_per_word = 8;
 	device->driver->priv = cfg;
 	device->power_state = KDAL_POWER_ON;
 
-	pr_info("kdal: spi0 probed (clock=%u Hz, mode=%u)\n",
-		cfg->clock_hz, cfg->mode);
+	pr_info("kdal: spi0 probed (clock=%u Hz, mode=%u)\n", cfg->clock_hz,
+		cfg->mode);
 	return 0;
 }
 
@@ -116,7 +116,6 @@ static ssize_t spi_read(struct kdal_device *device, char __user *buf,
 static ssize_t spi_write(struct kdal_device *device, const char __user *buf,
 			 size_t count, loff_t *ppos)
 {
-	struct spi_config *cfg;
 	char *kbuf;
 	ssize_t written;
 
@@ -142,6 +141,8 @@ static ssize_t spi_write(struct kdal_device *device, const char __user *buf,
 	written = device->backend->ops->write(device, kbuf, count);
 
 	if (written > 0) {
+		struct spi_config *cfg;
+
 		cfg = device->driver->priv;
 		if (cfg)
 			cfg->tx_bytes += written;

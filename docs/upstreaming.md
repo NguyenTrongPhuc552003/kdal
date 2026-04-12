@@ -68,11 +68,11 @@ if (ver.major != EXPECTED_MAJOR) { /* incompatible */ }
 
 Recommended submission order:
 
-1. **Headers**: `include/kdal/` — types, API contracts, ioctl definitions
-2. **Core**: `src/core/` — lifecycle, registry, events, chardev, debugfs
-3. **QEMU backend**: `src/backends/qemu/` — reference implementation
-4. **Example drivers**: `src/drivers/example/` — UART, I2C, SPI, GPU
-5. **Tests**: `tests/kunit/` — in-kernel test suite
+1. **Headers**: `include/kdal/` - types, API contracts, ioctl definitions
+2. **Core**: `src/core/` - lifecycle, registry, events, chardev, debugfs
+3. **QEMU backend**: `src/backends/qemu/` - reference implementation
+4. **Example drivers**: `src/drivers/example/` - UART, I2C, SPI, GPU
+5. **Tests**: `tests/kunit/` - in-kernel test suite
 6. **Documentation**: `docs/` → kernel `Documentation/` format
 
 ## Timeline

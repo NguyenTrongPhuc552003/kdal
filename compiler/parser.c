@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * KDAL Compiler — parser.c
+ * KDAL Compiler - parser.c
  * Recursive-descent parser: token stream → AST.
  *
  * The grammar is LL(1) for most constructs with up to 2-token lookahead.
@@ -29,14 +29,28 @@ typedef struct {
 
 /* ── Arena implementation ────────────────────────────────────────── */
 
+static kdal_arena_block_t *arena_new_block(size_t min_cap)
+{
+	kdal_arena_block_t *b = malloc(sizeof(*b) + min_cap);
+	if (!b)
+		return NULL;
+	b->next = NULL;
+	b->cap = min_cap;
+	b->used = 0;
+	return b;
+}
+
 kdal_arena_t *kdal_arena_new(size_t initial_cap)
 {
 	kdal_arena_t *a = malloc(sizeof(*a));
 	if (!a)
 		return NULL;
-	a->buf = malloc(initial_cap);
-	a->cap = a->buf ? initial_cap : 0;
-	a->used = 0;
+	a->block_size = initial_cap;
+	a->head = arena_new_block(initial_cap);
+	if (!a->head) {
+		free(a);
+		return NULL;
+	}
 	return a;
 }
 
@@ -44,28 +58,31 @@ void *kdal_arena_alloc(kdal_arena_t *a, size_t sz)
 {
 	/* align to 8 bytes */
 	sz = (sz + 7u) & ~7u;
-	if (a->used + sz > a->cap) {
-		size_t newcap = (a->cap * 2 > a->used + sz) ?
-					a->cap * 2 :
-					a->used + sz + 4096;
-		char *newbuf = realloc(a->buf, newcap);
-		if (!newbuf)
+	if (a->head->used + sz > a->head->cap) {
+		size_t newcap = (a->block_size > sz) ? a->block_size : sz;
+		kdal_arena_block_t *b = arena_new_block(newcap);
+		if (!b)
 			return NULL;
-		a->buf = newbuf;
-		a->cap = newcap;
+		b->next = a->head;
+		a->head = b;
 	}
-	void *ptr = a->buf + a->used;
-	a->used += sz;
+	void *ptr = a->head->buf + a->head->used;
+	a->head->used += sz;
 	memset(ptr, 0, sz);
 	return ptr;
 }
 
 void kdal_arena_free(kdal_arena_t *a)
 {
-	if (a) {
-		free(a->buf);
-		free(a);
+	if (!a)
+		return;
+	kdal_arena_block_t *b = a->head;
+	while (b) {
+		kdal_arena_block_t *next = b->next;
+		free(b);
+		b = next;
 	}
+	free(a);
 }
 
 /* ── AST helpers ─────────────────────────────────────────────────── */
@@ -427,10 +444,12 @@ static kdal_ast_t *parse_statement(parser_t *p)
 		p_expect(p, TOK_SEMICOLON);
 		node = kdal_ast_new(p->arena, KDAL_NODE_LET_STMT, line, col);
 		/* store name as first child (as a fake IDENT expr), val as second */
-		kdal_ast_t *nm =
-			kdal_ast_new(p->arena, KDAL_NODE_EXPR_IDENT, line, col);
-		((kdal_expr_node_t *)nm)->u.sval = name;
-		kdal_ast_add_child(node, nm);
+		kdal_expr_node_t *nm = kdal_arena_alloc(p->arena, sizeof(*nm));
+		nm->base.type = KDAL_NODE_EXPR_IDENT;
+		nm->base.line = line;
+		nm->base.col = col;
+		nm->u.sval = name;
+		kdal_ast_add_child(node, &nm->base);
 		kdal_ast_add_child(node, val);
 		return node;
 	}
@@ -581,10 +600,12 @@ static kdal_ast_t *parse_statement(parser_t *p)
 		kdal_ast_t *body = parse_statement_list(p);
 		p_expect(p, TOK_RBRACE);
 		node = kdal_ast_new(p->arena, KDAL_NODE_FOR_STMT, line, col);
-		kdal_ast_t *vn =
-			kdal_ast_new(p->arena, KDAL_NODE_EXPR_IDENT, line, col);
-		((kdal_expr_node_t *)vn)->u.sval = var;
-		kdal_ast_add_child(node, vn);
+		kdal_expr_node_t *vn = kdal_arena_alloc(p->arena, sizeof(*vn));
+		vn->base.type = KDAL_NODE_EXPR_IDENT;
+		vn->base.line = line;
+		vn->base.col = col;
+		vn->u.sval = var;
+		kdal_ast_add_child(node, &vn->base);
 		kdal_ast_add_child(node, lo);
 		kdal_ast_add_child(node, hi);
 		if (body)
@@ -613,6 +634,450 @@ static kdal_ast_t *parse_statement(parser_t *p)
 				   kdal_tok_name(t->type));
 			p->had_error = 1;
 			return NULL;
+		}
+	}
+}
+
+/* ── Device class body parsers ────────────────────────────────────── */
+
+/* Check if current token is an identifier matching a specific string */
+static int p_is_ident(const parser_t *p, const char *name)
+{
+	const kdal_token_t *t = p_cur(p);
+	return t->type == TOK_IDENT && (size_t)t->len == strlen(name) &&
+	       memcmp(t->src, name, t->len) == 0;
+}
+
+/* Parse an access qualifier (ro/wo/rw/rc); returns default if absent */
+static kdal_access_t parse_access(parser_t *p)
+{
+	switch (p_cur(p)->type) {
+	case TOK_KW_RO:
+		p_advance(p);
+		return KDAL_ACCESS_RO;
+	case TOK_KW_WO:
+		p_advance(p);
+		return KDAL_ACCESS_WO;
+	case TOK_KW_RW:
+		p_advance(p);
+		return KDAL_ACCESS_RW;
+	case TOK_KW_RC:
+		p_advance(p);
+		return KDAL_ACCESS_RC;
+	default:
+		return KDAL_ACCESS_RW;
+	}
+}
+
+/* Parse bitfield members: name : bit_range [= val] ; */
+static kdal_ast_t *parse_bitfield_members(parser_t *p)
+{
+	kdal_ast_t *members = NULL;
+	while (p_cur(p)->type == TOK_IDENT) {
+		int line = p_cur(p)->line, col = p_cur(p)->col;
+		kdal_bf_member_node_t *m =
+			kdal_arena_alloc(p->arena, sizeof(*m));
+		m->base.type = KDAL_NODE_BITFIELD_MEMBER;
+		m->base.line = line;
+		m->base.col = col;
+		m->name = p_intern(p, p_cur(p));
+		p_advance(p);
+		p_expect(p, TOK_COLON);
+		/* bit range: INT [.. INT] */
+		if (p_cur(p)->type == TOK_INT || p_cur(p)->type == TOK_HEX) {
+			m->bit_lo = (int)p_cur(p)->v.ival;
+			m->bit_hi = m->bit_lo;
+			p_advance(p);
+			if (p_cur(p)->type == TOK_DOTDOT) {
+				p_advance(p);
+				if (p_cur(p)->type == TOK_INT ||
+				    p_cur(p)->type == TOK_HEX) {
+					m->bit_hi = (int)p_cur(p)->v.ival;
+					p_advance(p);
+				}
+			}
+		}
+		/* optional reset value */
+		if (p_cur(p)->type == TOK_EQ) {
+			p_advance(p);
+			m->reset_val = parse_expr(p);
+		}
+		p_expect(p, TOK_SEMICOLON);
+		members = kdal_ast_append(members, &m->base);
+	}
+	return members;
+}
+
+/* Parse a single register declaration (both forms) */
+static kdal_ast_t *parse_register_decl(parser_t *p, int simplified)
+{
+	int line = p_cur(p)->line, col = p_cur(p)->col;
+	kdal_reg_decl_node_t *reg = kdal_arena_alloc(p->arena, sizeof(*reg));
+	reg->base.type = KDAL_NODE_REGISTER_DECL;
+	reg->base.line = line;
+	reg->base.col = col;
+	reg->offset = UINT64_MAX;
+	reg->access = KDAL_ACCESS_RW;
+	reg->width = 32;
+	reg->name = p_intern(p, p_cur(p));
+	p_advance(p);
+
+	if (simplified || p_cur(p)->type != TOK_COLON) {
+		/* Simplified form: NAME OFFSET ACCESS ; */
+		if (p_cur(p)->type == TOK_HEX || p_cur(p)->type == TOK_INT) {
+			reg->offset = (uint64_t)p_cur(p)->v.ival;
+			p_advance(p);
+		}
+		reg->access = parse_access(p);
+		p_expect(p, TOK_SEMICOLON);
+	} else {
+		/* Full form: NAME : TYPE [@ OFFSET] [ACCESS] [= RESET] ; */
+		p_expect(p, TOK_COLON);
+		if (p_cur(p)->type == TOK_KW_BITFIELD) {
+			reg->is_bitfield = 1;
+			reg->width = 0;
+			p_advance(p);
+			if (p_cur(p)->type == TOK_AT) {
+				p_advance(p);
+				if (p_cur(p)->type == TOK_HEX ||
+				    p_cur(p)->type == TOK_INT) {
+					reg->offset =
+						(uint64_t)p_cur(p)->v.ival;
+					p_advance(p);
+				}
+			}
+			reg->access = parse_access(p);
+			p_expect(p, TOK_LBRACE);
+			reg->members = parse_bitfield_members(p);
+			p_expect(p, TOK_RBRACE);
+			p_expect(p, TOK_SEMICOLON);
+		} else {
+			/* scalar type: u8/u16/u32/u64 */
+			switch (p_cur(p)->type) {
+			case TOK_KW_U8:
+				reg->width = 8;
+				p_advance(p);
+				break;
+			case TOK_KW_U16:
+				reg->width = 16;
+				p_advance(p);
+				break;
+			case TOK_KW_U32:
+				reg->width = 32;
+				p_advance(p);
+				break;
+			case TOK_KW_U64:
+				reg->width = 64;
+				p_advance(p);
+				break;
+			default:
+				kdal_error(p->filename, p_cur(p)->line,
+					   p_cur(p)->col,
+					   "expected type (u8/u16/u32/u64/"
+					   "bitfield)");
+				p->had_error = 1;
+				break;
+			}
+			if (p_cur(p)->type == TOK_AT) {
+				p_advance(p);
+				if (p_cur(p)->type == TOK_HEX ||
+				    p_cur(p)->type == TOK_INT) {
+					reg->offset =
+						(uint64_t)p_cur(p)->v.ival;
+					p_advance(p);
+				}
+			}
+			reg->access = parse_access(p);
+			if (p_cur(p)->type == TOK_EQ) {
+				p_advance(p);
+				reg->reset_val = parse_expr(p);
+			}
+			p_expect(p, TOK_SEMICOLON);
+		}
+	}
+	return &reg->base;
+}
+
+/* Parse a single signal declaration */
+static kdal_ast_t *parse_signal_decl(parser_t *p)
+{
+	int line = p_cur(p)->line, col = p_cur(p)->col;
+	kdal_signal_node_t *sig = kdal_arena_alloc(p->arena, sizeof(*sig));
+	sig->base.type = KDAL_NODE_SIGNAL_DECL;
+	sig->base.line = line;
+	sig->base.col = col;
+	sig->dir = KDAL_SIG_IN;
+	sig->trigger = KDAL_TRIG_EDGE_RISING;
+	sig->name = p_intern(p, p_cur(p));
+	p_advance(p);
+
+	if (p_cur(p)->type == TOK_COLON) {
+		/* Full form: name : dir trigger ; */
+		p_advance(p);
+		/* direction */
+		if (p_cur(p)->type == TOK_KW_IN) {
+			sig->dir = KDAL_SIG_IN;
+			p_advance(p);
+		} else if (p_is_ident(p, "out")) {
+			sig->dir = KDAL_SIG_OUT;
+			p_advance(p);
+		} else if (p_is_ident(p, "inout")) {
+			sig->dir = KDAL_SIG_INOUT;
+			p_advance(p);
+		}
+		/* trigger */
+		if (p_cur(p)->type == TOK_KW_EDGE) {
+			p_advance(p);
+			p_expect(p, TOK_LPAREN);
+			switch (p_cur(p)->type) {
+			case TOK_KW_RISING:
+				sig->trigger = KDAL_TRIG_EDGE_RISING;
+				break;
+			case TOK_KW_FALLING:
+				sig->trigger = KDAL_TRIG_EDGE_FALLING;
+				break;
+			case TOK_KW_ANY:
+				sig->trigger = KDAL_TRIG_EDGE_ANY;
+				break;
+			default:
+				break;
+			}
+			p_advance(p);
+			p_expect(p, TOK_RPAREN);
+		} else if (p_cur(p)->type == TOK_KW_LEVEL) {
+			p_advance(p);
+			p_expect(p, TOK_LPAREN);
+			switch (p_cur(p)->type) {
+			case TOK_KW_HIGH:
+				sig->trigger = KDAL_TRIG_LEVEL_HIGH;
+				break;
+			case TOK_KW_LOW:
+				sig->trigger = KDAL_TRIG_LEVEL_LOW;
+				break;
+			default:
+				break;
+			}
+			p_advance(p);
+			p_expect(p, TOK_RPAREN);
+		} else if (p_cur(p)->type == TOK_KW_COMPLETION) {
+			sig->trigger = KDAL_TRIG_COMPLETION;
+			p_advance(p);
+		} else if (p_cur(p)->type == TOK_KW_TIMEOUT) {
+			sig->trigger = KDAL_TRIG_TIMEOUT;
+			p_advance(p);
+			p_expect(p, TOK_LPAREN);
+			sig->trigger_arg = parse_expr(p);
+			p_expect(p, TOK_RPAREN);
+		}
+	}
+	/* else: simplified form - just name, defaults applied above */
+	p_expect(p, TOK_SEMICOLON);
+	return &sig->base;
+}
+
+/* Parse a single capability declaration */
+static kdal_ast_t *parse_capability_decl(parser_t *p)
+{
+	int line = p_cur(p)->line, col = p_cur(p)->col;
+	kdal_cap_node_t *cap = kdal_arena_alloc(p->arena, sizeof(*cap));
+	cap->base.type = KDAL_NODE_CAPABILITY_DECL;
+	cap->base.line = line;
+	cap->base.col = col;
+	cap->name = p_intern(p, p_cur(p));
+	p_advance(p);
+
+	if (p_cur(p)->type == TOK_EQ) {
+		/* Full form: name = value ; */
+		p_advance(p);
+		cap->value = parse_expr(p);
+	} else if (p_cur(p)->type != TOK_SEMICOLON) {
+		/* Simplified form: name value ; (no =) */
+		cap->value = parse_expr(p);
+	}
+	p_expect(p, TOK_SEMICOLON);
+	return &cap->base;
+}
+
+/* Check if current token is a power state keyword or identifier */
+static int p_is_power_state_name(const parser_t *p)
+{
+	kdal_tok_t t = p_cur(p)->type;
+	return t == TOK_KW_ON || t == TOK_KW_OFF || t == TOK_KW_SUSPEND ||
+	       t == TOK_KW_DEFAULT || t == TOK_IDENT;
+}
+
+/* Parse a single power state declaration */
+static kdal_ast_t *parse_power_state_decl(parser_t *p, int simplified)
+{
+	int line = p_cur(p)->line, col = p_cur(p)->col;
+	kdal_power_state_node_t *ps = kdal_arena_alloc(p->arena, sizeof(*ps));
+	ps->base.type = KDAL_NODE_POWER_STATE;
+	ps->base.line = line;
+	ps->base.col = col;
+	ps->name = p_intern(p, p_cur(p));
+	p_advance(p);
+
+	if (!simplified && p_cur(p)->type == TOK_COLON) {
+		/* Full form: name : spec ; */
+		p_advance(p);
+		ps->spec = p_intern(p, p_cur(p));
+		p_advance(p);
+	}
+	p_expect(p, TOK_SEMICOLON);
+	return &ps->base;
+}
+
+/* Parse a single config field declaration: name : type [= val] [in lo..hi] ; */
+static kdal_ast_t *parse_config_field_decl(parser_t *p)
+{
+	int line = p_cur(p)->line, col = p_cur(p)->col;
+	kdal_config_field_node_t *cf = kdal_arena_alloc(p->arena, sizeof(*cf));
+	cf->base.type = KDAL_NODE_CONFIG_FIELD;
+	cf->base.line = line;
+	cf->base.col = col;
+	cf->name = p_intern(p, p_cur(p));
+	p_advance(p);
+	p_expect(p, TOK_COLON);
+	/* type keyword */
+	cf->type_kw = (int)p_cur(p)->type;
+	p_advance(p);
+	/* optional default value */
+	if (p_cur(p)->type == TOK_EQ) {
+		p_advance(p);
+		cf->default_val = parse_expr(p);
+	}
+	/* optional range: in lo..hi */
+	if (p_cur(p)->type == TOK_KW_IN) {
+		p_advance(p);
+		cf->range_lo = parse_expr(p);
+		p_expect(p, TOK_DOTDOT);
+		cf->range_hi = parse_expr(p);
+	}
+	p_expect(p, TOK_SEMICOLON);
+	return &cf->base;
+}
+
+/* Parse the body of a device class declaration */
+static void parse_device_class_body(parser_t *p, kdal_device_node_t *dev)
+{
+	while (p_cur(p)->type != TOK_RBRACE && p_cur(p)->type != TOK_EOF) {
+		if (p_cur(p)->type == TOK_KW_CLASS) {
+			/* class <ident>; - device class type (simplified) */
+			p_advance(p);
+			if (p_cur(p)->type == TOK_IDENT)
+				dev->device_class_type = p_intern(p, p_cur(p));
+			p_advance(p);
+			p_expect(p, TOK_SEMICOLON);
+
+		} else if (p_is_ident(p, "compatible")) {
+			/* compatible "string"; */
+			p_advance(p);
+			if (p_cur(p)->type == TOK_STRING)
+				dev->compatible = p_intern(p, p_cur(p));
+			p_advance(p);
+			p_expect(p, TOK_SEMICOLON);
+
+		} else if (p_cur(p)->type == TOK_KW_REGISTERS ||
+			   p_is_ident(p, "register_map")) {
+			int simplified = p_is_ident(p, "register_map");
+			p_advance(p);
+			int bl = p_cur(p)->line, bc = p_cur(p)->col;
+			p_expect(p, TOK_LBRACE);
+			kdal_ast_t *block = kdal_ast_new(
+				p->arena, KDAL_NODE_REGISTERS_BLOCK, bl, bc);
+			while (p_cur(p)->type != TOK_RBRACE &&
+			       p_cur(p)->type != TOK_EOF) {
+				if (p_cur(p)->type == TOK_IDENT) {
+					kdal_ast_t *r = parse_register_decl(
+						p, simplified);
+					kdal_ast_add_child(block, r);
+				} else {
+					p_advance(p);
+				}
+			}
+			p_expect(p, TOK_RBRACE);
+			dev->registers = block;
+
+		} else if (p_cur(p)->type == TOK_KW_SIGNALS) {
+			p_advance(p);
+			int bl = p_cur(p)->line, bc = p_cur(p)->col;
+			p_expect(p, TOK_LBRACE);
+			kdal_ast_t *block = kdal_ast_new(
+				p->arena, KDAL_NODE_SIGNALS_BLOCK, bl, bc);
+			while (p_cur(p)->type != TOK_RBRACE &&
+			       p_cur(p)->type != TOK_EOF) {
+				if (p_cur(p)->type == TOK_IDENT) {
+					kdal_ast_t *s = parse_signal_decl(p);
+					kdal_ast_add_child(block, s);
+				} else {
+					p_advance(p);
+				}
+			}
+			p_expect(p, TOK_RBRACE);
+			dev->signals = block;
+
+		} else if (p_cur(p)->type == TOK_KW_CAPABILITIES) {
+			p_advance(p);
+			int bl = p_cur(p)->line, bc = p_cur(p)->col;
+			p_expect(p, TOK_LBRACE);
+			kdal_ast_t *block = kdal_ast_new(
+				p->arena, KDAL_NODE_CAPABILITIES_BLOCK, bl, bc);
+			while (p_cur(p)->type != TOK_RBRACE &&
+			       p_cur(p)->type != TOK_EOF) {
+				if (p_cur(p)->type == TOK_IDENT) {
+					kdal_ast_t *c =
+						parse_capability_decl(p);
+					kdal_ast_add_child(block, c);
+				} else {
+					p_advance(p);
+				}
+			}
+			p_expect(p, TOK_RBRACE);
+			dev->capabilities = block;
+
+		} else if (p_cur(p)->type == TOK_KW_POWER ||
+			   p_is_ident(p, "power_states")) {
+			int simplified = p_is_ident(p, "power_states");
+			p_advance(p);
+			int bl = p_cur(p)->line, bc = p_cur(p)->col;
+			p_expect(p, TOK_LBRACE);
+			kdal_ast_t *block = kdal_ast_new(
+				p->arena, KDAL_NODE_POWER_BLOCK, bl, bc);
+			while (p_cur(p)->type != TOK_RBRACE &&
+			       p_cur(p)->type != TOK_EOF) {
+				if (p_is_power_state_name(p)) {
+					kdal_ast_t *ps = parse_power_state_decl(
+						p, simplified);
+					kdal_ast_add_child(block, ps);
+				} else {
+					p_advance(p);
+				}
+			}
+			p_expect(p, TOK_RBRACE);
+			dev->power = block;
+
+		} else if (p_cur(p)->type == TOK_KW_CONFIG) {
+			p_advance(p);
+			int bl = p_cur(p)->line, bc = p_cur(p)->col;
+			p_expect(p, TOK_LBRACE);
+			kdal_ast_t *block = kdal_ast_new(
+				p->arena, KDAL_NODE_CONFIG_BLOCK, bl, bc);
+			while (p_cur(p)->type != TOK_RBRACE &&
+			       p_cur(p)->type != TOK_EOF) {
+				if (p_cur(p)->type == TOK_IDENT) {
+					kdal_ast_t *f =
+						parse_config_field_decl(p);
+					kdal_ast_add_child(block, f);
+				} else {
+					p_advance(p);
+				}
+			}
+			p_expect(p, TOK_RBRACE);
+			dev->config = block;
+
+		} else {
+			/* error recovery - skip unrecognised tokens */
+			p_advance(p);
 		}
 	}
 }
@@ -702,7 +1167,6 @@ kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 			}
 			p_expect(&p, TOK_RBRACE);
 		}
-		p_expect(&p, TOK_SEMICOLON);
 		file->backend = &be->base;
 	}
 
@@ -710,7 +1174,9 @@ kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 	if (p_cur(&p)->type == TOK_KW_DEVICE) {
 		int line = p_cur(&p)->line, col = p_cur(&p)->col;
 		p_advance(&p);
-		p_expect(&p, TOK_KW_CLASS);
+		/* 'class' keyword is optional (simplified form omits it) */
+		if (p_cur(&p)->type == TOK_KW_CLASS)
+			p_advance(&p);
 		kdal_device_node_t *dev = kdal_arena_alloc(arena, sizeof(*dev));
 		dev->base.type = KDAL_NODE_DEVICE_CLASS;
 		dev->base.line = line;
@@ -718,11 +1184,7 @@ kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 		dev->name = p_intern(&p, p_cur(&p));
 		p_advance(&p);
 		p_expect(&p, TOK_LBRACE);
-		while (p_cur(&p)->type != TOK_RBRACE &&
-		       p_cur(&p)->type != TOK_EOF) {
-			/* skip blocks — reserved for sema pass in full implementation */
-			p_advance(&p);
-		}
+		parse_device_class_body(&p, dev);
 		p_expect(&p, TOK_RBRACE);
 		file->device = &dev->base;
 	} else if (p_cur(&p)->type == TOK_KW_DRIVER) {
@@ -738,6 +1200,15 @@ kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 			p_advance(&p);
 			drv->device_class = p_intern(&p, p_cur(&p));
 			p_advance(&p);
+			/* consume qualified name: IDENT.IDENT */
+			while (p_cur(&p)->type == TOK_DOT) {
+				p_advance(&p); /* skip '.' */
+				if (p_cur(&p)->type == TOK_IDENT) {
+					drv->device_class =
+						p_intern(&p, p_cur(&p));
+					p_advance(&p);
+				}
+			}
 		}
 		p_expect(&p, TOK_LBRACE);
 		/* Parse probe / remove / on handlers */

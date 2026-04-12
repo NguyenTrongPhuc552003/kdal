@@ -1,0 +1,53 @@
+name: Feature Request
+description: Suggest a new feature or capability for KDAL.
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the feature you'd like to see in KDAL.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Statement
+      description: What problem does this solve? What's the motivation?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed Capability
+      description: Describe the feature in detail.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Affected Component
+      options:
+        - Kernel module (src/)
+        - Compiler (kdalc)
+        - CLI (kdality)
+        - VS Code extension
+        - Build system (CMake)
+        - Documentation / Website
+        - Language / DSL
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-impact
+    attributes:
+      label: Public API Impact
+      description: Does this change any public API, ioctl, or ABI?
+
+  - type: textarea
+    id: test-strategy
+    attributes:
+      label: Test Strategy
+      description: How would you verify this feature works?

@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — npu.kdh
+ * KDAL Standard Library - npu.kdh
  * Abstract NPU (Neural Processing Unit) inference-engine interface.
  *
  * Designed for edge AI accelerators such as:
@@ -139,7 +139,7 @@ device class NpuDevice {
         on      : allowed;
         off     : allowed;
         suspend : allowed;
-        default : off;       /* NPU starts powered-off — load model before use */
+        default : off;       /* NPU starts powered-off - load model before use */
     }
 
     config {

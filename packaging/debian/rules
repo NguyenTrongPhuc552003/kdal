@@ -1,4 +1,22 @@
 #!/usr/bin/make -f
+# debian/rules for KDAL - uses CMake via dh_auto_*
+
+export DH_VERBOSE = 1
 
 %:
 	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- \
+		-DCMAKE_BUILD_TYPE=Release \
+		-DCMAKE_INSTALL_PREFIX=/usr
+
+override_dh_auto_build:
+	dh_auto_build
+
+override_dh_auto_install:
+	dh_auto_install
+
+# Split headers into kdal-dev
+override_dh_install:
+	dh_install

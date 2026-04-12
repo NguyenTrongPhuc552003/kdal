@@ -1,5 +1,5 @@
 /*
- * KDAL Example — i2c_sensor.kdc
+ * KDAL Example - i2c_sensor.kdc
  * I2C temperature sensor driver (BME280-style register map).
  *
  * Demonstrates:
@@ -29,7 +29,7 @@ driver I2cTempSensor for I2C.I2cController {
     }
 
     /*
-     * probe — initialise the sensor.
+     * probe - initialise the sensor.
      *   1. Write config register (oversampling × 1 for T)
      *   2. Write mode register (forced mode)
      *   3. Arm a 500 ms polling timer
@@ -61,7 +61,7 @@ driver I2cTempSensor for I2C.I2cController {
     }
 
     /*
-     * on read — userspace reads the current temperature.
+     * on read - userspace reads the current temperature.
      * Kick a forced-mode measurement and wait for the result.
      */
     on read(I2C.DATA_CMD) {
@@ -89,12 +89,12 @@ driver I2cTempSensor for I2C.I2cController {
     }
 
     /*
-     * on signal(tx_abort) — I2C abort (NACK, arbitration lost, etc.)
+     * on signal(tx_abort) - I2C abort (NACK, arbitration lost, etc.)
      */
     on signal(I2C.tx_abort) {
         let reason = read(I2C.TX_ABRT_SOURCE);
         if (reason == 0x0001) {
-            log("I2cTempSensor: NACK on address — sensor not present?\n");
+            log("I2cTempSensor: NACK on address - sensor not present?\n");
         } elif (reason == 0x0004) {
             log("I2cTempSensor: arbitration lost\n");
         } else {
@@ -103,7 +103,7 @@ driver I2cTempSensor for I2C.I2cController {
     }
 
     /*
-     * on timeout — periodic forced measurement kick (every 500 ms).
+     * on timeout - periodic forced measurement kick (every 500 ms).
      * After the measurement is available, re-arm the timer.
      */
     on timeout(I2C.stop_det) {
@@ -117,7 +117,7 @@ driver I2cTempSensor for I2C.I2cController {
     }
 
     /*
-     * on power — suspend: cancel polling, disable controller.
+     * on power - suspend: cancel polling, disable controller.
      */
     on power(on -> suspend) {
         cancel(I2C.stop_det);

@@ -1,5 +1,5 @@
 /*
- * NPU accelerator demo — userspace program that demonstrates how an NPU
+ * NPU accelerator demo - userspace program that demonstrates how an NPU
  * device would be accessed through the KDAL abstraction.
  *
  * Since the NPU driver is not yet implemented (planned for Radxa Orion O6),
@@ -22,8 +22,8 @@
 #include <errno.h>
 
 /* Mirror KDAL ioctl ABI */
-#define KDAL_IOC_MAGIC  'K'
-#define KDAL_NAME_MAX   32
+#define KDAL_IOC_MAGIC 'K'
+#define KDAL_NAME_MAX 32
 
 struct kdal_ioctl_version {
 	unsigned int major;
@@ -40,12 +40,13 @@ struct kdal_ioctl_list {
 	char names[64][KDAL_NAME_MAX];
 };
 
-#define KDAL_IOCTL_GET_VERSION   _IOR(KDAL_IOC_MAGIC, 1, struct kdal_ioctl_version)
-#define KDAL_IOCTL_LIST_DEVICES  _IOR(KDAL_IOC_MAGIC, 4, struct kdal_ioctl_list)
-#define KDAL_IOCTL_SELECT_DEV    _IOW(KDAL_IOC_MAGIC, 6, struct kdal_ioctl_devname)
+#define KDAL_IOCTL_GET_VERSION \
+	_IOR(KDAL_IOC_MAGIC, 1, struct kdal_ioctl_version)
+#define KDAL_IOCTL_LIST_DEVICES _IOR(KDAL_IOC_MAGIC, 4, struct kdal_ioctl_list)
+#define KDAL_IOCTL_SELECT_DEV _IOW(KDAL_IOC_MAGIC, 6, struct kdal_ioctl_devname)
 
-#define DEV_PATH  "/dev/kdal"
-#define NPU_DEV   "npu0"
+#define DEV_PATH "/dev/kdal"
+#define NPU_DEV "npu0"
 
 static int find_npu_device(int fd)
 {
@@ -113,7 +114,7 @@ int main(void)
 		return 0;
 	}
 
-	/* NPU device found — attempt to use it */
+	/* NPU device found - attempt to use it */
 	memset(&sel, 0, sizeof(sel));
 	snprintf(sel.name, sizeof(sel.name), "%s", NPU_DEV);
 	rc = ioctl(fd, KDAL_IOCTL_SELECT_DEV, &sel);
@@ -128,7 +129,7 @@ int main(void)
 	printf("Submitting inference workload...\n");
 	/* write(fd, model_data, model_size); */
 	/* read(fd, result_data, result_size); */
-	printf("(Not implemented yet — awaiting NPU backend)\n");
+	printf("(Not implemented yet - awaiting NPU backend)\n");
 
 	printf("\nNPU demo complete.\n");
 	close(fd);

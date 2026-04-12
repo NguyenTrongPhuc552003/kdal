@@ -1,0 +1,34 @@
+# KDAL development environment — zero-setup container.
+#
+# Build:  docker build -t kdal-dev -f Dockerfile.dev .
+# Run:    docker run -it -v $(pwd):/workspace kdal-dev
+#
+# Provides: cmake, gcc, aarch64 cross-compiler, QEMU, cppcheck,
+#           shellcheck, Node.js 20 — everything needed to build and test KDAL.
+
+FROM ubuntu:22.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# Base toolchain + kernel build deps + analysis tools
+RUN apt-get update -qq && apt-get install -y --no-install-recommends \
+    build-essential cmake ninja-build \
+    bc flex bison libelf-dev libssl-dev \
+    gcc-aarch64-linux-gnu \
+    qemu-system-arm \
+    device-tree-compiler \
+    cppcheck sparse shellcheck \
+    dwarves pahole \
+    python3 \
+    curl git ca-certificates gnupg \
+    && rm -rf /var/lib/apt/lists/*
+
+# Node.js 20.x (Ubuntu 22.04 ships v12 which is too old for vsce/Astro)
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y --no-install-recommends nodejs \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /workspace
+
+# Default: drop into a shell
+CMD ["/bin/bash"]

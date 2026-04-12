@@ -1,5 +1,5 @@
-(* KDAL Device Header Grammar — .kdh files *)
-(* Version 0.1 — EBNF (ISO 14977 extended) *)
+(* KDAL Device Header Grammar - .kdh files *)
+(* Version 0.1 - EBNF (ISO 14977 extended) *)
 (*
  * A .kdh file declares a device CLASS: the register map, signal set,
  * capability flags, and power-state contract for one class of hardware.

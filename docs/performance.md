@@ -1,7 +1,7 @@
 # Performance
 
 > **Status (v0.1.0-alpha):** Methodology and tooling defined. Baseline
-> measurements pending — requires QEMU guest with the KDAL module loaded.
+> measurements pending - requires QEMU guest with the KDAL module loaded.
 > Results will be populated once the runtime is tested on the target platform.
 
 ## Overview

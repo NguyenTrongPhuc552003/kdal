@@ -5,20 +5,20 @@
 # add_subdirectory). For in-tree builds, use KDALConfig.cmake instead.
 #
 # Input variables:
-#   KDAL_ROOT              — override search root
+#   KDAL_ROOT              - override search root
 #
 # Output variables (set on success):
-#   KDAL_FOUND             — TRUE when all required components are found
-#   KDAL_VERSION           — package version string
-#   KDAL_INCLUDE_DIRS      — header search paths
-#   KDAL_LIBRARIES         — link libraries
-#   KDAL_COMPILER          — path to kdalc binary
-#   KDAL_TOOL              — path to kdality binary
-#   KDAL_STDLIB_DIR        — path to .kdh standard library files
+#   KDAL_FOUND             - TRUE when all required components are found
+#   KDAL_VERSION           - package version string
+#   KDAL_INCLUDE_DIRS      - header search paths
+#   KDAL_LIBRARIES         - link libraries
+#   KDAL_COMPILER          - path to kdalc binary
+#   KDAL_TOOL              - path to kdality binary
+#   KDAL_STDLIB_DIR        - path to .kdh standard library files
 #
 # Imported targets:
-#   KDAL::libkdal          — KDAL runtime static library
-#   KDAL::kdality          — kdality binary target
+#   KDAL::libkdal          - KDAL runtime static library
+#   KDAL::kdality          - kdality binary target
 
 cmake_minimum_required(VERSION 3.16)
 

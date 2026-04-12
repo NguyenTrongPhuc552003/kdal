@@ -1,10 +1,32 @@
 Source: kdal
-Section: kernel
+Section: devel
 Priority: optional
-Maintainer: Trong Phuc Nguyen
+Maintainer: Trong Phuc Nguyen <trongphuc.ng552003@gmail.com>
+Build-Depends: debhelper-compat (= 13), cmake (>= 3.20), gcc
 Standards-Version: 4.7.0
+Homepage: https://github.com/NguyenTrongPhuc552003/kdal
+Vcs-Git: https://github.com/NguyenTrongPhuc552003/kdal.git
+Vcs-Browser: https://github.com/NguyenTrongPhuc552003/kdal
+Rules-Requires-Root: no
 
 Package: kdal
 Architecture: any
-Description: Kernel Device Abstraction Layer
- Initial Debian packaging placeholder for KDAL.
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: linux-headers-generic, gcc-aarch64-linux-gnu
+Description: Kernel Device Abstraction Layer - compiler and toolchain
+ KDAL is an open-source Linux kernel framework for writing portable device
+ drivers and accelerator backends in a high-level declarative language
+ (.kdc/.kdh). This package provides:
+  - kdalc: the KDAL compiler (source-to-C code generator)
+  - kdality: unified CLI tool (compile, init, simulate, lint, test-gen, dt-gen)
+  - libkdalc.a: compiler library for downstream integration
+  - Standard library of .kdh device header files (uart, spi, i2c, gpio, gpu, npu)
+  - CMake package files for find_package(KDAL)
+  - Kernel-space and compiler public headers
+
+Package: kdal-dev
+Architecture: any
+Depends: kdal (= ${binary:Version}), ${misc:Depends}
+Description: Kernel Device Abstraction Layer - development headers
+ Development headers for building against the KDAL compiler library
+ (libkdalc) and the kernel-space API. Includes kdal/ and kdalc/ headers.

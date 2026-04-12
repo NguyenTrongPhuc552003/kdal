@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a73e8"/>
+      <stop offset="100%" style="stop-color:#0d47a1"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="16" fill="url(#bg)"/>
+  <!-- Chip outline -->
+  <rect x="32" y="32" width="64" height="64" rx="4" fill="none" stroke="#fff" stroke-width="3"/>
+  <!-- Pins top -->
+  <line x1="48" y1="20" x2="48" y2="32" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="64" y1="20" x2="64" y2="32" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="80" y1="20" x2="80" y2="32" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pins bottom -->
+  <line x1="48" y1="96" x2="48" y2="108" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="64" y1="96" x2="64" y2="108" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="80" y1="96" x2="80" y2="108" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pins left -->
+  <line x1="20" y1="48" x2="32" y2="48" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="20" y1="64" x2="32" y2="64" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="20" y1="80" x2="32" y2="80" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- Pins right -->
+  <line x1="96" y1="48" x2="108" y2="48" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="96" y1="64" x2="108" y2="64" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <line x1="96" y1="80" x2="108" y2="80" stroke="#fff" stroke-width="3" stroke-linecap="round"/>
+  <!-- K letter -->
+  <text x="64" y="72" font-family="monospace" font-weight="bold" font-size="32"
+        fill="#fff" text-anchor="middle" dominant-baseline="central">K</text>
+</svg>

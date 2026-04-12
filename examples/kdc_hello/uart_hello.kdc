@@ -1,5 +1,5 @@
 /*
- * KDAL Example — uart_hello.kdc
+ * KDAL Example - uart_hello.kdc
  * Simple UART driver for the QEMU virt PL011 UART.
  *
  * This is the smallest complete .kdc driver that:
@@ -35,7 +35,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * probe — called once when the driver is bound.
+     * probe - called once when the driver is bound.
      * Initialises the UART: set baud rate, enable TX+RX, unmask RX IRQ.
      */
     probe {
@@ -62,7 +62,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * remove — called when the driver is unbound.
+     * remove - called when the driver is unbound.
      */
     remove {
         write(DEV.CTRL.enable, false);
@@ -71,7 +71,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * on read — userspace reads from /dev/kdal0.
+     * on read - userspace reads from /dev/kdal0.
      * Wait for a byte to appear in the RX FIFO, then let the runtime
      * copy the DR value to the userspace buffer.
      */
@@ -80,7 +80,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * on write — userspace writes to /dev/kdal0.
+     * on write - userspace writes to /dev/kdal0.
      * Wait until the TX FIFO has room before accepting the byte.
      */
     on write(DEV.DATA, val) {
@@ -89,7 +89,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * on signal(rx_ready) — IRQ: byte arrived in RX FIFO.
+     * on signal(rx_ready) - IRQ: byte arrived in RX FIFO.
      * The runtime will wake any blocked read() waiters automatically;
      * this handler just logs the event.
      */
@@ -101,14 +101,14 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * on signal(error) — framing/parity/overrun error.
+     * on signal(error) - framing/parity/overrun error.
      */
     on signal(DEV.error) {
         log("UartHello: UART error (flags=0x%x)\n", read(DEV.FLAGS));
     }
 
     /*
-     * on power(on -> suspend) — entering suspend.
+     * on power(on -> suspend) - entering suspend.
      */
     on power(on -> suspend) {
         write(DEV.CTRL.enable, false);
@@ -116,7 +116,7 @@ driver UartHelloDriver for DEV.UartHello {
     }
 
     /*
-     * on power(suspend -> on) — resuming from suspend.
+     * on power(suspend -> on) - resuming from suspend.
      */
     on power(suspend -> on) {
         write(DEV.CTRL.enable, true);

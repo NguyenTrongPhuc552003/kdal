@@ -1,5 +1,5 @@
 /*
- * simulate.c — kdality simulate subcommand.
+ * simulate.c - kdality simulate subcommand.
  *
  * Dry-run interpreter that traces .kdc driver execution without a kernel.
  * Simulates register reads/writes to a virtual register file and prints
@@ -16,11 +16,12 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../../compiler/include/codegen.h"
+
 /* ── Virtual register file ───────────────────────────────────────── */
 
 #define MAX_VREGS 64
 #define NAME_LEN 64
-#define LINE_LEN 512
 
 struct vreg {
 	char name[NAME_LEN];
@@ -44,7 +45,7 @@ static unsigned long sim_reg_read(struct sim_state *s, const char *name)
 			return s->regs[i].value;
 		}
 	}
-	/* Unknown register — create with zero */
+	/* Unknown register - create with zero */
 	if (s->nregs < MAX_VREGS) {
 		strncpy(s->regs[s->nregs].name, name, NAME_LEN - 1);
 		s->regs[s->nregs].value = 0;
@@ -86,192 +87,324 @@ static void sim_log(struct sim_state *s, const char *msg)
 		printf("  LOG: %s\n", msg);
 }
 
-/* ── Simple .kdc line interpreter ────────────────────────────────
- *
- * We interpret .kdc files line by line, recognizing:
- *   reg_write(NAME, VALUE);
- *   reg_read(NAME)
- *   log("message");
- *   on <event> {  — starts handler scope
- *   }             — ends handler scope
- *
- * This is intentionally simple (not a full AST walk). It demonstrates
- * the concept of dry-run simulation for newcomers.
- */
+/* ── File reader ─────────────────────────────────────────────────── */
 
-static int simulate_handler(FILE *fp, const char *handler_name,
-			    struct sim_state *s)
+static char *read_source(const char *path, size_t *out_len)
 {
-	char line[LINE_LEN];
-	int depth = 1;
+	FILE *fp = fopen(path, "rb");
+	if (!fp)
+		return NULL;
+	fseek(fp, 0, SEEK_END);
+	long sz = ftell(fp);
+	fseek(fp, 0, SEEK_SET);
+	if (sz < 0) {
+		fclose(fp);
+		return NULL;
+	}
+	char *buf = malloc((size_t)sz + 1);
+	if (!buf) {
+		fclose(fp);
+		return NULL;
+	}
+	size_t n = fread(buf, 1, (size_t)sz, fp);
+	fclose(fp);
+	buf[n] = '\0';
+	if (out_len)
+		*out_len = n;
+	return buf;
+}
 
-	printf("\n── Simulating: on %s ──\n", handler_name);
-	s->step = 0;
+/* ── Expression evaluator ────────────────────────────────────────── */
 
-	while (fgets(line, sizeof(line), fp) && depth > 0) {
-		char *p = line;
-		while (*p == ' ' || *p == '\t')
-			p++;
+static const char *expr_reg_name(const kdal_ast_t *expr)
+{
+	if (!expr)
+		return "?";
+	const kdal_expr_node_t *e = (const kdal_expr_node_t *)expr;
+	if (expr->type == KDAL_NODE_EXPR_REG_PATH)
+		return e->u.path.parts[e->u.path.nparts - 1];
+	if (expr->type == KDAL_NODE_EXPR_IDENT)
+		return e->u.sval;
+	return "?";
+}
 
-		if (*p == '\n' || *p == '\0' || *p == '/')
-			continue;
+static unsigned long sim_eval(struct sim_state *s, const kdal_ast_t *expr)
+{
+	if (!expr)
+		return 0;
+	const kdal_expr_node_t *e = (const kdal_expr_node_t *)expr;
 
-		/* Track brace depth */
-		for (char *c = p; *c; c++) {
-			if (*c == '{')
-				depth++;
-			if (*c == '}')
-				depth--;
+	switch (expr->type) {
+	case KDAL_NODE_EXPR_LITERAL_INT:
+		return (unsigned long)e->u.ival;
+	case KDAL_NODE_EXPR_LITERAL_BOOL:
+		return e->u.bval ? 1 : 0;
+	case KDAL_NODE_EXPR_LITERAL_STR:
+		return 0;
+	case KDAL_NODE_EXPR_REG_PATH:
+		return sim_reg_read(s, e->u.path.parts[e->u.path.nparts - 1]);
+	case KDAL_NODE_EXPR_IDENT:
+		return sim_reg_read(s, e->u.sval);
+	case KDAL_NODE_EXPR_READ:
+		return sim_reg_read(s, expr_reg_name(e->u.read_path));
+	case KDAL_NODE_EXPR_BINOP: {
+		unsigned long l = sim_eval(s, e->u.binop.lhs);
+		unsigned long r = sim_eval(s, e->u.binop.rhs);
+		switch (e->u.binop.op) {
+		case KDAL_BINOP_ADD:
+			return l + r;
+		case KDAL_BINOP_SUB:
+			return l - r;
+		case KDAL_BINOP_MUL:
+			return l * r;
+		case KDAL_BINOP_DIV:
+			return r ? l / r : 0;
+		case KDAL_BINOP_MOD:
+			return r ? l % r : 0;
+		case KDAL_BINOP_SHL:
+			return l << r;
+		case KDAL_BINOP_SHR:
+			return l >> r;
+		case KDAL_BINOP_AND:
+			return l & r;
+		case KDAL_BINOP_OR:
+			return l | r;
+		case KDAL_BINOP_XOR:
+			return l ^ r;
+		case KDAL_BINOP_EQ:
+			return l == r;
+		case KDAL_BINOP_NEQ:
+			return l != r;
+		case KDAL_BINOP_LT:
+			return l < r;
+		case KDAL_BINOP_LE:
+			return l <= r;
+		case KDAL_BINOP_GT:
+			return l > r;
+		case KDAL_BINOP_GE:
+			return l >= r;
+		case KDAL_BINOP_LAND:
+			return l && r;
+		case KDAL_BINOP_LOR:
+			return l || r;
 		}
+		return 0;
+	}
+	case KDAL_NODE_EXPR_UNOP: {
+		unsigned long v = sim_eval(s, e->u.unop.operand);
+		switch (e->u.unop.op) {
+		case KDAL_UNOP_NEG:
+			return (unsigned long)(-(long)v);
+		case KDAL_UNOP_NOT:
+			return !v;
+		case KDAL_UNOP_INV:
+			return ~v;
+		}
+		return 0;
+	}
+	default:
+		return 0;
+	}
+}
 
-		if (depth <= 0)
+/* ── AST statement interpreter ───────────────────────────────────── */
+
+static void sim_exec(struct sim_state *s, const kdal_ast_t *stmt)
+{
+	for (const kdal_ast_t *st = stmt; st; st = st->next) {
+		switch (st->type) {
+		case KDAL_NODE_REG_WRITE_STMT: {
+			const kdal_ast_t *target = st->child;
+			const kdal_ast_t *value = target ? target->next : NULL;
+			sim_reg_write(s, expr_reg_name(target),
+				      sim_eval(s, value));
 			break;
-
-		/* reg_write(NAME, VALUE); */
-		char rname[NAME_LEN];
-		unsigned long val;
-		if (sscanf(p, "reg_write ( %63[^,] , %li )", rname, &val) ==
-			    2 ||
-		    sscanf(p, "reg_write(%63[^,], %li)", rname, &val) == 2 ||
-		    sscanf(p, "reg_write(%63[^,],%li)", rname, &val) == 2) {
-			sim_reg_write(s, rname, val);
-			continue;
 		}
-
-		/* reg_read(NAME) - standalone */
-		if (sscanf(p, "reg_read ( %63[^)] )", rname) == 1 ||
-		    sscanf(p, "reg_read(%63[^)])", rname) == 1) {
-			sim_reg_read(s, rname);
-			continue;
+		case KDAL_NODE_ASSIGN_STMT: {
+			const kdal_ast_t *lhs = st->child;
+			const kdal_ast_t *rhs = lhs ? lhs->next : NULL;
+			sim_reg_write(s, expr_reg_name(lhs), sim_eval(s, rhs));
+			break;
 		}
-
-		/* val = reg_read(NAME); */
-		char vname[NAME_LEN];
-		if (sscanf(p, "%63s = reg_read(%63[^)])", vname, rname) == 2 ||
-		    sscanf(p, "%63s = reg_read ( %63[^)] )", vname, rname) ==
-			    2) {
-			unsigned long v = sim_reg_read(s, rname);
-			if (s->trace)
-				printf("  [%d] %s = 0x%lx\n", s->step++, vname,
-				       v);
-			continue;
+		case KDAL_NODE_LET_STMT: {
+			const kdal_ast_t *var = st->child;
+			const kdal_ast_t *init = var ? var->next : NULL;
+			unsigned long val = sim_eval(s, init);
+			if (s->trace && var)
+				printf("  [%d] let %s = 0x%lx\n", s->step++,
+				       expr_reg_name(var), val);
+			break;
 		}
-
-		/* log("message"); */
-		char *lq = strstr(p, "log(\"");
-		if (lq) {
-			lq += 5;
-			char *end = strchr(lq, '"');
-			if (end) {
-				char msg[256];
-				size_t len = (size_t)(end - lq);
-				if (len >= sizeof(msg))
-					len = sizeof(msg) - 1;
-				memcpy(msg, lq, len);
-				msg[len] = '\0';
-				sim_log(s, msg);
+		case KDAL_NODE_LOG_STMT:
+			if (st->child &&
+			    st->child->type == KDAL_NODE_EXPR_LITERAL_STR) {
+				const kdal_expr_node_t *e =
+					(const kdal_expr_node_t *)st->child;
+				sim_log(s, e->u.sval);
+			} else {
+				sim_log(s, "(dynamic)");
 			}
-			continue;
-		}
-
-		/* return — just note it */
-		if (strncmp(p, "return", 6) == 0) {
+			break;
+		case KDAL_NODE_EMIT_STMT:
+			if (s->trace)
+				printf("  [%d] emit %s\n", s->step++,
+				       expr_reg_name(st->child));
+			break;
+		case KDAL_NODE_WAIT_STMT:
+			if (s->trace)
+				printf("  [%d] wait()\n", s->step++);
+			break;
+		case KDAL_NODE_ARM_STMT:
+			if (s->trace)
+				printf("  [%d] arm()\n", s->step++);
+			break;
+		case KDAL_NODE_CANCEL_STMT:
+			if (s->trace)
+				printf("  [%d] cancel()\n", s->step++);
+			break;
+		case KDAL_NODE_RETURN_STMT:
 			if (s->trace)
 				printf("  [%d] return\n", s->step++);
-			continue;
+			return;
+		case KDAL_NODE_IF_STMT: {
+			const kdal_ast_t *c = st->child;
+			while (c) {
+				unsigned long cond = sim_eval(s, c);
+				const kdal_ast_t *body = c->next;
+				if (cond && body) {
+					sim_exec(s, body);
+					break;
+				}
+				c = body ? body->next : NULL;
+			}
+			break;
+		}
+		case KDAL_NODE_FOR_STMT: {
+			const kdal_ast_t *var = st->child;
+			const kdal_ast_t *lo = var ? var->next : NULL;
+			const kdal_ast_t *hi = lo ? lo->next : NULL;
+			const kdal_ast_t *body = hi ? hi->next : NULL;
+			unsigned long lo_val = sim_eval(s, lo);
+			unsigned long hi_val = sim_eval(s, hi);
+			for (unsigned long i = lo_val;
+			     i <= hi_val && i <= lo_val + 10000; i++) {
+				if (s->trace)
+					printf("  [%d] for iteration %lu\n",
+					       s->step++, i);
+				sim_exec(s, body);
+			}
+			break;
+		}
+		default:
+			if (st->child)
+				sim_exec(s, st->child);
+			break;
 		}
 	}
-
-	return 0;
 }
+
+/* ── Handler name ────────────────────────────────────────────────── */
+
+static const char *handler_label(const kdal_handler_node_t *h)
+{
+	switch (h->evt_type) {
+	case KDAL_EVT_READ:
+		return "read";
+	case KDAL_EVT_WRITE:
+		return "write";
+	case KDAL_EVT_SIGNAL:
+		return "signal";
+	case KDAL_EVT_POWER:
+		return "power";
+	case KDAL_EVT_TIMEOUT:
+		return "timeout";
+	}
+	return "unknown";
+}
+
+/* ── Simulate a parsed .kdc file ─────────────────────────────────── */
 
 static int simulate_file(const char *path, const char *target_event, int trace)
 {
-	FILE *fp;
-	char line[LINE_LEN];
-	struct sim_state state;
-	char driver_name[NAME_LEN] = "";
-	char device_name[NAME_LEN] = "";
-	int found = 0;
-
-	memset(&state, 0, sizeof(state));
-	state.trace = trace;
-
-	fp = fopen(path, "r");
-	if (!fp) {
+	size_t src_len;
+	char *src = read_source(path, &src_len);
+	if (!src) {
 		fprintf(stderr, "simulate: cannot open '%s': %s\n", path,
 			strerror(errno));
 		return -1;
 	}
 
+	kdal_arena_t *arena = kdal_arena_new(65536);
+
+	/* Copy source into arena so token src pointers stay valid */
+	char *arena_src = kdal_arena_alloc(arena, src_len + 1);
+	memcpy(arena_src, src, src_len + 1);
+	free(src);
+
+	kdal_token_t *tokens = NULL;
+	int ntokens = kdal_lex(arena, arena_src, src_len, &tokens, path);
+
+	if (ntokens < 0) {
+		fprintf(stderr, "simulate: lexer error in '%s'\n", path);
+		kdal_arena_free(arena);
+		return 1;
+	}
+
+	kdal_file_node_t *file = kdal_parse(arena, tokens, ntokens, path);
+	if (!file || !file->driver) {
+		fprintf(stderr, "simulate: no driver found in '%s'\n", path);
+		kdal_arena_free(arena);
+		return 1;
+	}
+
+	const kdal_driver_node_t *drv =
+		(const kdal_driver_node_t *)file->driver;
+	struct sim_state state;
+	int found = 0;
+
+	memset(&state, 0, sizeof(state));
+	state.trace = trace;
+
 	printf("=== KDAL Simulation: %s ===\n", path);
+	printf("Driver: %s (device: %s)\n", drv->name,
+	       drv->device_class ? drv->device_class : "?");
 
-	while (fgets(line, sizeof(line), fp)) {
-		char *p = line;
-		while (*p == ' ' || *p == '\t')
-			p++;
-
-		if (*p == '\n' || *p == '\0' || *p == '/')
-			continue;
-
-		/* driver NAME for DEVICE { */
-		if (strncmp(p, "driver ", 7) == 0) {
-			sscanf(p, "driver %63s for %63[^ {]", driver_name,
-			       device_name);
-			printf("Driver: %s (device: %s)\n", driver_name,
-			       device_name);
-			continue;
-		}
-
-		/* on <event> { */
-		char event[NAME_LEN] = "";
-		char extra[NAME_LEN] = "";
-		if (strncmp(p, "on ", 3) == 0) {
-			sscanf(p + 3, "%63s %63[^{ \n]", event, extra);
-
-			/* If targeting a specific event, skip others */
-			if (target_event) {
-				if (strcmp(event, target_event) != 0 &&
-				    (extra[0] == '\0' ||
-				     strcmp(extra, target_event) != 0)) {
-					/* Skip this handler */
-					int depth = 0;
-					for (char *c = p; *c; c++) {
-						if (*c == '{')
-							depth++;
-					}
-					while (depth > 0 &&
-					       fgets(line, sizeof(line), fp)) {
-						for (char *c = line; *c; c++) {
-							if (*c == '{')
-								depth++;
-							if (*c == '}')
-								depth--;
-						}
-					}
-					continue;
-				}
-			}
-
-			char full_event[128];
-			if (extra[0] && strcmp(extra, "{") != 0)
-				snprintf(full_event, sizeof(full_event),
-					 "%s %s", event, extra);
-			else
-				snprintf(full_event, sizeof(full_event), "%s",
-					 event);
-
-			simulate_handler(fp, full_event, &state);
+	/* Simulate probe handler */
+	if (drv->probe && drv->probe->child) {
+		if (!target_event || strcmp(target_event, "probe") == 0) {
+			printf("\n── Simulating: probe ──\n");
+			state.step = 0;
+			sim_exec(&state, drv->probe->child);
 			found = 1;
-			continue;
 		}
 	}
 
-	fclose(fp);
+	/* Simulate remove handler */
+	if (drv->remove && drv->remove->child) {
+		if (!target_event || strcmp(target_event, "remove") == 0) {
+			printf("\n── Simulating: remove ──\n");
+			state.step = 0;
+			sim_exec(&state, drv->remove->child);
+			found = 1;
+		}
+	}
+
+	/* Simulate event handlers */
+	for (const kdal_ast_t *h = drv->handlers; h; h = h->next) {
+		const kdal_handler_node_t *ev = (const kdal_handler_node_t *)h;
+		const char *label = handler_label(ev);
+		if (target_event && strcmp(target_event, label) != 0)
+			continue;
+		printf("\n── Simulating: on %s ──\n", label);
+		state.step = 0;
+		sim_exec(&state, ev->body);
+		found = 1;
+	}
 
 	if (!found && target_event) {
 		fprintf(stderr, "simulate: handler 'on %s' not found in '%s'\n",
 			target_event, path);
+		kdal_arena_free(arena);
 		return 1;
 	}
 
@@ -285,6 +418,7 @@ static int simulate_file(const char *path, const char *target_event, int trace)
 	}
 
 	printf("\n=== Simulation complete ===\n");
+	kdal_arena_free(arena);
 	return 0;
 }
 
@@ -305,7 +439,7 @@ static void simulate_help(void)
 		"  kdality simulate examples/kdc_hello/uart_hello.kdc --event probe\n");
 }
 
-int kdality_simulate(int argc, char *argv[])
+int kdality_simulate(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	const char *target_event = NULL;

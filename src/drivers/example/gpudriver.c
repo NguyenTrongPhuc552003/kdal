@@ -27,9 +27,9 @@ void kdal_qemu_free_ring(struct kdal_device *device);
 
 /* ── GPU state ──────────────────────────────────────────────────── */
 
-#define GPU_MAX_QUEUES		4
-#define GPU_MAX_BUFFERS		16
-#define GPU_KBUF_SIZE		4096
+#define GPU_MAX_QUEUES 4
+#define GPU_MAX_BUFFERS 16
+#define GPU_KBUF_SIZE 4096
 
 struct gpu_state {
 	u32 active_queues;
@@ -60,8 +60,8 @@ static int gpu_queue_create(struct kdal_device *device,
 	queue->depth = 64;
 	gs->active_queues++;
 
-	pr_info("kdal: gpu0 queue %u created (depth=%u)\n",
-		queue->id, queue->depth);
+	pr_info("kdal: gpu0 queue %u created (depth=%u)\n", queue->id,
+		queue->depth);
 	return 0;
 }
 
@@ -97,7 +97,7 @@ static int gpu_buffer_map(struct kdal_device *device,
 
 	/* Simulate IOVA assignment */
 	buffer->iova = (u64)(gs->mapped_buffers + 1) * 0x10000;
-	buffer->cpu_addr = NULL;	/* no real mapping on QEMU */
+	buffer->cpu_addr = NULL; /* no real mapping on QEMU */
 	gs->mapped_buffers++;
 
 	pr_debug("kdal: gpu0 buffer mapped at iova=0x%llx size=%u\n",
@@ -122,8 +122,8 @@ static void gpu_buffer_unmap(struct kdal_device *device,
 }
 
 static int gpu_submit(struct kdal_device *device,
-		      struct kdal_accel_queue *queue,
-		      const void *cmd, size_t cmd_len)
+		      const struct kdal_accel_queue *queue, const void *cmd,
+		      size_t cmd_len)
 {
 	struct gpu_state *gs;
 
@@ -144,8 +144,8 @@ static int gpu_submit(struct kdal_device *device,
 	kdal_emit_event(KDAL_EVENT_ACCEL_COMPLETE, device->name,
 			(u32)gs->submit_count);
 
-	pr_debug("kdal: gpu0 submit #%llu (%zu bytes)\n",
-		 gs->submit_count, cmd_len);
+	pr_debug("kdal: gpu0 submit #%llu (%zu bytes)\n", gs->submit_count,
+		 cmd_len);
 	return 0;
 }
 
@@ -240,7 +240,6 @@ static ssize_t gpu_read(struct kdal_device *device, char __user *buf,
 static ssize_t gpu_write(struct kdal_device *device, const char __user *buf,
 			 size_t count, loff_t *ppos)
 {
-	struct gpu_state *gs;
 	char *kbuf;
 	ssize_t written;
 
@@ -266,6 +265,8 @@ static ssize_t gpu_write(struct kdal_device *device, const char __user *buf,
 	written = device->backend->ops->write(device, kbuf, count);
 
 	if (written > 0) {
+		struct gpu_state *gs;
+
 		gs = device->driver->priv;
 		if (gs)
 			gs->tx_bytes += written;

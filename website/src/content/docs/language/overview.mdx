@@ -1,0 +1,89 @@
+---
+title: Language Overview
+description: How the KDAL DSL separates device description from driver behavior.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+KDAL splits driver development into two complementary file types. This
+page introduces the concepts; the following pages dive into each format.
+
+## Two-File Model
+
+| File type     | Extension | Purpose                                                                                    |
+| ------------- | --------- | ------------------------------------------------------------------------------------------ |
+| Device Header | `.kdh`    | Declares *what* the device is - registers, signals, capabilities, power states             |
+| Driver Code   | `.kdc`    | Implements *how* the driver behaves - event handlers for probe, read, write, signal, power |
+
+The compiler (`kdalc`) reads both files and generates a complete Linux kernel module in C,
+ready to build with `make modules`.
+
+## Design Philosophy
+
+### Declarative at the top, imperative at the edges
+
+A `.kdh` file is purely declarative: it describes hardware registers, signal lines, capabilities,
+and power states. No executable logic.
+
+A `.kdc` driver is mostly declarative (config, annotations) but contains imperative event
+handlers where real work happens. This mirrors how hardware engineers think: "the device has
+these registers; when this event occurs, do this sequence."
+
+### Intentionally not Turing-complete
+
+KDAL rejects:
+- **Recursion** - call depth bounded at 1 (handler calls built-ins only)
+- **Heap allocation** - driver state lives in a C struct allocated once by `probe`
+- **Unbounded loops** - only `for i in 0..N` (N must be compile-time constant)
+- **Pointer arithmetic** - register access uses typed paths; compiler generates `ioread32`/`iowrite32`
+- **Inline assembly** - no escape hatch to machine code
+
+This keeps the generated code auditable and eliminates entire classes of kernel bugs.
+
+<Aside type="tip">
+    Every KDAL program terminates. There are no infinite loops and no recursion.
+</Aside>
+
+## Compilation Flow
+
+```
+.kdc file
+       │
+       ▼
+┌─────────────┐
+│   Lexer     │  characters → token stream
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│   Parser    │  tokens → AST (recursive descent)
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  Semantic   │  type checking, register access
+│  Analysis   │  verification, scope resolution
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│   Codegen   │  AST → .c + Makefile.kbuild
+└──────┬──────┘
+       ▼
+   kbuild → .ko
+```
+
+## Comparison with Alternatives
+
+| Feature             | C + Kbuild   | Arduino           | Zephyr RTOS     | **KDAL**                 |
+| ------------------- | ------------ | ----------------- | --------------- | ------------------------ |
+| Target              | Linux `.ko`  | Bare-metal        | RTOS `.ko`      | Linux `.ko`              |
+| Register safety     | Manual       | Manual            | Manual          | **Compile-time**         |
+| Backend abstraction | Manual       | None              | DTS + Kconfig   | **`backend` annotation** |
+| Signal/IRQ model    | Manual       | `attachInterrupt` | `gpio_callback` | **`on signal` handler**  |
+| Power management    | PM framework | None              | `pm_device`     | **`on power` handler**   |
+| Learning curve      | High         | Low               | Medium          | **Low–Medium**           |
+| Turing-complete     | Yes          | Yes               | Yes             | **No (by design)**       |
+
+## Next Steps
+
+- [Device Headers (.kdh)](/language/device-headers/) - the declarative format
+- [Driver Code (.kdc)](/language/driver-code/) - the imperative format
+- [Standard Library](/language/stdlib/) - pre-built device headers

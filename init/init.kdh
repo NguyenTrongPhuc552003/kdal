@@ -1,0 +1,29 @@
+// init.kdh - device header for init
+//
+// This file describes the hardware registers, signals,
+// and capabilities of the init device.
+
+device init {
+    class gpio;
+    compatible "example,init";
+
+    register_map {
+        CTRL   0x00 rw;    // control register
+        STATUS 0x04 ro;    // status register
+        DATA   0x08 rw;    // data register
+    }
+
+    signals {
+        irq;               // hardware interrupt
+    }
+
+    capabilities {
+        dma false;
+    }
+
+    power_states {
+        off;
+        on;
+        suspend;
+    }
+}

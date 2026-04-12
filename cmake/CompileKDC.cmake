@@ -1,5 +1,5 @@
 # CompileKDC.cmake
-# Provides add_kdc_driver() — compile a .kdc file into a kernel module.
+# Provides add_kdc_driver() - compile a .kdc file into a kernel module.
 #
 # Usage:
 #
@@ -14,17 +14,17 @@
 #   )
 #
 # After cmake --build, the following files are created in OUTPUT_DIR:
-#   my_uart.c            — generated kernel C source
-#   Makefile.kbuild      — obj-m fragment
+#   my_uart.c            - generated kernel C source
+#   Makefile.kbuild      - obj-m fragment
 #
 # A custom target named `my_uart_kmod` is also added, which runs
 # `make -f Makefile.kbuild KDIR=<KERNEL_DIR>` to produce my_uart.ko.
 #
 # Variables respected:
-#   KDAL_COMPILER        — path to kdalc (set by KDALConfig.cmake)
-#   KDAL_STDLIB_DIR      — path to .kdh stdlib (set by KDALConfig.cmake)
-#   KDAL_KERNEL_DIR      — default KERNEL_DIR if not specified per-call
-#   KDAL_CROSS_COMPILE   — default CROSS_COMPILE if not specified per-call
+#   KDAL_COMPILER        - path to kdalc (set by KDALConfig.cmake)
+#   KDAL_STDLIB_DIR      - path to .kdh stdlib (set by KDALConfig.cmake)
+#   KDAL_KERNEL_DIR      - default KERNEL_DIR if not specified per-call
+#   KDAL_CROSS_COMPILE   - default CROSS_COMPILE if not specified per-call
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -38,7 +38,7 @@ if(NOT KDAL_COMPILER)
 endif()
 
 if(NOT KDAL_COMPILER)
-    message(WARNING "CompileKDC: kdalc not found — add_kdc_driver() will be a no-op")
+    message(WARNING "CompileKDC: kdalc not found - add_kdc_driver() will be a no-op")
 endif()
 
 # ── add_kdc_driver ────────────────────────────────────────────────────

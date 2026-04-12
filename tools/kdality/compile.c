@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * kdality — compile subcommand
+ * kdality - compile subcommand
  * Translates a .kdc driver file into a kernel C module.
  *
  * Invoked as: kdality compile [options] <file.kdc>
@@ -32,7 +32,7 @@ static void compile_help(void)
 		"Then build with: make -f Makefile.kbuild KDIR=<kernel-dir>\n");
 }
 
-int kdality_compile(int argc, char *argv[])
+int kdality_compile(int argc, char *const argv[])
 {
 	kdal_codegen_opts_t opts = {
 		.output_dir = ".",

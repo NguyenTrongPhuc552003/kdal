@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * KDAL Compiler — token.h
+ * KDAL Compiler - token.h
  * Token definitions for the KDAL language lexer.
  *
  * A flat enum of all token types recognised by kdalc.

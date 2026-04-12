@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — i2c.kdh
+ * KDAL Standard Library - i2c.kdh
  * I2C controller interface (DesignWare DW_apb_i2c compatible).
  *
  * This interface covers the DesignWare IP that is present in many

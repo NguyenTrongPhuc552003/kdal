@@ -1,5 +1,5 @@
 /*
- * GPU accelerator demo — userspace program that exercises the KDAL
+ * GPU accelerator demo - userspace program that exercises the KDAL
  * accelerator path through /dev/kdal ioctls.
  *
  * Demonstrates:
@@ -25,8 +25,8 @@
 #include <errno.h>
 
 /* Mirror KDAL ioctl ABI */
-#define KDAL_IOC_MAGIC  'K'
-#define KDAL_NAME_MAX   32
+#define KDAL_IOC_MAGIC 'K'
+#define KDAL_NAME_MAX 32
 
 struct kdal_ioctl_version {
 	unsigned int major;
@@ -45,12 +45,13 @@ struct kdal_ioctl_info {
 	unsigned int feature_flags;
 };
 
-#define KDAL_IOCTL_GET_VERSION  _IOR(KDAL_IOC_MAGIC, 1, struct kdal_ioctl_version)
-#define KDAL_IOCTL_SELECT_DEV   _IOW(KDAL_IOC_MAGIC, 6, struct kdal_ioctl_devname)
-#define KDAL_IOCTL_GET_INFO     _IOR(KDAL_IOC_MAGIC, 2, struct kdal_ioctl_info)
+#define KDAL_IOCTL_GET_VERSION \
+	_IOR(KDAL_IOC_MAGIC, 1, struct kdal_ioctl_version)
+#define KDAL_IOCTL_SELECT_DEV _IOW(KDAL_IOC_MAGIC, 6, struct kdal_ioctl_devname)
+#define KDAL_IOCTL_GET_INFO _IOR(KDAL_IOC_MAGIC, 2, struct kdal_ioctl_info)
 
-#define DEV_PATH  "/dev/kdal"
-#define GPU_DEV   "gpu0"
+#define DEV_PATH "/dev/kdal"
+#define GPU_DEV "gpu0"
 
 int main(void)
 {

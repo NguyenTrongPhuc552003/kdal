@@ -1,0 +1,178 @@
+---
+title: Quick Start
+description: Write your first KDAL driver in 5 minutes.
+---
+
+import { Steps, Aside } from "@astrojs/starlight/components";
+
+This guide walks you through creating, compiling, and running a KDAL driver
+from scratch.
+
+## Prerequisites
+
+- KDAL SDK installed ([Installation Guide](/getting-started/installation/))
+- `kdalc` and `kdality` on your PATH
+
+## Your First Driver
+
+<Steps>
+
+1. **Scaffold a new project:**
+
+   ```sh
+   kdality init hello_led
+   cd hello_led
+   ```
+
+   This creates:
+
+   ```
+   hello_led/
+   ├── hello_led.kdh     # Device header
+   ├── hello_led.kdc     # Driver code
+   ├── Makefile           # Build wrapper
+   └── README.md          # Notes
+   ```
+
+2. **Edit the device header** (`hello_led.kdh`):
+
+   ```kdal
+   kdal_version: "0.1";
+
+   device class HelloLed {
+       compatible "example,hello-led";
+       class gpio;
+
+       registers {
+           CTRL  : u32 @ 0x00 rw = 0x00;
+           STATE : u32 @ 0x04 ro;
+       }
+
+       signals {
+           toggle : in edge(rising);
+       }
+
+       power_states {
+           on  : allowed;
+           off : allowed;
+           default : on;
+       }
+   }
+   ```
+
+3. **Implement the driver** (`hello_led.kdc`):
+
+   ```kdal
+   kdal_version: "0.1";
+
+   use "hello_led.kdh";
+
+   driver HelloLedDriver for HelloLed {
+
+       on probe {
+           reg_write(CTRL, 0x01);
+           log("LED driver initialized");
+       }
+
+       on remove {
+           reg_write(CTRL, 0x00);
+           log("LED driver removed");
+       }
+
+       on read {
+           return reg_read(STATE);
+       }
+
+       on write {
+           reg_write(CTRL, input);
+       }
+
+       on signal toggle {
+           let current = reg_read(STATE);
+           if (current == 0x01) {
+               reg_write(CTRL, 0x00);
+           } else {
+               reg_write(CTRL, 0x01);
+           }
+       }
+
+       on power off {
+           reg_write(CTRL, 0x00);
+       }
+
+       on power on {
+           reg_write(CTRL, 0x01);
+       }
+   }
+   ```
+
+4. **Lint the source:**
+
+   ```sh
+   kdality lint hello_led.kdc
+   ```
+
+5. **Compile to kernel C:**
+
+   ```sh
+   kdality compile hello_led.kdc -o output/
+   ```
+
+   This produces:
+
+   - `output/hello_led.c` — complete kernel module source
+   - `output/Makefile.kbuild` — Kbuild Makefile for `make modules`
+
+6. **Build the kernel module:**
+
+   ```sh
+   make -C /path/to/kernel M=$(pwd)/output modules
+   ```
+
+7. **Load on QEMU:**
+
+   ```sh
+   cp output/hello_led.ko /path/to/shared/
+   # Inside QEMU guest:
+   insmod /mnt/modules/hello_led.ko
+   ```
+
+</Steps>
+
+## Simulating Without a Kernel
+
+You can dry-run your driver without building a kernel module:
+
+```sh
+kdality simulate hello_led.kdc
+```
+
+This runs an interpreter that traces register reads/writes to stdout.
+
+## Generating Tests
+
+Auto-generate KUnit test stubs from your driver:
+
+```sh
+kdality test-gen hello_led.kdc -o tests/
+```
+
+## Generating Device Tree Overlays
+
+If your target uses Device Tree:
+
+```sh
+kdality dt-gen hello_led.kdh -o dts/
+```
+
+<Aside type="note">
+  The compiler is at v0.1.0-alpha. Advanced `.kdc` syntax (import aliases, dotted
+  paths) is still being implemented. See the [Language Specification](/language/spec/)
+  for the full grammar.
+</Aside>
+
+## Next Steps
+
+- [Language Overview](/language/overview/) - understand `.kdh` and `.kdc` in depth
+- [Standard Library](/language/stdlib/) - pre-built device headers for UART, I2C, SPI, GPIO, GPU, NPU
+- [Editor Support](/toolchain/editors/) - VS Code extension and Vim plugin

@@ -14,7 +14,7 @@
 
 #include <kdal/core/kdal.h>
 
-#define KDAL_EVENT_LOG_SIZE	256
+#define KDAL_EVENT_LOG_SIZE 256
 
 static struct kdal_event kdal_event_log[KDAL_EVENT_LOG_SIZE];
 static unsigned int kdal_event_head;
@@ -42,8 +42,8 @@ int kdal_emit_event(enum kdal_event_type type, const char *device_name,
 
 	wake_up_interruptible(&kdal_event_wq);
 
-	pr_debug("kdal: event type=%u dev=%s data=%u\n",
-		 type, device_name ? device_name : "(null)", data);
+	pr_debug("kdal: event type=%u dev=%s data=%u\n", type,
+		 device_name ? device_name : "(null)", data);
 
 	return 0;
 }

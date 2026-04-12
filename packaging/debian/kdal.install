@@ -1,0 +1,6 @@
+usr/bin/kdalc
+usr/bin/kdality
+usr/lib/*/libkdalc.a
+usr/share/kdal/stdlib/*.kdh
+usr/share/kdal/vim/
+usr/lib/*/cmake/KDAL/*.cmake

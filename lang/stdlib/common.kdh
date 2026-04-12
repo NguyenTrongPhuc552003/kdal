@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — common.kdh
+ * KDAL Standard Library - common.kdh
  * Primitive types, universal constants, and shared capability flags.
  *
  * Every KDAL file implicitly imports this file; explicit import is not
@@ -28,7 +28,7 @@ device class KdalCommon {
         I32_MAX : i32 =  2147483647;
 
         /*
-         * Timeout sentinels — pass to wait() / arm()
+         * Timeout sentinels - pass to wait() / arm()
          * TIMEOUT_NONE means no timeout (wait forever)
          * TIMEOUT_NOW  means poll once, do not block
          */
@@ -43,7 +43,7 @@ device class KdalCommon {
     }
 
     capabilities {
-        /* Standard capability flags — may be imported by device classes */
+        /* Standard capability flags - may be imported by device classes */
         CAP_DMA         = 0x01;
         CAP_FIFO        = 0x02;
         CAP_LOOPBACK    = 0x04;

@@ -1,26 +1,54 @@
 {
     "name": "kdal-lang",
     "displayName": "KDAL Language Support",
-    "description": "Syntax highlighting and snippets for KDAL device headers (.kdh) and driver files (.kdc)",
+    "description": "Full IDE experience for KDAL device headers (.kdh) and driver files (.kdc) - syntax highlighting, lint, compile, simulate, and more.",
     "version": "0.1.0",
     "publisher": "kdal-project",
+    "license": "GPL-3.0-or-later",
+    "icon": "icons/kdal-icon.png",
     "engines": {
         "vscode": "^1.80.0"
     },
+    "main": "./out/extension.js",
+    "activationEvents": [
+        "workspaceContains:**/*.kdh",
+        "workspaceContains:**/*.kdc"
+    ],
     "categories": [
         "Programming Languages",
-        "Snippets"
+        "Snippets",
+        "Linters",
+        "Other"
     ],
     "keywords": [
         "kdal",
         "kernel",
         "driver",
         "embedded",
-        "linux"
+        "linux",
+        "device-tree",
+        "kdc",
+        "kdh"
     ],
+    "homepage": "https://github.com/NguyenTrongPhuc552003/kdal",
+    "bugs": {
+        "url": "https://github.com/NguyenTrongPhuc552003/kdal/issues"
+    },
     "repository": {
         "type": "git",
         "url": "https://github.com/NguyenTrongPhuc552003/kdal"
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./",
+        "package": "vsce package"
+    },
+    "devDependencies": {
+        "@types/node": "^18.0.0",
+        "@types/vscode": "^1.80.0",
+        "typescript": "^5.3.0",
+        "@vscode/vsce": "^3.0.0"
     },
     "contributes": {
         "languages": [
@@ -33,7 +61,11 @@
                 "extensions": [
                     ".kdh"
                 ],
-                "configuration": "./language-configuration.json"
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./icons/kdh-file.svg",
+                    "dark": "./icons/kdh-file.svg"
+                }
             },
             {
                 "id": "kdc",
@@ -44,7 +76,11 @@
                 "extensions": [
                     ".kdc"
                 ],
-                "configuration": "./language-configuration.json"
+                "configuration": "./language-configuration.json",
+                "icon": {
+                    "light": "./icons/kdc-file.svg",
+                    "dark": "./icons/kdc-file.svg"
+                }
             }
         ],
         "grammars": [
@@ -67,6 +103,195 @@
             {
                 "language": "kdc",
                 "path": "./snippets/kdc.json"
+            }
+        ],
+        "commands": [
+            {
+                "command": "kdal.compile",
+                "title": "KDAL: Compile Driver",
+                "icon": "$(play)"
+            },
+            {
+                "command": "kdal.lint",
+                "title": "KDAL: Lint File",
+                "icon": "$(checklist)"
+            },
+            {
+                "command": "kdal.init",
+                "title": "KDAL: Create New Project",
+                "icon": "$(add)"
+            },
+            {
+                "command": "kdal.simulate",
+                "title": "KDAL: Simulate Device",
+                "icon": "$(debug-start)"
+            },
+            {
+                "command": "kdal.dtgen",
+                "title": "KDAL: Generate Device Tree"
+            },
+            {
+                "command": "kdal.testgen",
+                "title": "KDAL: Generate Test"
+            },
+            {
+                "command": "kdal.showToolchainInfo",
+                "title": "KDAL: Show Toolchain Info"
+            },
+            {
+                "command": "kdal.installSDK",
+                "title": "KDAL: Install SDK"
+            },
+            {
+                "command": "kdal.redetectToolchain",
+                "title": "KDAL: Re-detect Toolchain"
+            }
+        ],
+        "menus": {
+            "editor/title": [
+                {
+                    "when": "resourceLangId == kdc",
+                    "command": "kdal.compile",
+                    "group": "navigation"
+                },
+                {
+                    "when": "resourceLangId == kdh || resourceLangId == kdc",
+                    "command": "kdal.lint",
+                    "group": "navigation"
+                }
+            ],
+            "editor/context": [
+                {
+                    "when": "resourceLangId == kdc",
+                    "command": "kdal.compile",
+                    "group": "kdal@1"
+                },
+                {
+                    "when": "resourceLangId == kdh || resourceLangId == kdc",
+                    "command": "kdal.lint",
+                    "group": "kdal@2"
+                },
+                {
+                    "when": "resourceLangId == kdh",
+                    "command": "kdal.simulate",
+                    "group": "kdal@3"
+                },
+                {
+                    "when": "resourceLangId == kdh",
+                    "command": "kdal.dtgen",
+                    "group": "kdal@4"
+                },
+                {
+                    "when": "resourceLangId == kdc",
+                    "command": "kdal.testgen",
+                    "group": "kdal@5"
+                }
+            ],
+            "commandPalette": [
+                {
+                    "command": "kdal.compile",
+                    "when": "resourceLangId == kdc"
+                },
+                {
+                    "command": "kdal.simulate",
+                    "when": "resourceLangId == kdh"
+                },
+                {
+                    "command": "kdal.dtgen",
+                    "when": "resourceLangId == kdh"
+                },
+                {
+                    "command": "kdal.testgen",
+                    "when": "resourceLangId == kdc"
+                }
+            ]
+        },
+        "taskDefinitions": [
+            {
+                "type": "kdal",
+                "required": [
+                    "command"
+                ],
+                "properties": {
+                    "command": {
+                        "type": "string",
+                        "description": "The kdality subcommand to run (compile, lint, simulate, dt-gen, test-gen)"
+                    },
+                    "file": {
+                        "type": "string",
+                        "description": "Target .kdh or .kdc file"
+                    }
+                }
+            }
+        ],
+        "configuration": {
+            "title": "KDAL",
+            "properties": {
+                "kdal.toolchainPath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to directory containing kdalc and kdality binaries. Leave empty to auto-detect from KDAL_HOME or PATH."
+                },
+                "kdal.stdlibPath": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Path to KDAL standard library (.kdh files). Auto-detected if empty."
+                },
+                "kdal.lintOnSave": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Automatically lint .kdh and .kdc files on save."
+                }
+            }
+        },
+        "walkthroughs": [
+            {
+                "id": "kdal.getStarted",
+                "title": "Get Started with KDAL",
+                "description": "Write your first Linux kernel driver in two steps.",
+                "steps": [
+                    {
+                        "id": "installSDK",
+                        "title": "Install the KDAL SDK",
+                        "description": "Run **KDAL: Install SDK** from the Command Palette, or use the one-liner:\n\n```\ncurl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh\n```\n\nOr [build from source](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/installation.md).",
+                        "media": {
+                            "markdown": ""
+                        },
+                        "completionEvents": [
+                            "onCommand:kdal.installSDK"
+                        ]
+                    },
+                    {
+                        "id": "createProject",
+                        "title": "Create Your First Project",
+                        "description": "Open the Command Palette and run **KDAL: Create New Project** to scaffold a driver project.",
+                        "media": {
+                            "markdown": ""
+                        },
+                        "completionEvents": [
+                            "onCommand:kdal.init"
+                        ]
+                    },
+                    {
+                        "id": "writeDriver",
+                        "title": "Write Your Driver",
+                        "description": "Open the generated `.kdc` file and start writing event handlers. Use snippets like `onprobe`, `onread`, `onwrite` for fast scaffolding.",
+                        "media": {
+                            "markdown": ""
+                        }
+                    },
+                    {
+                        "id": "compileAndSimulate",
+                        "title": "Compile & Simulate",
+                        "description": "Click the **Play** button in the editor title bar to compile, or use **KDAL: Simulate Device** to dry-run your driver without a kernel.",
+                        "media": {
+                            "markdown": ""
+                        },
+                        "completionEvents": [
+                            "onCommand:kdal.compile"
+                        ]
+                    }
+                ]
             }
         ]
     }

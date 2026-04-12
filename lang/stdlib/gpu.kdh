@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — gpu.kdh
+ * KDAL Standard Library - gpu.kdh
  * Abstract GPU command-queue interface.
  *
  * This is an abstraction layer over GPU command submission and

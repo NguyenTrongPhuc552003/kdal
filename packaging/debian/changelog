@@ -1,5 +1,10 @@
 kdal (0.1.0-1) unstable; urgency=medium
 
-  * Initial packaging placeholder.
+  * Initial release.
+  * kdalc compiler: lexer, parser, semantic analysis, C code generator.
+  * kdality CLI: compile, init, simulate, lint, test-gen, dt-gen, kdalctl.
+  * Standard library: uart, spi, i2c, gpio, gpu, npu device headers.
+  * CMake build system with find_package(KDAL) support.
+  * Public kernel-space headers and compiler headers.
 
- -- Trong Phuc Nguyen <maintainer@example.com>  Sat, 11 Apr 2026 12:00:00 +0000
+ -- Trong Phuc Nguyen <trongphuc.ng552003@gmail.com>  Sat, 12 Apr 2026 12:00:00 +0000

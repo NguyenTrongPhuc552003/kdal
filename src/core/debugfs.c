@@ -30,9 +30,7 @@ static int show_device(struct kdal_device *device, void *data)
 	struct seq_ctx *ctx = data;
 
 	seq_printf(ctx->seq, "%-16s class=%u power=%u driver=%s\n",
-		   device->name,
-		   device->class_id,
-		   device->power_state,
+		   device->name, device->class_id, device->power_state,
 		   device->driver ? device->driver->name : "(none)");
 
 	return 0;
@@ -63,8 +61,8 @@ static int snapshot_show(struct seq_file *s, void *v)
 	struct kdal_registry_snapshot snap;
 
 	kdal_get_registry_snapshot(&snap);
-	seq_printf(s, "backends=%u drivers=%u devices=%u\n",
-		   snap.backends, snap.drivers, snap.devices);
+	seq_printf(s, "backends=%u drivers=%u devices=%u\n", snap.backends,
+		   snap.drivers, snap.devices);
 	return 0;
 }
 DEFINE_SHOW_ATTRIBUTE(snapshot);
@@ -80,10 +78,8 @@ int kdal_debugfs_init(void)
 		return 0; /* non-fatal */
 	}
 
-	debugfs_create_file("devices", 0444, kdal_dbgdir, NULL,
-			    &devices_fops);
-	debugfs_create_file("version", 0444, kdal_dbgdir, NULL,
-			    &version_fops);
+	debugfs_create_file("devices", 0444, kdal_dbgdir, NULL, &devices_fops);
+	debugfs_create_file("version", 0444, kdal_dbgdir, NULL, &version_fops);
 	debugfs_create_file("snapshot", 0444, kdal_dbgdir, NULL,
 			    &snapshot_fops);
 

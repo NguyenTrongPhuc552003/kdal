@@ -24,10 +24,10 @@
 int kdal_qemu_alloc_ring(struct kdal_device *device);
 void kdal_qemu_free_ring(struct kdal_device *device);
 
-#define I2C_KBUF_SIZE	256
+#define I2C_KBUF_SIZE 256
 
 struct i2c_config {
-	u32 bus_speed_hz;	/* 100000 = standard, 400000 = fast */
+	u32 bus_speed_hz; /* 100000 = standard, 400000 = fast */
 	u32 slave_addr;
 	u64 tx_bytes;
 	u64 rx_bytes;
@@ -119,7 +119,6 @@ static ssize_t i2c_read(struct kdal_device *device, char __user *buf,
 static ssize_t i2c_write(struct kdal_device *device, const char __user *buf,
 			 size_t count, loff_t *ppos)
 {
-	struct i2c_config *cfg;
 	char *kbuf;
 	ssize_t written;
 
@@ -145,6 +144,8 @@ static ssize_t i2c_write(struct kdal_device *device, const char __user *buf,
 	written = device->backend->ops->write(device, kbuf, count);
 
 	if (written > 0) {
+		struct i2c_config *cfg;
+
 		cfg = device->driver->priv;
 		if (cfg)
 			cfg->tx_bytes += written;

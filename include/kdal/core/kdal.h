@@ -55,12 +55,13 @@ int kdal_for_each_device(kdal_device_iter_fn fn, void *data);
 /* ── events ─────────────────────────────────────────────────────── */
 
 int kdal_emit_event(enum kdal_event_type type, const char *device_name,
-                    u32 data);
+		    u32 data);
+int kdal_poll_event(struct kdal_event *out);
 void kdal_event_shutdown(void);
 
 /* ── power ──────────────────────────────────────────────────────── */
 
 int kdal_set_device_power(struct kdal_device *device,
-                          enum kdal_power_state state);
+			  enum kdal_power_state state);
 
 #endif /* KDAL_CORE_KDAL_H */

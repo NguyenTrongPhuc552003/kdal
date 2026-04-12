@@ -1,0 +1,154 @@
+name: nightly
+
+on:
+  workflow_dispatch:
+
+jobs:
+  nightly-build:
+    name: Nightly · ${{ matrix.os }}-${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            cc: gcc
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-latest
+            cc: aarch64-linux-gnu-gcc
+            cross: true
+            cross_pkg: gcc-aarch64-linux-gnu
+          - os: darwin
+            arch: aarch64
+            runner: macos-14
+            cc: clang
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compiler
+        if: matrix.cross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.cross_pkg }}
+
+      - name: Generate nightly version
+        id: version
+        run: |
+          BASE_VERSION="$(cat VERSION)"
+          DATE="$(date +%Y%m%d)"
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+          echo "nightly_version=${BASE_VERSION}-nightly.${DATE}.${SHORT_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure nightly build
+        env:
+          CC: ${{ matrix.cc }}
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+        run: cmake --preset nightly
+
+      - name: Build toolchain
+        env:
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+        run: cmake --build --preset nightly --target kdalc kdality
+
+      - name: Stage nightly tarball
+        env:
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+        run: |
+          NVERSION="${{ steps.version.outputs.nightly_version }}"
+          SDK_DIR="kdal-${NVERSION}-${{ matrix.os }}-${{ matrix.arch }}"
+          cmake --install "build/nightly/${KDAL_TARGET_TRIPLET}" --prefix "${SDK_DIR}"
+
+          test -x "${SDK_DIR}/bin/kdalc"
+          test -x "${SDK_DIR}/bin/kdality"
+          test -f "${SDK_DIR}/lib/libkdalc.a"
+          test -d "${SDK_DIR}/include/kdal"
+          test -d "${SDK_DIR}/include/kdalc"
+          test -d "${SDK_DIR}/share/kdal/stdlib"
+          test -d "${SDK_DIR}/share/kdal/vim"
+          test -d "${SDK_DIR}/lib/cmake/KDAL"
+
+          tar czf "${SDK_DIR}.tar.gz" "${SDK_DIR}"
+          echo "SDK_TARBALL=${SDK_DIR}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Upload nightly artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nightly-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ env.SDK_TARBALL }}
+          retention-days: 7
+
+  nightly-test:
+    name: Nightly test suite
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure and build tools
+        run: |
+          cmake --preset ci-release
+          cmake --build --preset ci-release --target kdalc kdality
+
+      - name: Build and run tests
+        run: |
+          chmod +x scripts/ci/*.sh
+          ./scripts/ci/test.sh
+
+      - name: Lint C code
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cppcheck
+          cppcheck --enable=warning,style,performance \
+            --suppress=missingIncludeSystem \
+            --suppress=missingInclude \
+            --suppress=unusedStructMember \
+            --suppress=constParameter \
+            --suppress=constVariablePointer \
+            --suppress=constParameterPointer \
+            --suppress=variableScope \
+            -I compiler/include \
+            --error-exitcode=1 \
+            tools/kdality/ compiler/ \
+            tests/userspace/ tests/integration/ \
+            examples/
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: |
+            website/package-lock.json
+            editor/vscode/kdal-lang/package-lock.json
+
+      - name: Build docs site
+        working-directory: website
+        run: |
+          npm ci && npm run build
+          PAGE_COUNT=$(find dist -name 'index.html' | wc -l)
+          echo "Docs: ${PAGE_COUNT} pages"
+
+      - name: Build VS Code extension
+        working-directory: editor/vscode/kdal-lang
+        run: |
+          npm ci
+          npm run compile
+          npx @vscode/vsce package --no-dependencies
+
+  nightly-notify:
+    name: Nightly status
+    needs: [nightly-build, nightly-test]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Report status
+        run: |
+          if [ "${{ needs.nightly-build.result }}" = "success" ] && \
+             [ "${{ needs.nightly-test.result }}" = "success" ]; then
+            echo "::notice::Nightly build and tests passed"
+          else
+            echo "::warning::Nightly build status: build=${{ needs.nightly-build.result }}, test=${{ needs.nightly-test.result }}"
+          fi

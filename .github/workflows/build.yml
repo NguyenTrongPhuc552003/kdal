@@ -13,22 +13,23 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build kdality
-        run: make -C tools/kdality
-
-      - name: Verify binary
+      - name: Build with CMake
         run: |
-          test -x tools/kdality/kdality
-          file tools/kdality/kdality
+          cmake --preset ci-release
+          cmake --build --preset ci-release
 
-      - name: Build compiler
-        run: make -C compiler
+      - name: Verify binaries
+        run: |
+          test -x build/ci/release/kdality
+          file build/ci/release/kdality
+          test -x build/ci/release/compiler/kdalc
+          file build/ci/release/compiler/kdalc
 
       - name: Upload kdality artifact
         uses: actions/upload-artifact@v4
         with:
           name: kdality-linux-x86_64
-          path: tools/kdality/kdality
+          path: build/ci/release/kdality
 
   build-tests:
     name: Build userspace tests
@@ -38,12 +39,10 @@ jobs:
 
       - name: Build test programs
         run: |
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o testapp tests/userspace/testapp.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o benchmark tests/userspace/benchmark.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o kdaltest tests/integration/kdaltest.c
+          CFLAGS="-std=c99 -Wall -Wextra -pedantic -Wno-gnu-zero-variadic-macro-arguments -D_DEFAULT_SOURCE"
+          cc $CFLAGS -o testapp tests/userspace/testapp.c
+          cc $CFLAGS -o benchmark tests/userspace/benchmark.c
+          cc $CFLAGS -o kdaltest tests/integration/kdaltest.c
 
       - name: Verify binaries
         run: |

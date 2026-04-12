@@ -27,14 +27,12 @@ jobs:
 
       - name: Build test programs
         run: |
-          make -C tools/kdality
-          make -C compiler
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o testapp tests/userspace/testapp.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o benchmark tests/userspace/benchmark.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o kdaltest tests/integration/kdaltest.c
+          cmake --preset ci-release
+          cmake --build --preset ci-release
+          CFLAGS="-std=c99 -Wall -Wextra -pedantic -Wno-gnu-zero-variadic-macro-arguments -D_DEFAULT_SOURCE"
+          cc $CFLAGS -o testapp tests/userspace/testapp.c
+          cc $CFLAGS -o benchmark tests/userspace/benchmark.c
+          cc $CFLAGS -o kdaltest tests/integration/kdaltest.c
 
       - name: Dry-run testapp
         run: |

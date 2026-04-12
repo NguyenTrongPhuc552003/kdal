@@ -38,10 +38,25 @@ jobs:
 
       - name: Run cppcheck on userspace code
         run: |
-          cppcheck --enable=warning,style,performance \
+          cppcheck --enable=warning,style,performance,portability \
             --suppress=missingIncludeSystem \
+            --suppress=missingInclude \
+            --suppress=unusedStructMember \
+            --suppress=constParameter \
+            --suppress=constVariablePointer \
+            --suppress=constParameterPointer \
+            --suppress=constParameterCallback \
+            --suppress=variableScope \
+            --suppress=unknownMacro \
+            -I include \
+            -I compiler/include \
             --error-exitcode=1 \
+            src/backends/generic/ \
+            src/backends/qemu/ \
+            src/core/ \
+            src/drivers/example/ \
             tools/kdality/ \
+            compiler/ \
             tests/userspace/ \
             tests/integration/ \
             examples/

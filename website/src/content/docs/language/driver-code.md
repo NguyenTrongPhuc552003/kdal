@@ -1,0 +1,203 @@
+---
+title: Driver Code (.kdc)
+description: Implementing driver behavior with event handlers.
+---
+
+A `.kdc` file implements driver behavior using event handlers. It imports
+one or more `.kdh` device headers and defines how the driver responds to
+probe, I/O, signal, and power events.
+
+## File Structure
+
+```kdal
+kdal_version: "0.1";
+
+import "uart.kdh" as UART;
+
+backend mmio {
+    base_addr: 0x09000000;
+}
+
+driver MyUartDriver for UART.UartDevice {
+    config { … }
+    probe  { … }
+    remove { … }
+    on read  { … }
+    on write { … }
+    on signal <name> { … }
+    on power <state> { … }
+}
+```
+
+## Example
+
+```kdal
+// uart_hello.kdc - simple UART driver for PL011
+
+use "uart.kdh";
+
+driver uart_hello for uart {
+
+    on probe {
+        reg_write(CR, 0x301);    // enable TX, RX, UART
+        log("UART initialized");
+    }
+
+    on remove {
+        reg_write(CR, 0x00);     // disable UART
+    }
+
+    on read {
+        val = reg_read(DR);
+        return val;
+    }
+
+    on write {
+        reg_write(DR, input);
+    }
+
+    on signal rx_ready {
+        data = reg_read(DR);
+        log("RX data received");
+    }
+
+    on power off {
+        reg_write(CR, 0x00);
+    }
+
+    on power on {
+        reg_write(CR, 0x301);
+    }
+}
+```
+
+## Backend Annotation
+
+The `backend` block declares the hardware transport:
+
+| Backend      | Description                                 |
+| ------------ | ------------------------------------------- |
+| `mmio`       | Direct MMIO register access via `ioremap`   |
+| `platdev`    | Linux `platform_device` / `platform_driver` |
+| `devicetree` | DT-compatible (generates OF match table)    |
+| `virtio`     | VirtIO transport (QEMU)                     |
+| `soc`        | SoC vendor glue layer                       |
+| `qemu`       | QEMU ring-buffer emulation (test/dev)       |
+
+## Event Handlers
+
+| Handler              | Kernel Equivalent       | When It Runs                       |
+| -------------------- | ----------------------- | ---------------------------------- |
+| `on probe`           | `.probe` callback       | Driver bound to device             |
+| `on remove`          | `.remove` callback      | Driver unbound                     |
+| `on read`            | `kdal_driver_ops.read`  | Userspace `read()` on `/dev/kdal`  |
+| `on write`           | `kdal_driver_ops.write` | Userspace `write()` on `/dev/kdal` |
+| `on signal <name>`   | IRQ handler             | Named signal fires                 |
+| `on power <state>`   | PM callback             | Power state transition             |
+| `on timeout <timer>` | Timer callback          | Armed timer fires                  |
+
+## Built-in Operations
+
+| Operation              | Description                              |
+| ---------------------- | ---------------------------------------- |
+| `read(reg_path)`       | Returns register value as typed integer  |
+| `write(reg_path, val)` | Writes typed value to register           |
+| `reg_read(name)`       | Shorthand for reading a register by name |
+| `reg_write(name, val)` | Shorthand for writing a register by name |
+| `emit(signal [, val])` | Triggers an output signal                |
+| `wait(signal, ms)`     | Waits for a signal with timeout (ms)     |
+| `arm(timer, ms)`       | Starts a one-shot or periodic timer      |
+| `cancel(timer)`        | Cancels an armed timer                   |
+| `log(fmt, ...)`        | Kernel `pr_debug`/`dev_dbg` print        |
+
+## Control Flow
+
+Only structured control flow is permitted:
+
+```kdal
+if (condition) {
+    // ...
+} elif (condition) {
+    // ...
+} else {
+    // ...
+}
+
+for i in 0..8 {
+    // bounded range - always terminates
+}
+
+let result = reg_read(STATUS);
+return result;
+```
+
+**Not allowed:** `while`, `goto`, `break`, `continue`, recursion.
+
+## Config Bind Block
+
+Override device header config defaults:
+
+```kdal
+driver MyDriver for MyDevice {
+    config {
+        baud_rate = 9600;
+        data_bits = 7;
+    }
+    // ...
+}
+```
+
+## What the Compiler Generates
+
+For the `uart_hello.kdc` above, the compiler emits roughly:
+
+```c
+#include <linux/module.h>
+#include <linux/platform_device.h>
+#include <linux/of.h>
+
+/* Register offsets from uart.kdh */
+#define UART_DR    0x000
+#define UART_FR    0x018
+
+static int uart_hello_probe(struct platform_device *pdev) {
+    void __iomem *base = devm_platform_ioremap_resource(pdev, 0);
+    if (IS_ERR(base)) return PTR_ERR(base);
+    pr_info("UART initialized\n");
+    return 0;
+}
+
+static int uart_hello_remove(struct platform_device *pdev) {
+    return 0;
+}
+
+static const struct of_device_id uart_hello_of_match[] = {
+    { .compatible = "arm,pl011" },
+    { }
+};
+MODULE_DEVICE_TABLE(of, uart_hello_of_match);
+
+static struct platform_driver uart_hello_driver = {
+    .probe  = uart_hello_probe,
+    .remove = uart_hello_remove,
+    .driver = {
+        .name = "uart_hello",
+        .of_match_table = uart_hello_of_match,
+    },
+};
+module_platform_driver(uart_hello_driver);
+
+MODULE_LICENSE("GPL");
+MODULE_DESCRIPTION("Auto-generated by kdalc from uart_hello.kdc");
+```
+
+The compiler handles `platform_driver` boilerplate, OF match table,
+`devm_*` resource management, and `MODULE_*` macros automatically.
+
+## Scoping Rules
+
+- `.kdh` file defines a namespace equal to the import alias (or the device class name if no alias)
+- `ident.ident` - namespace member access (e.g., `UART.DATA`)
+- `ident.ident.ident` - bitfield within register (e.g., `UART.CONTROL.enable`)
+- `let` bindings are local to the enclosing handler block
+- No global mutable variables

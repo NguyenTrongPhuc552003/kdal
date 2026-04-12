@@ -11,7 +11,7 @@ hardware. This is critical for a thesis project where results must be
 reproducible.
 
 The QEMU aarch64 `virt` machine also matches the target ISA (ARM64), so
-drivers developed on QEMU require zero code changes on real hardware — only
+drivers developed on QEMU require zero code changes on real hardware - only
 a backend swap.
 
 ### Why not support every device class immediately?
@@ -19,7 +19,7 @@ a backend swap.
 The first milestone validates the **abstraction boundary**, not the device
 coverage. Starting with four classes (UART, I2C, SPI, GPU) proves the
 framework can handle both simple serial peripherals and complex accelerators.
-Adding GPIO, NPU, or others later exercises only the porting guide — the
+Adding GPIO, NPU, or others later exercises only the porting guide - the
 core remains unchanged.
 
 ### Why a thin core?
@@ -37,7 +37,7 @@ Out-of-tree development allows:
 - Easy deployment via `insmod` without kernel rebuilds
 - Clear separation for thesis evaluation
 
-The architecture is designed for future upstreaming — see
+The architecture is designed for future upstreaming - see
 [upstreaming.md](upstreaming.md).
 
 ## Implementation
@@ -77,7 +77,7 @@ The tool (`tools/kdality/kdalctl.c`) mirrors the ioctl ABI definitions
 locally and does not depend on kernel headers. Build with:
 
 ```sh
-make tool
+./scripts/dev/build.sh --variant release kdality
 ```
 
 ### How do I add a new device class?
@@ -99,7 +99,7 @@ Linux 4.x, so backporting is straightforward.
 ### What are `.kdh` and `.kdc` files?
 
 `.kdh` (KDAL Device Header) files are **declarative** descriptions of a
-hardware device — register maps, signal definitions, capabilities, and power
+hardware device - register maps, signal definitions, capabilities, and power
 states. `.kdc` (KDAL Driver Code) files contain **imperative** event
 handlers that implement driver logic (probe, read, write, signal, power).
 Together they separate *what a device is* from *how it behaves*.
@@ -107,13 +107,12 @@ Together they separate *what a device is* from *how it behaves*.
 ### How does the KDAL compiler work?
 
 The compiler (`kdalc`) reads a `.kdc` file plus its referenced `.kdh`
-header, then runs five pipeline stages:
+header, then runs four pipeline stages:
 
-1. **Lexer** — tokenizes source into 80+ token types
-2. **Parser** — builds an arena-allocated AST via recursive descent
-3. **Semantic analysis** — resolves symbols, validates register accesses
-4. **Code generation** — emits idiomatic kernel C (`platform_driver`, `devm_*`)
-5. **Kbuild emitter** — generates `Makefile.kbuild` for `make modules`
+1. **Lexer** - tokenizes source into 80+ token types
+2. **Parser** - builds an arena-allocated AST via recursive descent
+3. **Semantic analysis** - resolves symbols, validates register accesses
+4. **Code generation** - emits idiomatic kernel C + `Makefile.kbuild`
 
 The output is ready to compile with any kernel build tree.
 
@@ -126,7 +125,7 @@ New programmers can focus on *driver logic* rather than kernel API minutiae.
 
 ### Can I write a driver without knowing C?
 
-Yes — that is the goal. A `.kdc` file uses high-level constructs like
+Yes - that is the goal. A `.kdc` file uses high-level constructs like
 `on probe`, `on read`, and `reg_write(CTRL, 0x01)`. The compiler generates
 all the C code needed for a loadable kernel module. You can inspect the
 generated C to learn kernel programming incrementally.

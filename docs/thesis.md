@@ -45,13 +45,13 @@ measurable performance degradation?
 
 ### Chapter 3: Architecture & Design
 
-**Key contribution:** The five-layer architecture (User → Control → Core →
-Driver → Backend) with clean contracts at each boundary.
+**Key contribution:** The six-layer architecture (User → Control → Core →
+Driver → Backend → Hardware) with clean contracts at each boundary.
 
 **Repository evidence:**
-- `include/kdal/` — public API headers defining contracts
-- `docs/architecture.md` — layer diagram and data flow
-- `docs/api_reference.md` — complete API specification
+- `include/kdal/` - public API headers defining contracts
+- `docs/architecture.md` - layer diagram and data flow
+- `docs/api_reference.md` - complete API specification
 
 **Design decisions to discuss:**
 
@@ -150,5 +150,5 @@ Restate thesis question → summarize findings → highlight contributions.
 | Implementation    | `src/`, `Makefile`                                   |
 | Testing           | `tests/`, `scripts/ci/test.sh`                       |
 | Results           | `tests/userspace/benchmark.c`, `docs/performance.md` |
-| Reproducibility   | `scripts/setupqemu/`, `docs/installation.md`         |
+| Reproducibility   | `scripts/env/`, `docs/installation.md`               |
 | Porting           | `docs/portingguide.md`, `src/backends/`              |

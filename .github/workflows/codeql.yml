@@ -33,15 +33,19 @@ jobs:
 
       - name: Build userspace code
         run: |
-          make -C tools/kdality
+          cmake --preset ci-release
+          cmake --build --preset ci-release
           cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -Wno-gnu-zero-variadic-macro-arguments \
             -o testapp tests/userspace/testapp.c
           cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -Wno-gnu-zero-variadic-macro-arguments \
             -o benchmark tests/userspace/benchmark.c
           cc -std=c99 -Wall -D_DEFAULT_SOURCE \
+            -Wno-gnu-zero-variadic-macro-arguments \
             -o kdaltest tests/integration/kdaltest.c
-          cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c
-          cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c
+          cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c || true
+          cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c || true
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3

@@ -16,6 +16,7 @@
 
 #include <linux/errno.h>
 #include <linux/slab.h>
+#include <linux/spinlock.h>
 #include <linux/string.h>
 
 #include <kdal/api/common.h>
@@ -24,13 +25,14 @@
 
 /* ── per-device emulated I/O ring ───────────────────────────────── */
 
-#define QEMU_RING_SIZE	4096
+#define QEMU_RING_SIZE 4096
 
 struct qemu_dev_ring {
 	u8 buf[QEMU_RING_SIZE];
-	unsigned int head;	/* next write position */
-	unsigned int tail;	/* next read position  */
-	unsigned int count;	/* bytes available     */
+	unsigned int head; /* next write position */
+	unsigned int tail; /* next read position  */
+	unsigned int count; /* bytes available     */
+	spinlock_t lock;
 };
 
 static struct qemu_dev_ring *qemu_ring_create(void)
@@ -38,6 +40,8 @@ static struct qemu_dev_ring *qemu_ring_create(void)
 	struct qemu_dev_ring *ring;
 
 	ring = kzalloc(sizeof(*ring), GFP_KERNEL);
+	if (ring)
+		spin_lock_init(&ring->lock);
 	return ring;
 }
 
@@ -46,8 +50,8 @@ static void qemu_ring_destroy(struct qemu_dev_ring *ring)
 	kfree(ring);
 }
 
-static ssize_t qemu_ring_write(struct qemu_dev_ring *ring,
-			       const char *data, size_t len)
+static ssize_t qemu_ring_write(struct qemu_dev_ring *ring, const char *data,
+			       size_t len)
 {
 	size_t i;
 
@@ -63,8 +67,8 @@ static ssize_t qemu_ring_write(struct qemu_dev_ring *ring,
 	return (ssize_t)i;
 }
 
-static ssize_t qemu_ring_read(struct qemu_dev_ring *ring,
-			      char *data, size_t len)
+static ssize_t qemu_ring_read(struct qemu_dev_ring *ring, char *data,
+			      size_t len)
 {
 	size_t i;
 
@@ -109,6 +113,8 @@ static ssize_t qemu_backend_read(struct kdal_device *device, char *buf,
 				 size_t count)
 {
 	struct qemu_dev_ring *ring;
+	ssize_t ret;
+	unsigned long flags;
 
 	if (!device || !buf)
 		return -EINVAL;
@@ -117,13 +123,18 @@ static ssize_t qemu_backend_read(struct kdal_device *device, char *buf,
 	if (!ring)
 		return -EIO;
 
-	return qemu_ring_read(ring, buf, count);
+	spin_lock_irqsave(&ring->lock, flags);
+	ret = qemu_ring_read(ring, buf, count);
+	spin_unlock_irqrestore(&ring->lock, flags);
+	return ret;
 }
 
 static ssize_t qemu_backend_write(struct kdal_device *device, const char *buf,
 				  size_t count)
 {
 	struct qemu_dev_ring *ring;
+	ssize_t ret;
+	unsigned long flags;
 
 	if (!device || !buf)
 		return -EINVAL;
@@ -132,7 +143,10 @@ static ssize_t qemu_backend_write(struct kdal_device *device, const char *buf,
 	if (!ring)
 		return -EIO;
 
-	return qemu_ring_write(ring, buf, count);
+	spin_lock_irqsave(&ring->lock, flags);
+	ret = qemu_ring_write(ring, buf, count);
+	spin_unlock_irqrestore(&ring->lock, flags);
+	return ret;
 }
 
 static long qemu_backend_ioctl(struct kdal_device *device, unsigned int cmd,

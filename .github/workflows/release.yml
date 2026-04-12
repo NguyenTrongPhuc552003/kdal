@@ -10,62 +10,318 @@ on:
         description: 'Release tag (e.g., v0.1.0)'
         required: true
 
+# Only one release at a time
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  build-artifacts:
-    name: Build release artifacts
+  # ── Gate: require CI to pass before building release artifacts ─────
+  release-gate:
+    name: Release gate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
 
+      - name: Configure and build tools (sanity check)
+        run: |
+          cmake --preset ci-release
+          cmake --build --preset ci-release --target kdalc kdality
+
+      - name: Verify binaries execute
+        run: |
+          ./build/ci/release/compiler/kdalc --help || true
+          ./build/ci/release/kdality help || true
+
+      - name: Run CI test suite
+        run: |
+          chmod +x scripts/ci/*.sh
+          ./scripts/ci/test.sh
+
+      - name: Verify repository structure
+        run: |
+          for f in Makefile README.md LICENSE CONTRIBUTING.md CHANGELOG.md \
+                   SECURITY.md CITATION.cff VERSION; do
+            test -f "$f" || { echo "Missing: $f"; exit 1; }
+          done
+
+      - name: Verify version consistency
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
+          TAG_VERSION="${TAG_VERSION#v}"
+          FILE_VERSION="$(cat VERSION)"
+          if [ "$TAG_VERSION" != "$FILE_VERSION" ]; then
+            echo "::error::Tag version ($TAG_VERSION) does not match VERSION file ($FILE_VERSION)"
+            exit 1
+          fi
+
+  # ── SDK binary matrix ────────────────────────────────────────────
+  build-sdk:
+    name: SDK · ${{ matrix.os }}-${{ matrix.arch }}
+    needs: [release-gate]
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # --- Linux targets ---
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+            cc: gcc
+          - os: linux
+            arch: aarch64
+            runner: ubuntu-latest
+            cc: aarch64-linux-gnu-gcc
+            cross: true
+            cross_pkg: gcc-aarch64-linux-gnu
+          - os: linux
+            arch: riscv64
+            runner: ubuntu-latest
+            cc: riscv64-linux-gnu-gcc
+            cross: true
+            cross_pkg: gcc-riscv64-linux-gnu
+          # --- macOS targets ---
+          - os: darwin
+            arch: aarch64
+            runner: macos-14
+            cc: clang
+          - os: darwin
+            arch: x86_64
+            runner: macos-15-intel
+            cc: clang
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install cross-compiler
+        if: matrix.cross
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ${{ matrix.cross_pkg }}
+
+      - name: Determine version
+        id: version
+        run: |
+          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
+          echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Build compiler
+        env:
+          CC: ${{ matrix.cc }}
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+        run: cmake --preset release-matrix
+
       - name: Build kdality
-        run: make -C tools/kdality
+        env:
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+        run: cmake --build --preset release-matrix --target kdalc kdality
 
-      - name: Build test programs
+      - name: Stage SDK tarball
+        env:
+          KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
         run: |
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o testapp tests/userspace/testapp.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o benchmark tests/userspace/benchmark.c
-          cc -std=c99 -Wall -Wextra -D_DEFAULT_SOURCE \
-            -o kdaltest tests/integration/kdaltest.c
+          VERSION="${{ steps.version.outputs.tag }}"
+          SDK_DIR="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}"
+          cmake --install "build/release/${KDAL_TARGET_TRIPLET}" --prefix "${SDK_DIR}"
 
-      - name: Build example programs
+          test -x "${SDK_DIR}/bin/kdalc"
+          test -x "${SDK_DIR}/bin/kdality"
+          test -f "${SDK_DIR}/lib/libkdalc.a"
+          test -d "${SDK_DIR}/include/kdal"
+          test -d "${SDK_DIR}/include/kdalc"
+          test -d "${SDK_DIR}/share/kdal/stdlib"
+          test -d "${SDK_DIR}/share/kdal/vim"
+          test -f "${SDK_DIR}/share/kdal/vim/filetype.lua"
+          test -d "${SDK_DIR}/lib/cmake/KDAL"
+
+          # Create tarball
+          tar czf "${SDK_DIR}.tar.gz" "${SDK_DIR}"
+          echo "SDK_TARBALL=${SDK_DIR}.tar.gz" >> "$GITHUB_ENV"
+
+      - name: Upload SDK tarball
+        uses: actions/upload-artifact@v4
+        with:
+          name: sdk-${{ matrix.os }}-${{ matrix.arch }}
+          path: ${{ env.SDK_TARBALL }}
+
+  # ── Source archive ────────────────────────────────────────────────
+  build-source:
+    name: Source archive
+    needs: [release-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Determine version
+        id: version
         run: |
-          cc -std=c99 -Wall -o gpudemo examples/accel_demo/gpudemo.c
-          cc -std=c99 -Wall -o npudemo examples/accel_demo/npudemo.c
+          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
+          echo "tag=${VERSION}" >> "$GITHUB_OUTPUT"
 
       - name: Create source archive
         run: |
-          VERSION="${GITHUB_REF_NAME:-${{ github.event.inputs.tag }}}"
+          VERSION="${{ steps.version.outputs.tag }}"
           git archive --format=tar.gz --prefix="kdal-${VERSION}/" \
             -o "kdal-${VERSION}.tar.gz" HEAD
 
-      - name: Generate changelog
+      - name: Extract release notes from CHANGELOG
         run: |
-          chmod +x scripts/release/generate_changelog.sh
-          ./scripts/release/generate_changelog.sh > RELEASE_NOTES.md
+          VERSION="${{ steps.version.outputs.tag }}"
+          PLAIN_VERSION="${VERSION#v}"
+          # Extract the section for this version from CHANGELOG.md
+          awk -v ver="$PLAIN_VERSION" '
+            /^## \[/ {
+              if (found) exit
+              if ($0 ~ "\\[" ver "\\]") found=1
+              next
+            }
+            found { print }
+          ' CHANGELOG.md > RELEASE_NOTES.md
 
-      - name: Upload artifacts
+          # Fallback to generated changelog if section not found
+          if [ ! -s RELEASE_NOTES.md ]; then
+            chmod +x scripts/release/generate_changelog.sh
+            PREV_TAG="$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo '')"
+            if [ -n "$PREV_TAG" ]; then
+              ./scripts/release/generate_changelog.sh "$PREV_TAG" > RELEASE_NOTES.md
+            else
+              ./scripts/release/generate_changelog.sh > RELEASE_NOTES.md
+            fi
+          fi
+
+      - name: Upload source artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: release-artifacts
+          name: source-archive
           path: |
             kdal-*.tar.gz
-            tools/kdality/kdality
             RELEASE_NOTES.md
 
+  # ── DEB package ──────────────────────────────────────────────────
+  build-deb:
+    name: DEB package
+    needs: [release-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debhelper cmake gcc
+
+      - name: Prepare Debian source tree
+        run: cp -r packaging/debian .
+
+      - name: Build DEB package
+        run: dpkg-buildpackage -us -uc -b
+
+      - name: Collect DEB artifacts
+        run: |
+          mkdir -p deb-out
+          cp ../*.deb deb-out/
+
+      - name: Upload DEB artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: deb-packages
+          path: deb-out/*.deb
+
+  # ── RPM package ──────────────────────────────────────────────────
+  build-rpm:
+    name: RPM package
+    needs: [release-gate]
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: dnf install -y rpm-build cmake gcc make
+
+      - name: Prepare RPM source
+        run: |
+          VERSION="${GITHUB_REF_NAME:-v0.1.0}"
+          VERSION="${VERSION#v}"
+          mkdir -p ~/rpmbuild/SOURCES ~/rpmbuild/SPECS
+          tar czf "$HOME/rpmbuild/SOURCES/kdal-${VERSION}.tar.gz" \
+            --transform="s,^,kdal-${VERSION}/," \
+            --exclude='.git' .
+          cp packaging/rpm/kdal.spec ~/rpmbuild/SPECS/
+
+      - name: Build RPM package
+        run: rpmbuild -bb ~/rpmbuild/SPECS/kdal.spec
+
+      - name: Collect RPM artifacts
+        run: |
+          mkdir -p rpm-out
+          cp ~/rpmbuild/RPMS/*/*.rpm rpm-out/
+
+      - name: Upload RPM artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rpm-packages
+          path: rpm-out/*.rpm
+
+  # ── VS Code extension (VSIX) ────────────────────────────────────
+  build-vsix:
+    name: VS Code extension
+    needs: [release-gate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies and build
+        working-directory: editor/vscode/kdal-lang
+        run: |
+          npm ci
+          npm run compile
+
+      - name: Package VSIX
+        working-directory: editor/vscode/kdal-lang
+        run: |
+          npx @vscode/vsce package --no-dependencies
+          mv ./*.vsix "$GITHUB_WORKSPACE/"
+
+      - name: Upload VSIX artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vsix-package
+          path: '*.vsix'
+
+  # ── Create GitHub Release ────────────────────────────────────────
   create-release:
-    name: Create GitHub release
-    needs: build-artifacts
+    name: Publish GitHub release
+    needs: [build-sdk, build-source, build-deb, build-rpm, build-vsix]
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/v')
     permissions:
       contents: write
     steps:
-      - name: Download artifacts
+      - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          name: release-artifacts
+          merge-multiple: true
+
+      - name: Generate SHA256 checksums
+        run: |
+          sha256sum \
+            kdal-*.tar.gz \
+            ./*.deb \
+            ./*.rpm \
+            ./*.vsix \
+          > SHA256SUMS
+          echo "--- SHA256SUMS ---"
+          cat SHA256SUMS
 
       - name: Create release
         uses: softprops/action-gh-release@v2
@@ -73,6 +329,93 @@ jobs:
           body_path: RELEASE_NOTES.md
           files: |
             kdal-*.tar.gz
-            tools/kdality/kdality
+            ./*.deb
+            ./*.rpm
+            ./*.vsix
+            SHA256SUMS
           draft: false
-          prerelease: ${{ contains(github.ref, '-rc') }}
+          prerelease: ${{ contains(github.ref, '-rc') || contains(github.ref, '-alpha') || contains(github.ref, '-beta') }}
+
+  # ── Post-release validation ──────────────────────────────────────
+  validate-release:
+    name: Validate · ${{ matrix.os }}-${{ matrix.arch }}
+    needs: [create-release]
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: linux
+            arch: x86_64
+            runner: ubuntu-latest
+          - os: darwin
+            arch: aarch64
+            runner: macos-14
+    steps:
+      - name: Determine version
+        id: version
+        run: |
+          echo "tag=${GITHUB_REF_NAME}" >> "$GITHUB_OUTPUT"
+
+      - name: Download SDK tarball from release
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          TARBALL="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz"
+          URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}/${TARBALL}"
+          echo "Downloading: ${URL}"
+          curl -fsSL --retry 5 --retry-delay 5 -o "${TARBALL}" "${URL}"
+
+      - name: Download SHA256SUMS
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          URL="https://github.com/${{ github.repository }}/releases/download/${VERSION}/SHA256SUMS"
+          curl -fsSL --retry 5 --retry-delay 5 -o SHA256SUMS "${URL}"
+
+      - name: Verify checksum
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          TARBALL="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz"
+          grep "${TARBALL}" SHA256SUMS | shasum -a 256 -c - || \
+            grep "${TARBALL}" SHA256SUMS | sha256sum -c -
+
+      - name: Extract and validate SDK layout
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          TARBALL="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}.tar.gz"
+          tar xzf "${TARBALL}"
+          SDK_DIR="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}"
+
+          echo "==> Checking SDK layout..."
+          test -x "${SDK_DIR}/bin/kdalc"           || { echo "FAIL: kdalc missing";    exit 1; }
+          test -x "${SDK_DIR}/bin/kdality"         || { echo "FAIL: kdality missing";  exit 1; }
+          test -f "${SDK_DIR}/lib/libkdalc.a"      || { echo "FAIL: libkdalc.a missing"; exit 1; }
+          test -d "${SDK_DIR}/include/kdal"        || { echo "FAIL: kdal headers missing"; exit 1; }
+          test -d "${SDK_DIR}/include/kdalc"       || { echo "FAIL: kdalc headers missing"; exit 1; }
+          test -d "${SDK_DIR}/share/kdal/stdlib"   || { echo "FAIL: stdlib missing";   exit 1; }
+          test -d "${SDK_DIR}/lib/cmake/KDAL"      || { echo "FAIL: cmake files missing"; exit 1; }
+          test -d "${SDK_DIR}/share/kdal/vim"      || { echo "FAIL: vim files missing"; exit 1; }
+
+          # Count stdlib modules (expect 7)
+          KDH_COUNT=$(find "${SDK_DIR}/share/kdal/stdlib" -name '*.kdh' | wc -l)
+          echo "  stdlib .kdh files: ${KDH_COUNT}"
+          test "$KDH_COUNT" -ge 7 || { echo "FAIL: expected >= 7 stdlib files"; exit 1; }
+
+          # Count CMake files
+          CMAKE_COUNT=$(find "${SDK_DIR}/lib/cmake/KDAL" -name '*.cmake' | wc -l)
+          echo "  CMake files: ${CMAKE_COUNT}"
+          test "$CMAKE_COUNT" -ge 4 || { echo "FAIL: expected >= 4 cmake files"; exit 1; }
+
+          # Count Vim files
+          VIM_COUNT=$(find "${SDK_DIR}/share/kdal/vim" -name '*.vim' -o -name '*.lua' | wc -l)
+          echo "  Vim files: ${VIM_COUNT}"
+          test "$VIM_COUNT" -ge 8 || { echo "FAIL: expected >= 8 vim files"; exit 1; }
+
+          echo "==> SDK layout OK"
+
+      - name: Smoke-test binaries
+        run: |
+          VERSION="${{ steps.version.outputs.tag }}"
+          SDK_DIR="kdal-${VERSION}-${{ matrix.os }}-${{ matrix.arch }}"
+          "${SDK_DIR}/bin/kdality" help || true
+          echo "==> Binary smoke-test OK"

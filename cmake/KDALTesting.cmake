@@ -100,7 +100,7 @@ function(add_kdal_kunit_test TEST_NAME)
             LABELS    "kunit;kernel")
     else()
         message(STATUS
-            "KUnit test '${TEST_NAME}': KERNEL_DIR not set — skipping module build")
+            "KUnit test '${TEST_NAME}': KERNEL_DIR not set - skipping module build")
     endif()
 endfunction()
 

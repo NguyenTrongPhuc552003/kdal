@@ -1,6 +1,6 @@
 /* SPDX-License-Identifier: GPL-2.0-only */
 /*
- * KDAL Compiler — ast.h
+ * KDAL Compiler - ast.h
  * Abstract Syntax Tree node definitions.
  *
  * The AST is a tree of tagged-union nodes allocated from a linear
@@ -8,7 +8,7 @@
  *
  * Node type hierarchy:
  *
- *   kdal_ast_t (base — every node starts with this)
+ *   kdal_ast_t (base - every node starts with this)
  *   ├── KDAL_NODE_FILE
  *   ├── KDAL_NODE_IMPORT
  *   ├── KDAL_NODE_VERSION
@@ -55,7 +55,7 @@ typedef enum {
 	KDAL_NODE_BACKEND,
 	KDAL_NODE_BACKEND_OPTION,
 
-	/* .kdh — device class */
+	/* .kdh - device class */
 	KDAL_NODE_DEVICE_CLASS,
 	KDAL_NODE_REGISTERS_BLOCK,
 	KDAL_NODE_REGISTER_DECL,
@@ -69,7 +69,7 @@ typedef enum {
 	KDAL_NODE_CONFIG_BLOCK,
 	KDAL_NODE_CONFIG_FIELD,
 
-	/* .kdc — driver */
+	/* .kdc - driver */
 	KDAL_NODE_DRIVER,
 	KDAL_NODE_CONFIG_BIND,
 	KDAL_NODE_CONFIG_BIND_STMT,
@@ -228,6 +228,8 @@ typedef struct {
 typedef struct {
 	kdal_ast_t base;
 	const char *name;
+	const char *compatible; /* e.g. "example,init" or NULL */
+	const char *device_class_type; /* e.g. "gpio" from simplified form */
 	kdal_ast_t *registers; /* KDAL_NODE_REGISTERS_BLOCK or NULL */
 	kdal_ast_t *signals; /* KDAL_NODE_SIGNALS_BLOCK or NULL */
 	kdal_ast_t *capabilities;
@@ -272,6 +274,13 @@ typedef struct {
 	kdal_ast_t *value; /* expr or NULL */
 } kdal_cap_node_t;
 
+/* Power state node */
+typedef struct {
+	kdal_ast_t base;
+	const char *name; /* "on", "off", "suspend", or custom */
+	const char *spec; /* "allowed", "forbidden", or NULL */
+} kdal_power_state_node_t;
+
 /* Config field node (both .kdh config block and .kdc config bind) */
 typedef struct {
 	kdal_ast_t base;
@@ -305,7 +314,7 @@ typedef struct {
 	kdal_ast_t *body; /* list of statements */
 } kdal_handler_node_t;
 
-/* Expression node — covers all expression variants */
+/* Expression node - covers all expression variants */
 typedef struct {
 	kdal_ast_t base;
 	union {
@@ -335,10 +344,16 @@ typedef struct {
 
 /* ── Arena allocator interface ───────────────────────────────────── */
 
-typedef struct {
-	char *buf;
+typedef struct kdal_arena_block {
+	struct kdal_arena_block *next;
 	size_t cap;
 	size_t used;
+	char buf[];
+} kdal_arena_block_t;
+
+typedef struct {
+	kdal_arena_block_t *head; /* current (newest) block */
+	size_t block_size; /* default block capacity */
 } kdal_arena_t;
 
 kdal_arena_t *kdal_arena_new(size_t initial_cap);

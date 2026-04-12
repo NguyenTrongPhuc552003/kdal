@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.0-only
 /*
- * KDAL Compiler — lexer.c
+ * KDAL Compiler - lexer.c
  * Hand-written tokeniser for .kdh and .kdc source files.
  *
  * Produces a flat array of kdal_token_t from a source buffer.
@@ -103,7 +103,6 @@ typedef struct {
 	kdal_token_t *tokens;
 	int ntokens;
 	int cap;
-	kdal_arena_t *arena;
 	int had_error;
 } lexer_t;
 
@@ -197,10 +196,9 @@ static void lx_lex_ident(lexer_t *lx)
 		lx_advance(lx);
 	size_t len = lx->pos - start;
 	kdal_tok_t tt = lx_classify_ident(lx->src + start, len);
-	kdal_token_t *t;
 	lx_emit(lx, tt, lx->src + start, len, sline, scol);
 	if (tt == TOK_BOOL_TRUE || tt == TOK_BOOL_FALSE) {
-		t = &lx->tokens[lx->ntokens - 1];
+		kdal_token_t *t = &lx->tokens[lx->ntokens - 1];
 		t->v.bval = (tt == TOK_BOOL_TRUE) ? 1 : 0;
 	}
 }
@@ -274,6 +272,7 @@ static void lx_lex_string(lexer_t *lx)
 int kdal_lex(kdal_arena_t *arena, const char *src, size_t src_len,
 	     kdal_token_t **out_tokens, const char *filename)
 {
+	(void)arena; /* reserved for future arena-based token allocation */
 	lexer_t lx = {
 		.src = src,
 		.len = src_len,
@@ -281,7 +280,6 @@ int kdal_lex(kdal_arena_t *arena, const char *src, size_t src_len,
 		.line = 1,
 		.col = 1,
 		.filename = filename,
-		.arena = arena,
 	};
 
 	while (lx.pos < lx.len) {

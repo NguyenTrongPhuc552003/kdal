@@ -1,0 +1,42 @@
+// init.kdc - driver implementation for init
+//
+// Compile with: kdality compile init.kdc -o output/
+
+use "init.kdh";
+
+driver init for init {
+
+    on probe {
+        reg_write(CTRL, 0x01);    // enable device
+        log("init driver probed");
+    }
+
+    on remove {
+        reg_write(CTRL, 0x00);    // disable device
+        log("init driver removed");
+    }
+
+    on read {
+        // Wait for data ready
+        if (reg_read(STATUS) & 0x01) {
+            return reg_read(DATA);
+        }
+        return -1;
+    }
+
+    on write {
+        reg_write(DATA, input);
+    }
+
+    on signal irq {
+        log("interrupt received");
+    }
+
+    on power off {
+        reg_write(CTRL, 0x00);
+    }
+
+    on power on {
+        reg_write(CTRL, 0x01);
+    }
+}

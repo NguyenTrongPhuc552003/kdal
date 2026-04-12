@@ -1,5 +1,5 @@
 /*
- * KDAL Standard Library — spi.kdh
+ * KDAL Standard Library - spi.kdh
  * SPI controller interface (ARM PrimeCell PL022 SSP compatible).
  *
  * Matches the ARM PL022 Synchronous Serial Port (SSP) which supports
@@ -37,7 +37,7 @@ device class SpiController {
             sod     : 3     = false; /* Slave output disable */
         };
 
-        /* Data register — 16-bit TX/RX FIFO access */
+        /* Data register - 16-bit TX/RX FIFO access */
         DR  : u16  @ 0x008  rw  = 0x0000;
 
         /* Status register (read-only) */

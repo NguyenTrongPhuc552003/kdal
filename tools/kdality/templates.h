@@ -1,5 +1,5 @@
 /*
- * templates.h — embedded file templates for kdality init.
+ * templates.h - embedded file templates for kdality init.
  *
  * Each template is a static const char[] that gets written to disk
  * by the init subcommand, with placeholder substitution.
@@ -11,7 +11,7 @@
 /* ── .kdh device header template ─────────────────────────────────── */
 
 static const char tmpl_kdh[] =
-	"// %s.kdh — device header for %s\n"
+	"// %s.kdh - device header for %s\n"
 	"//\n"
 	"// This file describes the hardware registers, signals,\n"
 	"// and capabilities of the %s device.\n"
@@ -44,7 +44,7 @@ static const char tmpl_kdh[] =
 /* ── .kdc driver code template ───────────────────────────────────── */
 
 static const char tmpl_kdc[] =
-	"// %s_driver.kdc — driver implementation for %s\n"
+	"// %s_driver.kdc - driver implementation for %s\n"
 	"//\n"
 	"// Compile with: kdality compile %s_driver.kdc -o output/\n"
 	"\n"
@@ -93,9 +93,9 @@ static const char tmpl_makefile[] =
 	"# Makefile for %s KDAL project\n"
 	"#\n"
 	"# Usage:\n"
-	"#   make compile   — compile .kdc to C + Kbuild Makefile\n"
-	"#   make module    — build the kernel module (requires KDIR)\n"
-	"#   make clean     — remove build artifacts\n"
+	"#   make compile   - compile .kdc to C + Kbuild Makefile\n"
+	"#   make module    - build the kernel module (requires KDIR)\n"
+	"#   make clean     - remove build artifacts\n"
 	"\n"
 	"KDALITY ?= kdality\n"
 	"KDIR   ?= /lib/modules/$$(shell uname -r)/build\n"
@@ -117,7 +117,7 @@ static const char tmpl_makefile[] =
 /* ── README template ─────────────────────────────────────────────── */
 
 static const char tmpl_readme[] =
-	"# %s — KDAL Driver Project\n"
+	"# %s - KDAL Driver Project\n"
 	"\n"
 	"A kernel driver for the **%s** device, written in KDAL DSL.\n"
 	"\n"

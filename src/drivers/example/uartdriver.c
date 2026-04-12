@@ -1,5 +1,5 @@
 /*
- * UART example driver — the first end-to-end proof for KDAL.
+ * UART example driver - the first end-to-end proof for KDAL.
  *
  * This driver registers a "uart0" device backed by the QEMU virt
  * backend.  Data written by userspace goes into the QEMU emulation
@@ -26,14 +26,14 @@ void kdal_qemu_free_ring(struct kdal_device *device);
 
 /* ── UART-specific configuration (stored in driver priv) ──────── */
 
-#define UART_DEFAULT_BAUD	115200
-#define UART_KBUF_SIZE		4096
+#define UART_DEFAULT_BAUD 115200
+#define UART_KBUF_SIZE 4096
 
 struct uart_config {
 	u32 baud_rate;
-	u32 data_bits;	/* 5–8 */
-	u32 stop_bits;	/* 1–2 */
-	u32 parity;	/* 0=none, 1=odd, 2=even */
+	u32 data_bits; /* 5–8 */
+	u32 stop_bits; /* 1–2 */
+	u32 parity; /* 0=none, 1=odd, 2=even */
 	u64 tx_bytes;
 	u64 rx_bytes;
 };
@@ -126,7 +126,6 @@ static ssize_t uart_read(struct kdal_device *device, char __user *buf,
 static ssize_t uart_write(struct kdal_device *device, const char __user *buf,
 			  size_t count, loff_t *ppos)
 {
-	struct uart_config *cfg;
 	char *kbuf;
 	ssize_t written;
 
@@ -152,6 +151,8 @@ static ssize_t uart_write(struct kdal_device *device, const char __user *buf,
 	written = device->backend->ops->write(device, kbuf, count);
 
 	if (written > 0) {
+		struct uart_config *cfg;
+
 		cfg = device->driver->priv;
 		if (cfg)
 			cfg->tx_bytes += written;

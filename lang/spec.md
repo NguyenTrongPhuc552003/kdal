@@ -12,8 +12,8 @@ KDAL (Kernel Device Abstraction Layer) defines two file formats that together de
 
 | Extension | Role                                                       | Analogous to                        |
 | --------- | ---------------------------------------------------------- | ----------------------------------- |
-| `.kdh`    | Device header — register map, signals, capabilities        | C `.h` header + device tree binding |
-| `.kdc`    | Driver implementation — event handlers compiled to a `.ko` | C `.c` source + Kbuild Makefile     |
+| `.kdh`    | Device header - register map, signals, capabilities        | C `.h` header + device tree binding |
+| `.kdc`    | Driver implementation - event handlers compiled to a `.ko` | C `.c` source + Kbuild Makefile     |
 
 The KDAL compiler (`kdalc`, also invoked via `kdality compile`) translates a `.kdc` file (and its imported `.kdh` files) into:
 - a C translation unit (`.c`) containing a `kdal_driver_ops` struct and all handler functions
@@ -23,11 +23,11 @@ The KDAL compiler (`kdalc`, also invoked via `kdality compile`) translates a `.k
 
 ## 2. Design Goals
 
-1. **Auditable surface** — the language is intentionally not Turing-complete. No recursion, no heap, no pointers, no inline assembly. Every program terminates.
-2. **Kernel-space first** — all output targets the Linux kernel ABI. No libc, no syscalls in generated code.
-3. **Type safety at register level** — register accesses are always typed (u8/u16/u32/u64), access direction is verified at compile time (ro/wo/rw/rc).
-4. **Backend agnostic** — the same `.kdc` driver can target MMIO, platform_device, devicetree, virtio, or QEMU register stubs by changing the `backend` annotation.
-5. **Self-describing** — a `.kdh` file and a `.kdc` file together fully describe the device and driver; no out-of-band documentation is required.
+1. **Auditable surface** - the language is intentionally not Turing-complete. No recursion, no heap, no pointers, no inline assembly. Every program terminates.
+2. **Kernel-space first** - all output targets the Linux kernel ABI. No libc, no syscalls in generated code.
+3. **Type safety at register level** - register accesses are always typed (u8/u16/u32/u64), access direction is verified at compile time (ro/wo/rw/rc).
+4. **Backend agnostic** - the same `.kdc` driver can target MMIO, platform_device, devicetree, virtio, or QEMU register stubs by changing the `backend` annotation.
+5. **Self-describing** - a `.kdh` file and a `.kdc` file together fully describe the device and driver; no out-of-band documentation is required.
 
 ---
 
@@ -66,10 +66,10 @@ default  on  off  suspend
 | `i16`     | 16-bit                    | yes    |
 | `i32`     | 32-bit                    | yes    |
 | `i64`     | 64-bit                    | yes    |
-| `bool`    | 1-bit                     | —      |
-| `str`     | NUL-terminated, read-only | —      |
-| `timeout` | opaque timer handle       | —      |
-| `buf[T]`  | contiguous array of `T`   | —      |
+| `bool`    | 1-bit                     | -      |
+| `str`     | NUL-terminated, read-only | -      |
+| `timeout` | opaque timer handle       | -      |
+| `buf[T]`  | contiguous array of `T`   | -      |
 
 ### 3.4 Integer literals
 
@@ -255,7 +255,7 @@ Only structured control flow is permitted:
 ```kdal
 if (condition) { … } elif (condition) { … } else { … }
 
-for i in 0..8 { … }   // bounded range — always terminates
+for i in 0..8 { … }   // bounded range - always terminates
 ```
 
 No `while`, no `goto`, no `break`, no `continue`.
@@ -265,8 +265,8 @@ No `while`, no `goto`, no `break`, no `continue`.
 ## 6. Scoping Rules
 
 - `.kdh` file defines a **namespace** equal to the import alias (or the device class name if no alias is given)
-- `ident.ident` — namespace member access (e.g., `UART.DATA`)
-- `ident.ident.ident` — bitfield within register (e.g., `UART.CONTROL.enable`)
+- `ident.ident` - namespace member access (e.g., `UART.DATA`)
+- `ident.ident.ident` - bitfield within register (e.g., `UART.CONTROL.enable`)
 - `let` bindings are local to the enclosing handler block
 - No global mutable variables (driver state lives in a C struct allocated by the probe handler in generated code)
 
@@ -287,8 +287,8 @@ No `while`, no `goto`, no `break`, no `continue`.
 Given `my_driver.kdc` importing `my_device.kdh`, the compiler emits:
 
 ```
-my_driver.c          — C translation unit
-Makefile.kbuild      — obj-m := my_driver.o
+my_driver.c          - C translation unit
+Makefile.kbuild      - obj-m := my_driver.o
 ```
 
 The generated C registers a `kdal_driver_ops` struct and delegate all symbol definitions to the KDAL runtime library (`libkdal.a`). The developer then runs:
@@ -306,7 +306,7 @@ add_kdc_driver(my_driver my_driver.kdc)   # CMake
 The compiler emits structured diagnostics:
 
 ```
-my_driver.kdc:12:5: error: register 'DATA' is declared 'ro' — cannot write
+my_driver.kdc:12:5: error: register 'DATA' is declared 'ro' - cannot write
 my_driver.kdc:18:3: warning: wait() inside on_write handler may block IRQ context
 my_device.kdh:7:1: note: DATA declared here
 ```

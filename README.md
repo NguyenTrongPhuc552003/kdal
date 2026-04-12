@@ -32,19 +32,19 @@ that lets developers write portable device drivers and accelerator backends
 
 ```sh
 # Install dependencies (macOS or Linux)
-./scripts/devsetup/install_deps.sh
+./scripts/env/dependencies.sh
 
 # Prepare QEMU workspace
-./scripts/setupqemu/prepare.sh
+./scripts/env/prepare.sh
 
 # Build kernel with KDAL support
-./scripts/setupqemu/buildkernel.sh
+./scripts/env/kernel.sh
 
-# Build the userspace tool + compiler
-make all
+# Build everything (compiler + CLI + website + VS Code extension)
+./scripts/dev/build.sh --variant release all
 
 # Launch QEMU guest
-./scripts/setupqemu/run.sh
+./scripts/env/run.sh
 
 # Inside guest: load module and test
 insmod /mnt/shared/kdal.ko
@@ -89,44 +89,97 @@ lang/stdlib/        Standard device headers (7 .kdh files)
 lang/               Language specification + design docs
 tools/kdality/      Unified CLI + compiler frontend (kdality)
 editor/vscode/      VS Code extension for .kdh/.kdc
+editor/vim/         Vim/Neovim plugin for .kdh/.kdc
 cmake/              8 CMake modules for build integration
 tests/kunit/        In-kernel tests (38 test cases)
 tests/userspace/    Userspace smoke test + benchmark
 tests/integration/  Multi-device integration suite
-scripts/            Build, QEMU, CI, and release scripts
+scripts/dev/        Development scripts (build, run, test)
+scripts/e2e/        End-to-end test suites
+scripts/ci/         CI/CD helper scripts
+scripts/installer/  SDK installer (kdalup)
 docs/               Architecture, API, language guide, porting, thesis
+website/            Documentation site (Astro Starlight)
 examples/           Driver examples (.kdc, plain C, accel demos)
+build/              Variant-specific build trees and generated outputs
 ```
 
 ## Building
 
+The project uses **CMake 3.20+** as its build system, wrapped by convenience
+scripts under `scripts/dev/`.
+
+### Development Scripts
+
+```sh
+./scripts/dev/build.sh --variant <name> <target>   # Build targets
+./scripts/dev/run.sh --variant <name> <target>     # Run targets (auto-builds if needed)
+./scripts/dev/test.sh --variant <name> <target>    # Test targets with PASS/FAIL reporting
+```
+
+### Build Variants
+
+- `release`: optimized local SDK build in `build/release/`; use for packaging, install checks, and normal local use.
+- `debug`: symbols + assertions in `build/debug/`; use for compiler or CLI debugging.
+- `asan`: AddressSanitizer-enabled build in `build/asan/`; use for memory-safety investigations.
+
+Use `--variant` for normal local development. Use `--preset` only for automation-oriented trees such as `ci-release`, `nightly`, and `release-matrix`.
+
+### Build Targets
+
+```sh
+./scripts/dev/build.sh --variant release kdalc   # Compiler (kdalc + libkdalc.a)
+./scripts/dev/build.sh --variant release kdality # CLI toolchain
+./scripts/dev/build.sh --variant release website # Documentation site → build/release/website/
+./scripts/dev/build.sh --variant release vscode  # VS Code extension → build/release/editor/vscode/
+./scripts/dev/build.sh --variant debug module    # Kernel module iteration build
+./scripts/dev/build.sh --variant release all     # Everything above
+./scripts/dev/build.sh --variant asan clean      # Remove the asan build tree
+./scripts/dev/build.sh --variant release install # Install to system (cmake --install)
+```
+
 ### Kernel Module (cross-compile for aarch64)
 
 ```sh
+export KDAL_KERNEL_DIR=/path/to/linux-6.6
 export CROSS_COMPILE=aarch64-linux-gnu-
 export ARCH=arm64
-make KDIR=/path/to/linux-6.6 modules
-```
-
-### Userspace Tool + Compiler
-
-```sh
-make all      # builds compiler + kdality + module
-make tool     # builds kdality only
-make compiler # builds kdalc + libkdalc.a only
+./scripts/dev/build.sh --variant debug module
 ```
 
 ### Tests
 
 ```sh
-# Run offline CI suite (builds + compiles + dry-run tests)
-./scripts/ci/test.sh
+# Run all tests (mirrors CI stages locally)
+./scripts/dev/test.sh --variant release all
 
-# Static analysis
-./scripts/ci/static_analysis.sh
+# Test specific targets
+./scripts/dev/test.sh --variant release kdalc       # Compiler binary + sample compilation
+./scripts/dev/test.sh --variant release kdality     # CLI subcommands
+./scripts/dev/test.sh --variant release website     # Documentation site build
+./scripts/dev/test.sh --variant release vscode      # VS Code extension packaging
+./scripts/dev/test.sh --variant release cppcheck    # C static analysis (mirrors CI)
+./scripts/dev/test.sh --variant release shellcheck  # Shell script linting (mirrors CI)
+./scripts/dev/test.sh --variant release structure   # Project structure validation
+./scripts/dev/test.sh --variant release e2e         # End-to-end test suites
+./scripts/dev/test.sh help        # List all testable targets
+```
 
-# Style check
-./scripts/ci/checkpatch.sh
+Test reports are saved under the selected variant tree, for example `build/debug/test/<target>_<date>.log`.
+
+### Build Output Layout
+
+```
+build/
+├── release/           Optimized local build and install validation
+│   ├── compiler/      kdalc, libkdalc.a
+│   ├── website/       Documentation site dist
+│   ├── editor/vscode/ .vsix package
+│   └── test/          Test reports
+├── debug/             Debuggable local build with symbols
+├── asan/              AddressSanitizer build
+├── ci/release/        CI-only verification build
+└── nightly/<os-arch>/ Nightly matrix builds per target host/arch
 ```
 
 ## Documentation
@@ -152,9 +205,33 @@ make compiler # builds kdalc + libkdalc.a only
 | QEMU aarch64 `virt` | **Implemented** | `qemu` (ring buffer)  |
 | Radxa Orion O6      | Planned         | `generic` (MMIO + DT) |
 
+## Testing Without Hardware
+
+KDAL v0.1.0 is **QEMU-validated only** - no real hardware is required.
+
+### QEMU workflow
+
+```sh
+./scripts/env/dependencies.sh   # Install host tools
+./scripts/env/prepare.sh        # Download Ubuntu cloud image + create QEMU workspace
+./scripts/env/kernel.sh         # Cross-compile Linux 6.6 with KUnit + virtio
+./scripts/env/run.sh            # Boot QEMU aarch64 virt machine
+# Inside guest: insmod /mnt/shared/kdal.ko
+```
+
+### Docker (zero-setup)
+
+```sh
+docker build -t kdal-dev -f Dockerfile.dev .
+docker run -it -v $(pwd):/workspace kdal-dev
+# Inside container: cmake --preset ci-release && cmake --build --preset ci-release
+```
+
+The container includes cmake, gcc, aarch64 cross-compiler, QEMU, cppcheck, shellcheck, and Node.js.
+
 ## License
 
-GPLv3 — see [LICENSE](LICENSE).
+GPLv3 - see [LICENSE](LICENSE).
 
 ## Contributing
 

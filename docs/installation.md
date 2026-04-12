@@ -1,37 +1,80 @@
 # Installation
 
-## Prerequisites
+## Quick Install (Recommended)
+
+Install the KDAL SDK with one command:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
+```
+
+This downloads and runs `kdalup`, the KDAL version manager. It installs:
+
+| Component          | Path                         |
+| ------------------ | ---------------------------- |
+| `kdalc` compiler   | `~/.kdal/bin/kdalc`          |
+| `kdality` CLI tool | `~/.kdal/bin/kdality`        |
+| `kdalup` manager   | `~/.kdal/bin/kdalup`         |
+| Kernel headers     | `~/.kdal/include/kdal/`      |
+| Compiler headers   | `~/.kdal/include/kdalc/`     |
+| `libkdalc.a`       | `~/.kdal/lib/libkdalc.a`     |
+| Standard library   | `~/.kdal/share/kdal/stdlib/` |
+| CMake package      | `~/.kdal/lib/cmake/KDAL/`    |
+
+After install, restart your shell or run:
+
+```sh
+export PATH="$HOME/.kdal/bin:$PATH"
+```
+
+### Managing the SDK
+
+```sh
+kdalup version                       # Show installed version
+kdalup list                          # List all components
+kdalup update                        # Update to latest release
+kdalup self-update                   # Update kdalup itself
+kdalup install v0.2.0                # Install a specific version
+kdalup install --profile full        # Install everything (headers, cmake, vim)
+kdalup install --profile minimal     # Install just compiler + CLI + stdlib
+kdalup doctor                        # Verify installation health
+kdalup uninstall                     # Remove everything
+```
+
+### Custom install location
+
+```sh
+KDAL_HOME=/opt/kdal curl -fsSL .../install.sh | sh
+```
+
+## Prerequisites (Development from Source)
 
 - **macOS** (M1/M2/M3/M4) or **Linux** (x86_64 or aarch64)
 - QEMU with aarch64 system emulation
 - Cross-compiler for aarch64 (if host is not aarch64)
 - Linux 6.6 LTS kernel source (for module build)
 
-## Quick Start
+## Build from Source
 
 ```sh
 # 1. Install host dependencies
-./scripts/devsetup/install_deps.sh
+./scripts/env/dependencies.sh
 
 # 2. Prepare QEMU environment
-./scripts/setupqemu/prepare.sh
+./scripts/env/prepare.sh
 
 # 3. Build guest kernel with KUnit and module support
-./scripts/setupqemu/buildkernel.sh
+./scripts/env/kernel.sh
 
-# 4. Build KDAL module
-make KDIR=$HOME/kdal-qemu/kernel/linux-6.6.80 \
-     ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- module
+# 4. Build everything (compiler + CLI + website + VS Code extension)
+./scripts/dev/build.sh --variant release all
 
-# 5. Build userspace tool
-make tool
+# 5. Run tests
+./scripts/dev/test.sh --variant release all
 
-# 6. Run smoke tests
-make test
-
-# 7. Launch QEMU and load module
+# 6. Launch QEMU and load module
 cp kdal.ko $HOME/kdal-qemu/shared/modules/
-./scripts/setupqemu/run.sh
+./scripts/env/run.sh
 
 # Inside QEMU guest:
 mount -t 9p -o trans=virtio kdal-share /mnt
@@ -58,16 +101,31 @@ sudo apt install build-essential bc flex bison libelf-dev libssl-dev \
 
 ## Build System
 
-| Command         | Description                             |
-| --------------- | --------------------------------------- |
-| `make all`      | Build compiler + CLI tool               |
-| `make module`   | Build kernel module (requires `KDIR`)   |
-| `make compiler` | Build `kdalc` compiler and `libkdalc.a` |
-| `make tool`     | Build `kdality` CLI (links compiler)    |
-| `make test`     | Run smoke tests                         |
-| `make lint`     | Run style and static analysis           |
-| `make clean`    | Remove all build artifacts              |
-| `make docs`     | Show documentation location             |
+The project uses **CMake 3.20+**, wrapped by convenience scripts:
+
+| Command                                            | Description                                          |
+| -------------------------------------------------- | ---------------------------------------------------- |
+| `./scripts/dev/build.sh --variant release all`     | Build compiler + CLI + website + vscode              |
+| `./scripts/dev/build.sh --variant debug kdalc`     | Build `kdalc` compiler and `libkdalc.a` with symbols |
+| `./scripts/dev/build.sh --variant release kdality` | Build `kdality` CLI (links compiler)                 |
+| `./scripts/dev/build.sh --variant release website` | Build documentation site                             |
+| `./scripts/dev/build.sh --variant release vscode`  | Build VS Code extension (.vsix)                      |
+| `./scripts/dev/build.sh --variant debug module`    | Build kernel module (requires `KDAL_KERNEL_DIR`)     |
+| `./scripts/dev/build.sh --variant asan clean`      | Remove AddressSanitizer build artifacts              |
+| `./scripts/dev/build.sh --variant release install` | Install to system (cmake --install)                  |
+| `./scripts/dev/test.sh --variant release all`      | Run full test suite with reports                     |
+| `./scripts/dev/test.sh help`                       | List all testable targets                            |
+
+Build outputs are collected under variant-specific subtrees in `build/`:
+
+```
+build/
+├── release/           Optimized local build
+├── debug/             Symbols + assertions for debugging
+├── asan/              AddressSanitizer build
+├── ci/release/        CI-only verification tree
+└── nightly/<os-arch>/ Nightly matrix tree
+```
 
 ## Compiling `.kdc` Files
 
@@ -76,10 +134,10 @@ kernel module:
 
 ```sh
 # Compile a .kdc file into C + Makefile.kbuild
-./kdality compile examples/kdc_hello/uart_hello.kdc -o output/
+./build/release/kdality compile examples/kdc_hello/uart_hello.kdc -o output/
 
 # Or use the standalone compiler directly
-./kdalc examples/kdc_hello/uart_hello.kdc -o output/
+./build/release/compiler/kdalc examples/kdc_hello/uart_hello.kdc -o output/
 
 # Then build the generated kernel module
 make -C /path/to/kernel M=$(pwd)/output modules
@@ -105,14 +163,14 @@ cat /sys/kernel/debug/kdal/devices
 cat /sys/kernel/debug/kdal/snapshot
 
 # Use kdality runtime
-./kdality version
-./kdality list
-./kdality info uart0
-./kdality write uart0 "hello from KDAL"
-./kdality read uart0 16
+./build/release/kdality version
+./build/release/kdality list
+./build/release/kdality info uart0
+./build/release/kdality write uart0 "hello from KDAL"
+./build/release/kdality read uart0 16
 
 # Use kdality compiler
-./kdality compile examples/kdc_hello/uart_hello.kdc -o output/
+./build/release/kdality compile examples/kdc_hello/uart_hello.kdc -o output/
 ```
 
 ## Troubleshooting

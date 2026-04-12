@@ -6,10 +6,10 @@
 # in-source (non-installed) usage via add_subdirectory().
 #
 # Targets defined:
-#   KDAL::libkdal   — KDAL kernel-space runtime library (static)
-#   KDAL::libkdalc  — KDAL compiler library (static)
-#   KDAL::kdality   — unified toolchain binary (imported executable)
-#   KDAL::kdalc     — standalone compiler binary (imported executable)
+#   KDAL::libkdal   - KDAL kernel-space runtime library (static)
+#   KDAL::libkdalc  - KDAL compiler library (static)
+#   KDAL::kdality   - unified toolchain binary (imported executable)
+#   KDAL::kdalc     - standalone compiler binary (imported executable)
 
 cmake_minimum_required(VERSION 3.16)
 
@@ -35,7 +35,7 @@ set_target_properties(KDAL::libkdal PROPERTIES
         "RELEASE;DEBUG"
 )
 
-# Debug variant (optional — falls back to release if not present)
+# Debug variant (optional - falls back to release if not present)
 set_property(TARGET KDAL::libkdal APPEND PROPERTY
     IMPORTED_CONFIGURATIONS DEBUG)
 set_target_properties(KDAL::libkdal PROPERTIES

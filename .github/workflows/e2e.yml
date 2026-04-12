@@ -1,0 +1,138 @@
+name: e2e
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      suites:
+        description: "Space-separated list of suites (or 'all')"
+        default: "all"
+        required: false
+        type: string
+      quick:
+        description: "Quick mode (skip website build)"
+        default: false
+        type: boolean
+
+jobs:
+  # ── Fast suites (no npm / no network) ────────────────────────────
+  e2e-core:
+    name: "E2E: developer + compiler + packaging"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/
+
+      - name: Configure CMake build
+        run: cmake --preset release
+
+      - name: Run developer-journey suite
+        run: sh scripts/e2e/test_developer_journey.sh
+
+      - name: Run compiler suite
+        run: sh scripts/e2e/test_compiler.sh
+
+      - name: Run packaging suite
+        run: sh scripts/e2e/test_packaging.sh
+
+  # ── Editor support (may need npm for TS check) ──────────────────
+  e2e-editors:
+    name: "E2E: editor support"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/
+
+      - name: Run editor-support suite
+        run: sh scripts/e2e/test_editor_support.sh
+
+  # ── User journey (builds compiler + SDK install) ────────────────
+  e2e-user-journey:
+    name: "E2E: user journey"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/
+
+      - name: Configure CMake build
+        run: cmake --preset release
+
+      - name: Run user-journey suite
+        run: sh scripts/e2e/test_user_journey.sh
+
+  # ── Release pipeline validation ─────────────────────────────────
+  e2e-release:
+    name: "E2E: release pipeline"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PyYAML for YAML validation
+        run: pip3 install pyyaml
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/
+
+      - name: Build binaries (needed for tarball test)
+        run: |
+          cmake --preset release
+          cmake --build --preset release
+
+      - name: Run release suite
+        run: sh scripts/e2e/test_release.sh
+
+  # ── Website (slow - npm install + build) ────────────────────────
+  e2e-website:
+    name: "E2E: website build"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Make scripts executable
+        run: chmod -R +x scripts/
+
+      - name: Run website suite
+        run: sh scripts/e2e/test_website.sh
+
+  # ── Gate: all E2E suites must pass ──────────────────────────────
+  e2e-gate:
+    name: "E2E: all suites passed"
+    needs: [e2e-core, e2e-editors, e2e-user-journey, e2e-release, e2e-website]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Check suite results
+        run: |
+          if [ "${{ needs.e2e-core.result }}" != "success" ] || \
+             [ "${{ needs.e2e-editors.result }}" != "success" ] || \
+             [ "${{ needs.e2e-user-journey.result }}" != "success" ] || \
+             [ "${{ needs.e2e-release.result }}" != "success" ] || \
+             [ "${{ needs.e2e-website.result }}" != "success" ]; then
+            echo "One or more E2E suites failed."
+            echo "  e2e-core:         ${{ needs.e2e-core.result }}"
+            echo "  e2e-editors:      ${{ needs.e2e-editors.result }}"
+            echo "  e2e-user-journey: ${{ needs.e2e-user-journey.result }}"
+            echo "  e2e-release:      ${{ needs.e2e-release.result }}"
+            echo "  e2e-website:      ${{ needs.e2e-website.result }}"
+            exit 1
+          fi
+          echo "All E2E suites passed!"

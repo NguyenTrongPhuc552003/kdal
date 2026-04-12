@@ -49,16 +49,16 @@ struct kdal_ioctl_devname {
 
 #define KDAL_IOCTL_MAGIC 'K'
 
-#define KDAL_IOCTL_GET_VERSION                                                 \
+#define KDAL_IOCTL_GET_VERSION \
 	_IOR(KDAL_IOCTL_MAGIC, 0x00, struct kdal_ioctl_version)
-#define KDAL_IOCTL_GET_INFO                                                    \
+#define KDAL_IOCTL_GET_INFO \
 	_IOWR(KDAL_IOCTL_MAGIC, 0x01, struct kdal_ioctl_info)
 #define KDAL_IOCTL_SET_POWER _IOW(KDAL_IOCTL_MAGIC, 0x02, __u32)
-#define KDAL_IOCTL_LIST_DEVICES                                                \
+#define KDAL_IOCTL_LIST_DEVICES \
 	_IOR(KDAL_IOCTL_MAGIC, 0x03, struct kdal_ioctl_list)
-#define KDAL_IOCTL_POLL_EVENT                                                  \
+#define KDAL_IOCTL_POLL_EVENT \
 	_IOR(KDAL_IOCTL_MAGIC, 0x04, struct kdal_ioctl_event)
-#define KDAL_IOCTL_SELECT_DEV                                                  \
+#define KDAL_IOCTL_SELECT_DEV \
 	_IOW(KDAL_IOCTL_MAGIC, 0x05, struct kdal_ioctl_devname)
 
 #endif /* KDAL_IOCTL_H */

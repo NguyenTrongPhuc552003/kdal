@@ -1,17 +1,17 @@
 /*
- * kdality — KDAL utility: runtime control CLI + language toolchain.
+ * kdality - KDAL utility: runtime control CLI + language toolchain.
  */
 
 #include <stdio.h>
 #include <string.h>
 
 int kdalctl_run(int argc, char **argv);
-int kdality_compile(int argc, char **argv);
-int kdality_init(int argc, char **argv);
-int kdality_dtgen(int argc, char **argv);
-int kdality_simulate(int argc, char **argv);
-int kdality_testgen(int argc, char **argv);
-int kdality_lint(int argc, char **argv);
+int kdality_compile(int argc, char *const *argv);
+int kdality_init(int argc, char *const *argv);
+int kdality_dtgen(int argc, char *const *argv);
+int kdality_simulate(int argc, char *const *argv);
+int kdality_testgen(int argc, char *const *argv);
+int kdality_lint(int argc, char *const *argv);
 
 int main(int argc, char **argv)
 {

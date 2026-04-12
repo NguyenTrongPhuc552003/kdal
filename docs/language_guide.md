@@ -20,7 +20,7 @@ kernel module in C, ready to build with `make modules`.
 A `.kdh` file describes a hardware device declaratively:
 
 ```kdal
-// led.kdh — a simple GPIO-controlled LED
+// led.kdh - a simple GPIO-controlled LED
 
 device led {
     class gpio;
@@ -47,20 +47,20 @@ device led {
 ```
 
 Key elements:
-- **`device`** — names the device (used in `.kdc` and generated code)
-- **`class`** — maps to `enum kdal_device_class` (uart, i2c, spi, gpio, gpu, npu)
-- **`compatible`** — Device Tree compatible string for OF matching
-- **`register_map`** — named registers with offset and access mode (`ro`, `wo`, `rw`)
-- **`signals`** — software events the driver can react to
-- **`capabilities`** — key-value pairs describing hardware features
-- **`power_states`** — supported power states for power management
+- **`device`** - names the device (used in `.kdc` and generated code)
+- **`class`** - maps to `enum kdal_device_class` (uart, i2c, spi, gpio, gpu, npu)
+- **`compatible`** - Device Tree compatible string for OF matching
+- **`register_map`** - named registers with offset and access mode (`ro`, `wo`, `rw`)
+- **`signals`** - software events the driver can react to
+- **`capabilities`** - key-value pairs describing hardware features
+- **`power_states`** - supported power states for power management
 
 ## Your First Driver (`.kdc`)
 
 A `.kdc` file implements driver behavior using event handlers:
 
 ```kdal
-// uart_hello.kdc — simple UART driver for PL011
+// uart_hello.kdc - simple UART driver for PL011
 
 use "uart.kdh";
 
@@ -100,15 +100,15 @@ driver uart_hello for uart {
 ```
 
 Key constructs:
-- **`use`** — imports a `.kdh` device header
-- **`driver ... for ...`** — names the driver and binds it to a device
-- **`on probe`** — runs when the kernel attaches the driver to hardware
-- **`on remove`** — runs when the driver is unloaded
-- **`on read` / `on write`** — handle userspace `read()` / `write()` calls
-- **`on signal <name>`** — handle named software signals
-- **`on power <state>`** — handle power transitions
-- **`reg_read(NAME)`** / **`reg_write(NAME, val)`** — typed register access
-- **`log(msg)`** — emits `pr_info()` in the generated C
+- **`use`** - imports a `.kdh` device header
+- **`driver ... for ...`** - names the driver and binds it to a device
+- **`on probe`** - runs when the kernel attaches the driver to hardware
+- **`on remove`** - runs when the driver is unloaded
+- **`on read` / `on write`** - handle userspace `read()` / `write()` calls
+- **`on signal <name>`** - handle named software signals
+- **`on power <state>`** - handle power transitions
+- **`reg_read(NAME)`** / **`reg_write(NAME, val)`** - typed register access
+- **`log(msg)`** - emits `pr_info()` in the generated C
 
 ## Compiling
 
@@ -121,8 +121,8 @@ Key constructs:
 ```
 
 This produces:
-- `output/uart_hello.c` — complete kernel module source
-- `output/Makefile.kbuild` — Kbuild Makefile for `make modules`
+- `output/uart_hello.c` - complete kernel module source
+- `output/Makefile.kbuild` - Kbuild Makefile for `make modules`
 
 Then build the kernel module:
 
@@ -216,7 +216,7 @@ KDAL ships with pre-built `.kdh` files for common device classes:
 | `gpu.kdh`  | GPU accelerator | CMD, STATUS, CTRL, FENCE   |
 | `npu.kdh`  | NPU accelerator | CMD, STATUS, CTRL, RESULT  |
 
-Use them directly: `use "uart.kdh";` — the compiler searches `lang/stdlib/`
+Use them directly: `use "uart.kdh";` - the compiler searches `lang/stdlib/`
 automatically.
 
 ## Common Patterns

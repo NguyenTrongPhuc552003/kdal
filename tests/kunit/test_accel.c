@@ -77,20 +77,16 @@ static void test_submit_null(struct kunit *test)
 {
 	struct kdal_accel_queue queue = { 0 };
 
-	KUNIT_EXPECT_EQ(test,
-			kdal_gpu_accel_ops->submit(NULL, &queue, "x", 1),
+	KUNIT_EXPECT_EQ(test, kdal_gpu_accel_ops->submit(NULL, &queue, "x", 1),
 			-EINVAL);
 }
 
 /* ── suite ──────────────────────────────────────────────────────── */
 
 static struct kunit_case kdal_accel_cases[] = {
-	KUNIT_CASE(test_queue_create),
-	KUNIT_CASE(test_queue_null_params),
-	KUNIT_CASE(test_buffer_map_unmap),
-	KUNIT_CASE(test_submit),
-	KUNIT_CASE(test_submit_null),
-	{}
+	KUNIT_CASE(test_queue_create),	   KUNIT_CASE(test_queue_null_params),
+	KUNIT_CASE(test_buffer_map_unmap), KUNIT_CASE(test_submit),
+	KUNIT_CASE(test_submit_null),	   {}
 };
 
 static struct kunit_suite kdal_accel_suite = {

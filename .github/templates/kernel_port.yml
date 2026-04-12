@@ -1,0 +1,50 @@
+name: Kernel Port Proposal
+description: Propose porting KDAL to a new hardware platform.
+title: "[Port]: "
+labels: ["kernel-port"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the target platform for the KDAL port.
+
+  - type: textarea
+    id: platform
+    attributes:
+      label: Target Platform
+      description: Board name, SoC, architecture.
+    validations:
+      required: true
+
+  - type: dropdown
+    id: transport
+    attributes:
+      label: Transport Model
+      options:
+        - MMIO (memory-mapped I/O)
+        - Virtio
+        - Platform device
+        - PCI/PCIe
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: discovery
+    attributes:
+      label: Device Discovery
+      description: How are devices discovered? (Device Tree, ACPI, probing, etc.)
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-constraints
+    attributes:
+      label: Public API Constraints
+      description: Any limitations or extensions needed for the KDAL API?
+
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation Plan
+      description: How will you test the port? (QEMU, real hardware, etc.)
