@@ -17,16 +17,16 @@
 
 typedef enum {
 	/* Literals */
-	TOK_IDENT = 0, /* identifier or keyword */
-	TOK_INT = 1, /* decimal integer literal */
-	TOK_HEX = 2, /* 0x… hex literal */
-	TOK_BINLIT = 3, /* 0b… binary literal */
-	TOK_STRING = 4, /* "…" string literal */
-	TOK_BOOL_TRUE = 5, /* true */
-	TOK_BOOL_FALSE = 6, /* false */
+	TOK_IDENT, /* identifier or keyword */
+	TOK_INT, /* decimal integer literal */
+	TOK_HEX, /* hexadecimal integer literal */
+	TOK_BINLIT, /* binary integer literal */
+	TOK_STRING, /* string literal */
+	TOK_BOOL_TRUE, /* boolean true literal */
+	TOK_BOOL_FALSE, /* boolean false literal */
 
 	/* Keywords (.kdh and .kdc shared) */
-	TOK_KW_KDAL_VERSION = 100,
+	TOK_KW_KDAL_VERSION,
 	TOK_KW_IMPORT,
 	TOK_KW_AS,
 	TOK_KW_DEVICE,
@@ -92,44 +92,44 @@ typedef enum {
 	TOK_KW_BUF,
 
 	/* Punctuation and operators */
-	TOK_LBRACE = 200, /* { */
-	TOK_RBRACE, /* } */
-	TOK_LPAREN, /* ( */
-	TOK_RPAREN, /* ) */
-	TOK_LBRACKET, /* [ */
-	TOK_RBRACKET, /* ] */
-	TOK_SEMICOLON, /* ; */
-	TOK_COLON, /* : */
-	TOK_COMMA, /* , */
-	TOK_DOT, /* . */
-	TOK_AT, /* @ */
-	TOK_EQ, /* = */
-	TOK_EQEQ, /* == */
-	TOK_NEQ, /* != */
-	TOK_LT, /* < */
-	TOK_LE, /* <= */
-	TOK_GT, /* > */
-	TOK_GE, /* >= */
-	TOK_PLUS, /* + */
-	TOK_MINUS, /* - */
-	TOK_STAR, /* * */
-	TOK_SLASH, /* / */
-	TOK_PERCENT, /* % */
-	TOK_AMP, /* & */
-	TOK_PIPE, /* | */
-	TOK_CARET, /* ^ */
-	TOK_TILDE, /* ~ */
-	TOK_BANG, /* ! */
-	TOK_AMPAMP, /* && */
-	TOK_PIPEPIPE, /* || */
-	TOK_SHL, /* << */
-	TOK_SHR, /* >> */
-	TOK_DOTDOT, /* .. */
-	TOK_ARROW, /* -> */
+	TOK_LBRACE, /* left brace */
+	TOK_RBRACE, /* right brace */
+	TOK_LPAREN, /* left parenthesis */
+	TOK_RPAREN, /* right parenthesis */
+	TOK_LBRACKET, /* left bracket */
+	TOK_RBRACKET, /* right bracket */
+	TOK_SEMICOLON, /* semicolon */
+	TOK_COLON, /* colon */
+	TOK_COMMA, /* comma */
+	TOK_DOT, /* dot */
+	TOK_AT, /* at sign */
+	TOK_EQ, /* assignment operator */
+	TOK_EQEQ, /* equality operator */
+	TOK_NEQ, /* inequality operator */
+	TOK_LT, /* less-than operator */
+	TOK_LE, /* less-than-or-equal operator */
+	TOK_GT, /* greater-than operator */
+	TOK_GE, /* greater-than-or-equal operator */
+	TOK_PLUS, /* addition operator */
+	TOK_MINUS, /* subtraction operator */
+	TOK_STAR, /* multiplication operator */
+	TOK_SLASH, /* division operator */
+	TOK_PERCENT, /* modulo operator */
+	TOK_AMP, /* bitwise and operator */
+	TOK_PIPE, /* bitwise or operator */
+	TOK_CARET, /* bitwise xor operator */
+	TOK_TILDE, /* bitwise not operator */
+	TOK_BANG, /* logical not operator */
+	TOK_AMPAMP, /* logical and operator */
+	TOK_PIPEPIPE, /* logical or operator */
+	TOK_SHL, /* left shift operator */
+	TOK_SHR, /* right shift operator */
+	TOK_DOTDOT, /* range operator */
+	TOK_ARROW, /* arrow operator */
 
 	/* Meta */
-	TOK_EOF = 300,
-	TOK_ERROR = 301,
+	TOK_EOF,
+	TOK_ERROR,
 } kdal_tok_t;
 
 /* ── Token structure ─────────────────────────────────────────────── */
