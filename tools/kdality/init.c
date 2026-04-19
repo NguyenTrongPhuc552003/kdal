@@ -12,10 +12,12 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "templates.h"
 
@@ -26,14 +28,24 @@ static int write_file(const char *dir, const char *filename,
 {
 	char path[512];
 	FILE *fp;
+	int fd;
 
 	snprintf(path, sizeof(path), "%s/%s", dir, filename);
-	fp = fopen(path, "w");
-	if (!fp) {
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd < 0) {
 		fprintf(stderr, "cannot create %s: %s\n", path,
 			strerror(errno));
 		return -1;
 	}
+
+	fp = fdopen(fd, "w");
+	if (!fp) {
+		fprintf(stderr, "cannot create %s: %s\n", path,
+			strerror(errno));
+		close(fd);
+		return -1;
+	}
+
 	fputs(content, fp);
 	fclose(fp);
 	return 0;
