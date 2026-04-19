@@ -13,6 +13,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 /* ── Simple .kdh scanner ─────────────────────────────────────────
  *
@@ -189,6 +192,7 @@ static int generate_dtso(const struct kdh_info *info, const char *outdir,
 {
 	char path[512];
 	FILE *fp;
+	int fd;
 	unsigned long reg_size;
 
 	/* Compute reg size from highest register offset + 4 */
@@ -206,10 +210,17 @@ static int generate_dtso(const struct kdh_info *info, const char *outdir,
 	}
 
 	snprintf(path, sizeof(path), "%s/%s.dtso", outdir, info->device_name);
-	fp = fopen(path, "w");
-	if (!fp) {
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd < 0) {
 		fprintf(stderr, "dt-gen: cannot create '%s': %s\n", path,
 			strerror(errno));
+		return -1;
+	}
+	fp = fdopen(fd, "w");
+	if (!fp) {
+		fprintf(stderr, "dt-gen: cannot open stream for '%s': %s\n", path,
+			strerror(errno));
+		close(fd);
 		return -1;
 	}
 
