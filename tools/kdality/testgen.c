@@ -48,7 +48,7 @@ static int is_safe_outdir(const char *s)
 
 	/* Validate each path segment. */
 	seg = s;
-	for (p = s; ; p++) {
+	for (p = s;; p++) {
 		if (*p == '/' || *p == '\0') {
 			size_t len = (size_t)(p - seg);
 
@@ -89,7 +89,7 @@ static int is_safe_input_path(const char *s)
 
 	/* Validate path segments and reject "." / ".." / empty segments. */
 	seg = s;
-	for (p = s; ; p++) {
+	for (p = s;; p++) {
 		if (*p == '/' || *p == '\0') {
 			size_t len = (size_t)(p - seg);
 
@@ -146,14 +146,14 @@ static int parse_kdc(const char *path, struct kdc_info *info)
 		if (*p == '\n' || *p == '\0' || *p == '/')
 			continue;
 
-		/* driver NAME for DEVICE */
+		/* Parse the driver declaration line. */
 		if (strncmp(p, "driver ", 7) == 0) {
 			sscanf(p, "driver %63s for %63[^ {]", info->driver_name,
 			       info->device_name);
 			continue;
 		}
 
-		/* on <event> [<extra>] { */
+		/* Parse an event handler declaration line. */
 		if (strncmp(p, "on ", 3) == 0 &&
 		    info->nhandlers < MAX_HANDLERS) {
 			char event[NAME_LEN] = "";
@@ -185,8 +185,7 @@ static int parse_kdc(const char *path, struct kdc_info *info)
 	}
 
 	if (!is_safe_filename_component(info->driver_name)) {
-		fprintf(stderr,
-			"test-gen: invalid driver name '%s' in '%s'\n",
+		fprintf(stderr, "test-gen: invalid driver name '%s' in '%s'\n",
 			info->driver_name, path);
 		return -1;
 	}
@@ -216,7 +215,8 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 	}
 
 	if (!realpath(outdir, base)) {
-		fprintf(stderr, "test-gen: cannot resolve output directory '%s': %s\n",
+		fprintf(stderr,
+			"test-gen: cannot resolve output directory '%s': %s\n",
 			outdir, strerror(errno));
 		return -1;
 	}
@@ -227,7 +227,8 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		return -1;
 	}
 
-	if (snprintf(path, sizeof(path), "%s/%s", base, filename) >= (int)sizeof(path)) {
+	if (snprintf(path, sizeof(path), "%s/%s", base, filename) >=
+	    (int)sizeof(path)) {
 		fprintf(stderr, "test-gen: output path too long\n");
 		return -1;
 	}
@@ -236,7 +237,8 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		int dirfd = open(base, O_RDONLY | O_DIRECTORY);
 		int fd;
 		if (dirfd < 0) {
-			fprintf(stderr, "test-gen: cannot open output directory '%s': %s\n",
+			fprintf(stderr,
+				"test-gen: cannot open output directory '%s': %s\n",
 				base, strerror(errno));
 			return -1;
 		}
@@ -244,8 +246,8 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
 			    S_IRUSR | S_IWUSR);
 		if (fd < 0) {
-			fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
-				strerror(errno));
+			fprintf(stderr, "test-gen: cannot create '%s': %s\n",
+				path, strerror(errno));
 			close(dirfd);
 			return -1;
 		}
@@ -253,7 +255,8 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 
 		fp = fdopen(fd, "w");
 		if (!fp) {
-			fprintf(stderr, "test-gen: cannot create stream for '%s': %s\n",
+			fprintf(stderr,
+				"test-gen: cannot create stream for '%s': %s\n",
 				path, strerror(errno));
 			close(fd);
 			return -1;
@@ -274,9 +277,9 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 	fprintf(fp, "#include <kunit/test.h>\n");
 	fprintf(fp, "#include <linux/module.h>\n\n");
 
-	/* Forward declarations (user fills in actual includes) */
-	fprintf(fp, "/* TODO: Include your generated driver header */\n");
-	fprintf(fp, "/* #include \"%s.h\" */\n\n", info->driver_name);
+	/* Placeholder for project-specific includes. */
+	fprintf(fp,
+		"/* Add the generated driver header here before using this stub. */\n\n");
 
 	/* Setup / teardown */
 	fprintf(fp, "struct %s_test_ctx {\n", info->driver_name);
@@ -356,16 +359,23 @@ int kdality_testgen(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	const char *outdir = ".";
+	int argi = 0;
 
-	for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-h") == 0 ||
-		    strcmp(argv[i], "--help") == 0) {
+	while (argi < argc) {
+		const char *arg = argv[argi++];
+
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			testgen_help();
 			return 0;
-		} else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-			outdir = argv[++i];
-		} else if (argv[i][0] != '-') {
-			input = argv[i];
+		} else if (strcmp(arg, "-o") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"test-gen: missing value for '-o'\n");
+				return 1;
+			}
+			outdir = argv[argi++];
+		} else if (arg[0] != '-') {
+			input = arg;
 		}
 	}
 
@@ -402,8 +412,11 @@ int kdality_testgen(int argc, char *const argv[])
 
 	cwd_len = strlen(resolved_cwd);
 	if (strncmp(resolved_input, resolved_cwd, cwd_len) != 0 ||
-	    (resolved_input[cwd_len] != '\0' && resolved_input[cwd_len] != '/')) {
-		fprintf(stderr, "test-gen: input path escapes working directory: '%s'\n", input);
+	    (resolved_input[cwd_len] != '\0' &&
+	     resolved_input[cwd_len] != '/')) {
+		fprintf(stderr,
+			"test-gen: input path escapes working directory: '%s'\n",
+			input);
 		return 1;
 	}
 
