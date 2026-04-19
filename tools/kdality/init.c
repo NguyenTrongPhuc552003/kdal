@@ -12,10 +12,13 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 #include "templates.h"
 
@@ -24,12 +27,43 @@
 static int write_file(const char *dir, const char *filename,
 		      const char *content)
 {
-	char path[512];
+	char path[PATH_MAX];
+	char resolved_dir[PATH_MAX];
+	int dirfd, fd;
 	FILE *fp;
 
-	snprintf(path, sizeof(path), "%s/%s", dir, filename);
-	fp = fopen(path, "w");
+	if (!realpath(dir, resolved_dir)) {
+		fprintf(stderr, "cannot resolve directory %s: %s\n", dir,
+			strerror(errno));
+		return -1;
+	}
+
+	if (snprintf(path, sizeof(path), "%s/%s", resolved_dir, filename) >=
+	    (int)sizeof(path)) {
+		fprintf(stderr, "cannot create %s/%s: path too long\n",
+			resolved_dir, filename);
+		return -1;
+	}
+
+	dirfd = open(resolved_dir, O_RDONLY | O_DIRECTORY);
+	if (dirfd < 0) {
+		fprintf(stderr, "cannot open %s: %s\n", resolved_dir,
+			strerror(errno));
+		return -1;
+	}
+
+	fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
+		    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	close(dirfd);
+	if (fd < 0) {
+		fprintf(stderr, "cannot create %s: %s\n", path,
+			strerror(errno));
+		return -1;
+	}
+
+	fp = fdopen(fd, "w");
 	if (!fp) {
+		close(fd);
 		fprintf(stderr, "cannot create %s: %s\n", path,
 			strerror(errno));
 		return -1;
@@ -99,19 +133,31 @@ int kdality_init(int argc, char *const argv[])
 	const char *vendor = "example";
 	char buf[4096];
 	char filename[256];
+	int argi = 0;
 
 	/* Parse args */
-	for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-h") == 0 ||
-		    strcmp(argv[i], "--help") == 0) {
+	while (argi < argc) {
+		const char *arg = argv[argi++];
+
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			init_help();
 			return 0;
-		} else if (strcmp(argv[i], "--class") == 0 && i + 1 < argc) {
-			class = argv[++i];
-		} else if (strcmp(argv[i], "--vendor") == 0 && i + 1 < argc) {
-			vendor = argv[++i];
-		} else if (argv[i][0] != '-') {
-			name = argv[i];
+		} else if (strcmp(arg, "--class") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"kdality init: missing value for '--class'\n");
+				return 1;
+			}
+			class = argv[argi++];
+		} else if (strcmp(arg, "--vendor") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"kdality init: missing value for '--vendor'\n");
+				return 1;
+			}
+			vendor = argv[argi++];
+		} else if (arg[0] != '-') {
+			name = arg;
 		}
 	}
 
