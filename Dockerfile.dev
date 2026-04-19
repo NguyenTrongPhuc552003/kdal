@@ -1,10 +1,10 @@
-# KDAL development environment — zero-setup container.
+# KDAL development environment - zero-setup container.
 #
 # Build:  docker build -t kdal-dev -f Dockerfile.dev .
 # Run:    docker run -it -v $(pwd):/workspace kdal-dev
 #
 # Provides: cmake, gcc, aarch64 cross-compiler, QEMU, cppcheck,
-#           shellcheck, Node.js 20 — everything needed to build and test KDAL.
+#           shellcheck, Node.js 20 - everything needed to build and test KDAL.
 
 FROM ubuntu:22.04
 

@@ -1,6 +1,6 @@
 #!/bin/sh
 # scripts/ci/test_packaging.sh
-# Local packaging smoke test — mirrors CI build-deb and build-rpm jobs exactly.
+# Local packaging smoke test - mirrors CI build-deb and build-rpm jobs exactly.
 #
 # Runs inside Docker containers to replicate the GitHub Actions environment
 # before pushing a tag, so packaging failures are caught locally.
@@ -32,7 +32,7 @@ die()  { fail "$*"; exit 1; }
 
 TARGET="${1:-all}"
 
-command -v docker >/dev/null 2>&1 || die "Docker not found — install Docker and ensure it is running"
+command -v docker >/dev/null 2>&1 || die "Docker not found - install Docker and ensure it is running"
 
 docker info >/dev/null 2>&1 || die "Docker daemon is not running"
 
@@ -41,7 +41,7 @@ docker info >/dev/null 2>&1 || die "Docker daemon is not running"
 test_deb() {
     info "Testing DEB packaging (ubuntu:latest, matches CI build-deb job)"
 
-    # NOTE: Use explicit if/return — NOT relying on set -e propagation.
+    # NOTE: Use explicit if/return - NOT relying on set -e propagation.
     # POSIX set -e is suppressed inside functions called with "|| FAILED=1",
     # so docker run failure would be silently swallowed without this guard.
     if ! docker run --rm \
@@ -168,13 +168,13 @@ case "$TARGET" in
         test_rpm || FAILED=1
         ;;
     *)
-        die "Unknown target: $TARGET — use 'deb', 'rpm', or 'all'"
+        die "Unknown target: $TARGET - use 'deb', 'rpm', or 'all'"
         ;;
 esac
 
 echo ""
 if [ "$FAILED" -eq 0 ]; then
-    ok "All packaging tests passed — safe to push tag"
+    ok "All packaging tests passed - safe to push tag"
 else
-    die "Packaging test(s) failed — fix before pushing tag"
+    die "Packaging test(s) failed - fix before pushing tag"
 fi

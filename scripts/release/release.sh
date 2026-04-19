@@ -102,7 +102,7 @@ EOF
 # ── Helpers ────────────────────────────────────────────────────────────────────
 validate_semver() {
     printf '%s' "$1" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$' \
-        || die "Invalid version '$1' — expected X.Y.Z (e.g. 0.1.0)"
+        || die "Invalid version '$1' - expected X.Y.Z (e.g. 0.1.0)"
 }
 
 current_version() {
@@ -134,12 +134,12 @@ cmd_prepare() {
 
     # Clean working tree
     [ -z "$(git status --porcelain)" ] \
-        || die "Working tree is dirty — commit or stash all changes before releasing"
+        || die "Working tree is dirty - commit or stash all changes before releasing"
     ok "Working tree: clean"
 
     # Tag must not already exist locally or remotely
     if git -C "$REPO_ROOT" rev-parse "refs/tags/v$VERSION" >/dev/null 2>&1; then
-        die "Tag v$VERSION already exists locally — use a different version or delete the tag first"
+        die "Tag v$VERSION already exists locally - use a different version or delete the tag first"
     fi
     ok "Tag v$VERSION: available"
 
@@ -152,9 +152,9 @@ cmd_prepare() {
     # Report current version
     cur=$(current_version)
     if [ "$cur" = "$VERSION" ]; then
-        ok "VERSION: $cur (already at target — bump will be a no-op)"
+        ok "VERSION: $cur (already at target - bump will be a no-op)"
     else
-        warn "VERSION is $cur — 'bump' will update all files to $VERSION"
+        warn "VERSION is $cur - 'bump' will update all files to $VERSION"
     fi
 
     info "prepare: all checks passed for v$VERSION"
@@ -167,7 +167,7 @@ cmd_notes() {
 
     # If the target version section already exists, preserve it and skip generation.
     if changelog_has_version "$VERSION"; then
-        ok "CHANGELOG.md already has a section for v$VERSION — preserving existing content"
+        ok "CHANGELOG.md already has a section for v$VERSION - preserving existing content"
         return
     fi
 
@@ -179,7 +179,7 @@ cmd_notes() {
         info "Generating notes from commits since $prev ..."
         raw=$("$SCRIPT_DIR/generate_changelog.sh" "$prev")
     else
-        info "No previous tag found — generating notes from full commit history ..."
+        info "No previous tag found - generating notes from full commit history ..."
         raw=$("$SCRIPT_DIR/generate_changelog.sh")
     fi
 
@@ -240,9 +240,9 @@ cmd_verify() {
     if command -v shellcheck >/dev/null 2>&1; then
         find scripts -name '*.sh' -exec shellcheck {} + 2>/dev/null \
             && ok "shellcheck: all scripts clean" \
-            || warn "shellcheck: issues found — review before shipping"
+            || warn "shellcheck: issues found - review before shipping"
     else
-        warn "shellcheck not installed — shell script lint skipped"
+        warn "shellcheck not installed - shell script lint skipped"
     fi
 
     # Version consistency between VERSION file and version.h
@@ -253,29 +253,29 @@ cmd_verify() {
         if [ "$ver_file" = "$ver_h" ]; then
             ok "Version consistent: VERSION=$ver_file matches version.h"
         else
-            die "Version mismatch: VERSION=$ver_file but version.h says $ver_h — run 'bump' first"
+            die "Version mismatch: VERSION=$ver_file but version.h says $ver_h - run 'bump' first"
         fi
     fi
 
     # CHANGELOG must have a section for the target version (when version is known)
     if [ -n "${VERSION:-}" ]; then
         changelog_has_version "$VERSION" \
-            || die "CHANGELOG.md has no section for v$VERSION — run 'notes' first"
+            || die "CHANGELOG.md has no section for v$VERSION - run 'notes' first"
         ok "CHANGELOG.md: section for v$VERSION present"
     fi
 
     # Local packaging smoke test (requires Docker)
     if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
-        info "Docker available — running local packaging tests (DEB + RPM)"
+        info "Docker available - running local packaging tests (DEB + RPM)"
         if [ "$DRY_RUN" -eq 1 ]; then
             drymsg "Would run: $REPO_ROOT/scripts/ci/test_packaging.sh all"
         else
             "$REPO_ROOT/scripts/ci/test_packaging.sh" all \
                 && ok "Packaging smoke tests: passed" \
-                || die "Packaging smoke tests failed — fix before shipping"
+                || die "Packaging smoke tests failed - fix before shipping"
         fi
     else
-        warn "Docker not running — skipping local DEB/RPM packaging tests"
+        warn "Docker not running - skipping local DEB/RPM packaging tests"
         warn "Run 'scripts/ci/test_packaging.sh' manually before pushing the tag"
     fi
 
@@ -302,7 +302,7 @@ cmd_ship() {
         cat > "$commit_file" <<EOF
 chore(release): v$VERSION
 
-Release KDAL v$VERSION — $today.
+Release KDAL v$VERSION - $today.
 
 See CHANGELOG.md for the complete list of changes in this release.
 Artifacts: $repo_url/releases/tag/v$VERSION
@@ -319,7 +319,7 @@ EOF
             "$TEMPLATE_DIR/release-tag.txt" > "$tag_file"
     else
         cat > "$tag_file" <<EOF
-KDAL v$VERSION — $today
+KDAL v$VERSION - $today
 
 Kernel Device Abstraction Layer v$VERSION.
 
@@ -354,7 +354,7 @@ EOF
 
     # Only create a commit if there is something staged
     if git diff --cached --quiet; then
-        ok "Nothing to commit — all files already at v$VERSION"
+        ok "Nothing to commit - all files already at v$VERSION"
     else
         git commit -F "$commit_file"
         ok "Created release commit"
@@ -373,7 +373,7 @@ EOF
     trap - EXIT INT TERM
 
     printf '\n'
-    info "ship: done — GitHub Actions is now building release artifacts"
+    info "ship: done - GitHub Actions is now building release artifacts"
     printf '  CI:      %s/actions\n' "$repo_url"
     printf '  Release: %s/releases/tag/v%s\n\n' "$repo_url" "$VERSION"
 }
@@ -400,7 +400,7 @@ cmd_post_release() {
             || die "GitHub release v$VERSION not found (HTTP $http_code). Wait for CI to finish publishing first."
         ok "GitHub release v$VERSION: published"
     else
-        warn "curl not available — skipping publish check"
+        warn "curl not available - skipping publish check"
     fi
 
     "$SCRIPT_DIR/update_homebrew_sha.sh" "$VERSION"
@@ -418,7 +418,7 @@ cmd_post_release() {
 
 # ── Full pipeline (happy path) ─────────────────────────────────────────────────
 cmd_release() {
-    info "KDAL release pipeline — v$VERSION"
+    info "KDAL release pipeline - v$VERSION"
     [ "$DRY_RUN" -eq 1 ] && info "(dry-run mode: no files or git objects will be mutated)"
     printf '\n'
 
@@ -465,7 +465,7 @@ while [ $# -gt 0 ]; do
             VERSION="${1#v}"; shift
             ;;
         *)
-            die "Unknown argument: $1 — run with --help for usage"
+            die "Unknown argument: $1 - run with --help for usage"
             ;;
     esac
 done

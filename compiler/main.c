@@ -47,11 +47,13 @@ static int is_safe_source_path(const char *path)
 	if (!path || path[0] == '\0')
 		return 0;
 
-	/* Reject absolute paths (Unix and drive-letter style). */
-	if (path[0] == '/' || (strlen(path) > 1 && path[1] == ':'))
-		return 0;
-
-	/* Reject any ".." path component. */
+	/*
+	 * Absolute paths are allowed — this is a CLI compiler invoked
+	 * directly by the user or build systems that always pass full paths.
+	 *
+	 * Reject ".." path traversal components to prevent unintended
+	 * directory escape when paths are constructed programmatically.
+	 */
 	if (strcmp(path, "..") == 0)
 		return 0;
 	if (strncmp(path, "../", 3) == 0)
@@ -69,6 +71,7 @@ static int is_safe_source_path(const char *path)
 	if (strlen(path) >= 3 && strcmp(path + strlen(path) - 3, "\\..") == 0)
 		return 0;
 
+	/* Reject control characters in path. */
 	for (p = path; *p; ++p) {
 		if ((unsigned char)*p < 32)
 			return 0;

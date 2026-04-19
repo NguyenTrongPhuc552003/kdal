@@ -158,7 +158,7 @@ export async function checkForExtensionUpdate(context: vscode.ExtensionContext):
       );
     }
   } catch {
-    // Network errors are silent — don't interrupt the user
+    // Network errors are silent - don't interrupt the user
   }
 }
 

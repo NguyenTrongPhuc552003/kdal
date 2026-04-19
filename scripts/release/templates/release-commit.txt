@@ -1,6 +1,6 @@
 chore(release): v{{VERSION}}
 
-Release KDAL v{{VERSION}} — {{DATE}}.
+Release KDAL v{{VERSION}} - {{DATE}}.
 
 Packaging targets:
   SDK tarballs:  linux-x86_64  linux-aarch64  linux-riscv64
