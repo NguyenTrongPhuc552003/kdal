@@ -15,6 +15,8 @@
 #include <string.h>
 #include <limits.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/stat.h>
 
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
@@ -232,11 +234,22 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		return -1;
 	}
 
-	fp = fopen(path, "w");
-	if (!fp) {
-		fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
-			strerror(errno));
-		return -1;
+	{
+		int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC,
+			      S_IRUSR | S_IWUSR);
+		if (fd < 0) {
+			fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
+				strerror(errno));
+			return -1;
+		}
+
+		fp = fdopen(fd, "w");
+		if (!fp) {
+			fprintf(stderr, "test-gen: cannot create stream for '%s': %s\n",
+				path, strerror(errno));
+			close(fd);
+			return -1;
+		}
 	}
 
 	/* Header */
