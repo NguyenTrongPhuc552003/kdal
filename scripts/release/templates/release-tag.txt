@@ -1,4 +1,4 @@
-KDAL v{{VERSION}} — {{DATE}}
+KDAL v{{VERSION}} - {{DATE}}
 
 Kernel Device Abstraction Layer v{{VERSION}}
 

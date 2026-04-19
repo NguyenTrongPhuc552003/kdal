@@ -32,7 +32,7 @@ OS="$(uname -s)"
 
 case "$OS" in
 Darwin)
-	info "Detected macOS — using Homebrew"
+	info "Detected macOS - using Homebrew"
 	command -v brew >/dev/null 2>&1 || fail "Homebrew not found. Install from https://brew.sh"
 
 	info "Installing build tools..."
@@ -52,7 +52,7 @@ Darwin)
 	;;
 
 Linux)
-	info "Detected Linux — using apt-get"
+	info "Detected Linux - using apt-get"
 	if ! command -v apt-get >/dev/null 2>&1; then
 		fail "Only Debian/Ubuntu are supported. Install packages manually."
 	fi
@@ -69,7 +69,7 @@ Linux)
 		python3 python3-pip \
 		curl ca-certificates gnupg
 
-	# CMake — require >= 3.20 (Kitware APT repo for older distros)
+	# CMake - require >= 3.20 (Kitware APT repo for older distros)
 	_need_cmake=false
 	if command -v cmake >/dev/null 2>&1; then
 		_cmake_ver="$(cmake --version | head -1 | grep -oE '[0-9]+\.[0-9]+')"
@@ -91,11 +91,11 @@ Linux)
 			_cmake_ver="$(cmake --version | head -1 | grep -oE '[0-9]+\.[0-9]+')"
 			info "CMake ${_cmake_ver} installed"
 		else
-			warn "CMake installation failed — install manually: https://cmake.org/download/"
+			warn "CMake installation failed - install manually: https://cmake.org/download/"
 		fi
 	fi
 
-	# Node.js — require >= 18 (NodeSource for older distros)
+	# Node.js - require >= 18 (NodeSource for older distros)
 	_need_node=false
 	if command -v node >/dev/null 2>&1; then
 		_node_major="$(node --version | grep -oE '[0-9]+' | head -1)"

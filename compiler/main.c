@@ -40,6 +40,46 @@ static void usage(const char *prog)
 		KDAL_VERSION_STRING, prog);
 }
 
+static int is_safe_source_path(const char *path)
+{
+	const char *p;
+
+	if (!path || path[0] == '\0')
+		return 0;
+
+	/*
+	 * Absolute paths are allowed — this is a CLI compiler invoked
+	 * directly by the user or build systems that always pass full paths.
+	 *
+	 * Reject ".." path traversal components to prevent unintended
+	 * directory escape when paths are constructed programmatically.
+	 */
+	if (strcmp(path, "..") == 0)
+		return 0;
+	if (strncmp(path, "../", 3) == 0)
+		return 0;
+	if (strstr(path, "/../") != NULL)
+		return 0;
+	if (strlen(path) >= 3 && strcmp(path + strlen(path) - 3, "/..") == 0)
+		return 0;
+
+	/* Also reject backslash-separated traversal segments. */
+	if (strncmp(path, "..\\", 3) == 0)
+		return 0;
+	if (strstr(path, "\\..\\") != NULL)
+		return 0;
+	if (strlen(path) >= 3 && strcmp(path + strlen(path) - 3, "\\..") == 0)
+		return 0;
+
+	/* Reject control characters in path. */
+	for (p = path; *p; ++p) {
+		if ((unsigned char)*p < 32)
+			return 0;
+	}
+
+	return 1;
+}
+
 int main(int argc, char *argv[])
 {
 	kdal_codegen_opts_t opts = {
@@ -80,6 +120,11 @@ int main(int argc, char *argv[])
 	}
 
 	const char *src_path = argv[optind];
+
+	if (!is_safe_source_path(src_path)) {
+		fprintf(stderr, "%s: invalid input path\n", argv[0]);
+		return 1;
+	}
 
 	/* Basic extension check */
 	const char *ext = strrchr(src_path, '.');

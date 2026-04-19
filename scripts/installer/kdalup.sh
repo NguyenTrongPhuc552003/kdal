@@ -201,7 +201,7 @@ verify_sha256() {
 	_sha_cmd="$(sha256_cmd)"
 
 	if [ -z "$_sha_cmd" ]; then
-		warn "sha256sum/shasum not found — skipping integrity check"
+		warn "sha256sum/shasum not found - skipping integrity check"
 		return 2
 	fi
 
@@ -210,7 +210,7 @@ verify_sha256() {
 
 	if ! download "$_sums_url" "$_sums_file" 2>/dev/null; then
 		rm -f "$_sums_file"
-		warn "SHA256SUMS not available for ${_ver} — skipping integrity check"
+		warn "SHA256SUMS not available for ${_ver} - skipping integrity check"
 		return 2
 	fi
 
@@ -218,7 +218,7 @@ verify_sha256() {
 	rm -f "$_sums_file"
 
 	if [ -z "$_expected" ]; then
-		warn "No checksum found for ${_filename} — skipping integrity check"
+		warn "No checksum found for ${_filename} - skipping integrity check"
 		return 2
 	fi
 
@@ -607,12 +607,12 @@ cmd_doctor() {
 	echo ""
 
 	echo "Core binaries:"
-	_check_exists "${KDAL_HOME}/bin/kdalc" "kdalc compiler" "missing — reinstall SDK"
-	_check_exists "${KDAL_HOME}/bin/kdality" "kdality CLI" "missing — reinstall SDK"
+	_check_exists "${KDAL_HOME}/bin/kdalc" "kdalc compiler" "missing - reinstall SDK"
+	_check_exists "${KDAL_HOME}/bin/kdality" "kdality CLI" "missing - reinstall SDK"
 	echo ""
 
 	echo "Libraries:"
-	_check_exists "${KDAL_HOME}/share/kdal/stdlib" "Standard library" "missing — reinstall SDK"
+	_check_exists "${KDAL_HOME}/share/kdal/stdlib" "Standard library" "missing - reinstall SDK"
 	if [ "$_profile" = "full" ]; then
 		_check_exists "${KDAL_HOME}/include/kdal" "Kernel headers" "install with --profile full"
 		_check_exists "${KDAL_HOME}/lib/cmake/KDAL" "CMake package" "install with --profile full"
@@ -678,7 +678,7 @@ COMMANDS:
     help                             Show this help
 
 PROFILES:
-    minimal (default)   kdalc, kdality, stdlib — enough for driver development
+    minimal (default)   kdalc, kdality, stdlib - enough for driver development
     full                Everything + kernel headers, CMake package, Vim syntax
 
 ENVIRONMENT:
