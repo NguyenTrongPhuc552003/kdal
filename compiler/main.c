@@ -40,6 +40,43 @@ static void usage(const char *prog)
 		KDAL_VERSION_STRING, prog);
 }
 
+static int is_safe_source_path(const char *path)
+{
+	const char *p;
+
+	if (!path || path[0] == '\0')
+		return 0;
+
+	/* Reject absolute paths (Unix and drive-letter style). */
+	if (path[0] == '/' || (strlen(path) > 1 && path[1] == ':'))
+		return 0;
+
+	/* Reject any ".." path component. */
+	if (strcmp(path, "..") == 0)
+		return 0;
+	if (strncmp(path, "../", 3) == 0)
+		return 0;
+	if (strstr(path, "/../") != NULL)
+		return 0;
+	if (strlen(path) >= 3 && strcmp(path + strlen(path) - 3, "/..") == 0)
+		return 0;
+
+	/* Also reject backslash-separated traversal segments. */
+	if (strncmp(path, "..\\", 3) == 0)
+		return 0;
+	if (strstr(path, "\\..\\") != NULL)
+		return 0;
+	if (strlen(path) >= 3 && strcmp(path + strlen(path) - 3, "\\..") == 0)
+		return 0;
+
+	for (p = path; *p; ++p) {
+		if ((unsigned char)*p < 32)
+			return 0;
+	}
+
+	return 1;
+}
+
 int main(int argc, char *argv[])
 {
 	kdal_codegen_opts_t opts = {
@@ -80,6 +117,11 @@ int main(int argc, char *argv[])
 	}
 
 	const char *src_path = argv[optind];
+
+	if (!is_safe_source_path(src_path)) {
+		fprintf(stderr, "%s: invalid input path\n", argv[0]);
+		return 1;
+	}
 
 	/* Basic extension check */
 	const char *ext = strrchr(src_path, '.');
