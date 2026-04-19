@@ -17,6 +17,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/stat.h>
 
 #include "include/token.h"
 #include "include/ast.h"
@@ -299,8 +302,16 @@ static void emit_stmts(writer_t *w, const kdal_ast_t *stmts)
 
 static int emit_c_file(const kdal_file_node_t *file, const char *out_path)
 {
-	FILE *fp = fopen(out_path, "w");
+	int fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd < 0) {
+		fprintf(stderr, "kdalc: cannot open output '%s': %s\n",
+			out_path, strerror(errno));
+		return -1;
+	}
+
+	FILE *fp = fdopen(fd, "w");
 	if (!fp) {
+		close(fd);
 		fprintf(stderr, "kdalc: cannot open output '%s': %s\n",
 			out_path, strerror(errno));
 		return -1;
