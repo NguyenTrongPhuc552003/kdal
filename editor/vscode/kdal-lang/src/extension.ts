@@ -8,6 +8,7 @@ import {
   dtgenCommand,
   testgenCommand,
   installSDKCommand,
+  checkForExtensionUpdate,
   setOutputChannel,
 } from "./commands";
 import { createStatusBar, showStatusBar, disposeStatusBar, showToolchainInfo } from "./statusBar";
@@ -113,6 +114,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
       vscode.commands.executeCommand("workbench.action.openSettings", "kdal.toolchainPath");
     }
   }
+
+  // Check for a newer extension release on GitHub (once per day, non-blocking)
+  checkForExtensionUpdate(context).catch(() => undefined);
 }
 
 export function deactivate(): void {

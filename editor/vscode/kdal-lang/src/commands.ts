@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import * as path from "path";
+import * as https from "https";
 import { ToolchainPaths, runTool } from "./toolchain";
 
 let outputChannel: vscode.OutputChannel;
@@ -66,6 +67,76 @@ export async function installSDKCommand(): Promise<void> {
       vscode.commands.executeCommand("kdal.redetectToolchain");
     }
   });
+}
+
+/* ── Extension update check ────────────────────────────────────── */
+
+const REPO = "NguyenTrongPhuc552003/kdal";
+const CHECK_INTERVAL_MS = 24 * 60 * 60 * 1000; // once per day
+const LAST_CHECK_KEY = "kdal.lastUpdateCheck";
+
+function fetchLatestTag(): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const options = {
+      hostname: "api.github.com",
+      path: `/repos/${REPO}/releases/latest`,
+      headers: { "User-Agent": "kdal-vscode-extension", "Accept": "application/vnd.github+json" },
+    };
+    https.get(options, (res) => {
+      let data = "";
+      res.on("data", (chunk) => { data += chunk; });
+      res.on("end", () => {
+        try {
+          const json = JSON.parse(data);
+          if (json.tag_name) resolve(json.tag_name as string);
+          else reject(new Error("No tag_name in response"));
+        } catch (e) {
+          reject(e);
+        }
+      });
+    }).on("error", reject);
+  });
+}
+
+export async function checkForExtensionUpdate(context: vscode.ExtensionContext): Promise<void> {
+  // Throttle to once per day
+  const lastCheck = context.globalState.get<number>(LAST_CHECK_KEY, 0);
+  if (Date.now() - lastCheck < CHECK_INTERVAL_MS) return;
+
+  try {
+    const latestTag = await fetchLatestTag(); // e.g. "v0.2.0"
+    await context.globalState.update(LAST_CHECK_KEY, Date.now());
+
+    const latestVersion = latestTag.replace(/^v/, "");
+    const currentVersion: string = context.extension.packageJSON.version;
+
+    if (latestVersion === currentVersion) return;
+
+    // Simple semver comparison: just compare strings after splitting on '.'
+    const toNum = (v: string) => v.split(".").map(Number);
+    const [lMaj, lMin, lPat] = toNum(latestVersion);
+    const [cMaj, cMin, cPat] = toNum(currentVersion);
+
+    const isNewer =
+      lMaj > cMaj ||
+      (lMaj === cMaj && lMin > cMin) ||
+      (lMaj === cMaj && lMin === cMin && lPat > cPat);
+
+    if (!isNewer) return;
+
+    const choice = await vscode.window.showInformationMessage(
+      `KDAL extension ${latestTag} is available (you have v${currentVersion}). Download the new .vsix from GitHub Releases.`,
+      "Download",
+      "Later"
+    );
+    if (choice === "Download") {
+      vscode.env.openExternal(
+        vscode.Uri.parse(`https://github.com/${REPO}/releases/tag/${latestTag}`)
+      );
+    }
+  } catch {
+    // Network errors are silent — don't interrupt the user
+  }
 }
 
 /* ── Helper: resolve active .kdh/.kdc file ─────────────────────── */
