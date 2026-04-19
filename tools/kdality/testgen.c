@@ -14,6 +14,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -100,13 +101,65 @@ static int parse_kdc(const char *path, struct kdc_info *info)
 
 /* ── KUnit test generation ───────────────────────────────────────── */
 
+static int is_safe_filename_component(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+	if (strstr(s, "..") || strchr(s, '/') || strchr(s, '\\'))
+		return 0;
+	return 1;
+}
+
+static int path_is_within_base(const char *base, const char *target)
+{
+	size_t blen = strlen(base);
+	if (strncmp(base, target, blen) != 0)
+		return 0;
+	return target[blen] == '\0' || target[blen] == '/';
+}
+
 static int generate_kunit(const struct kdc_info *info, const char *outdir)
 {
 	char path[512];
+	char outdir_real[PATH_MAX];
+	char parent_real[PATH_MAX];
+	char *slash;
 	FILE *fp;
 	int fd;
 
-	snprintf(path, sizeof(path), "%s/test_%s.c", outdir, info->driver_name);
+	if (!is_safe_filename_component(info->driver_name)) {
+		fprintf(stderr, "test-gen: invalid driver name '%s'\n",
+			info->driver_name);
+		return -1;
+	}
+
+	if (!realpath(outdir, outdir_real)) {
+		fprintf(stderr, "test-gen: invalid output directory '%s': %s\n",
+			outdir, strerror(errno));
+		return -1;
+	}
+
+	snprintf(path, sizeof(path), "%s/test_%s.c", outdir_real, info->driver_name);
+
+	slash = strrchr(path, '/');
+	if (!slash) {
+		fprintf(stderr, "test-gen: internal path error for '%s'\n", path);
+		return -1;
+	}
+	*slash = '\0';
+	if (!realpath(path, parent_real)) {
+		fprintf(stderr, "test-gen: cannot resolve output directory '%s': %s\n",
+			path, strerror(errno));
+		return -1;
+	}
+	*slash = '/';
+
+	if (!path_is_within_base(outdir_real, parent_real)) {
+		fprintf(stderr, "test-gen: refusing to write outside '%s'\n",
+			outdir_real);
+		return -1;
+	}
+
 	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
 	if (fd < 0) {
 		fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
