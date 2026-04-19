@@ -56,3 +56,8 @@ I2cTempSensor.c
 # ── Miscellaneous ────────────────────────────────────────────────
 unknown.*
 *.kbuild
+
+# ── CodeQL local analysis ─────────────────────────────────────────
+.codeql-db/
+codeql-results.sarif
+
