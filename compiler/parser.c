@@ -418,224 +418,276 @@ static kdal_ast_t *parse_statement_list(parser_t *p)
 	return head;
 }
 
+static kdal_ast_t *parse_let_statement(parser_t *p, int line, int col)
+{
+	const kdal_token_t *name_tok;
+	kdal_ast_t *node, *val;
+	kdal_expr_node_t *nm;
+	const char *name;
+
+	p_advance(p);
+	name_tok = p_cur(p);
+	if (name_tok->type != TOK_IDENT) {
+		kdal_error(p->filename, line, col,
+			   "expected identifier after 'let'");
+		p->had_error = 1;
+		return NULL;
+	}
+
+	name = p_intern(p, name_tok);
+	p_advance(p);
+	if (p_cur(p)->type == TOK_COLON) {
+		p_advance(p);
+		p_advance(p);
+	}
+	p_expect(p, TOK_EQ);
+	val = parse_expr(p);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_LET_STMT, line, col);
+	nm = kdal_arena_alloc(p->arena, sizeof(*nm));
+	nm->base.type = KDAL_NODE_EXPR_IDENT;
+	nm->base.line = line;
+	nm->base.col = col;
+	nm->u.sval = name;
+	kdal_ast_add_child(node, &nm->base);
+	kdal_ast_add_child(node, val);
+	return node;
+}
+
+static kdal_ast_t *parse_write_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *reg, *val;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	reg = parse_expr(p);
+	p_expect(p, TOK_COMMA);
+	val = parse_expr(p);
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_REG_WRITE_STMT, line, col);
+	kdal_ast_add_child(node, reg);
+	kdal_ast_add_child(node, val);
+	return node;
+}
+
+static kdal_ast_t *parse_emit_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *sig, *val = NULL;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	sig = parse_expr(p);
+	if (p_cur(p)->type == TOK_COMMA) {
+		p_advance(p);
+		val = parse_expr(p);
+	}
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_EMIT_STMT, line, col);
+	kdal_ast_add_child(node, sig);
+	if (val)
+		kdal_ast_add_child(node, val);
+	return node;
+}
+
+static kdal_ast_t *parse_wait_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *sig, *ms;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	sig = parse_expr(p);
+	p_expect(p, TOK_COMMA);
+	ms = parse_expr(p);
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_WAIT_STMT, line, col);
+	kdal_ast_add_child(node, sig);
+	kdal_ast_add_child(node, ms);
+	return node;
+}
+
+static kdal_ast_t *parse_arm_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *timer, *ms;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	timer = parse_expr(p);
+	p_expect(p, TOK_COMMA);
+	ms = parse_expr(p);
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_ARM_STMT, line, col);
+	kdal_ast_add_child(node, timer);
+	kdal_ast_add_child(node, ms);
+	return node;
+}
+
+static kdal_ast_t *parse_cancel_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *timer;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	timer = parse_expr(p);
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_CANCEL_STMT, line, col);
+	kdal_ast_add_child(node, timer);
+	return node;
+}
+
+static kdal_ast_t *parse_return_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *val = NULL;
+
+	p_advance(p);
+	if (p_cur(p)->type != TOK_SEMICOLON)
+		val = parse_expr(p);
+	p_expect(p, TOK_SEMICOLON);
+	node = kdal_ast_new(p->arena, KDAL_NODE_RETURN_STMT, line, col);
+	if (val)
+		kdal_ast_add_child(node, val);
+	return node;
+}
+
+static kdal_ast_t *parse_log_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *arg;
+
+	p_advance(p);
+	p_expect(p, TOK_LPAREN);
+	node = kdal_ast_new(p->arena, KDAL_NODE_LOG_STMT, line, col);
+	while ((arg = parse_expr(p)) != NULL) {
+		kdal_ast_add_child(node, arg);
+		if (p_cur(p)->type != TOK_COMMA)
+			break;
+		p_advance(p);
+	}
+	p_expect(p, TOK_RPAREN);
+	p_expect(p, TOK_SEMICOLON);
+	return node;
+}
+
+static kdal_ast_t *parse_if_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node = kdal_ast_new(p->arena, KDAL_NODE_IF_STMT, line, col);
+
+	while (p_cur(p)->type == TOK_KW_IF || p_cur(p)->type == TOK_KW_ELIF) {
+		kdal_ast_t *cond, *body;
+
+		p_advance(p);
+		p_expect(p, TOK_LPAREN);
+		cond = parse_expr(p);
+		p_expect(p, TOK_RPAREN);
+		p_expect(p, TOK_LBRACE);
+		body = parse_statement_list(p);
+		p_expect(p, TOK_RBRACE);
+		kdal_ast_add_child(node, cond);
+		kdal_ast_add_child(node, body ? body :
+						kdal_ast_new(p->arena,
+							     KDAL_NODE_INVALID,
+							     line, col));
+		if (p_cur(p)->type != TOK_KW_ELIF)
+			break;
+	}
+
+	if (p_cur(p)->type == TOK_KW_ELSE) {
+		kdal_ast_t *body;
+
+		p_advance(p);
+		p_expect(p, TOK_LBRACE);
+		body = parse_statement_list(p);
+		p_expect(p, TOK_RBRACE);
+		kdal_ast_add_child(node, body ? body :
+						kdal_ast_new(p->arena,
+							     KDAL_NODE_INVALID,
+							     line, col));
+	}
+
+	return node;
+}
+
+static kdal_ast_t *parse_for_statement(parser_t *p, int line, int col)
+{
+	kdal_ast_t *node, *lo, *hi, *body;
+	kdal_expr_node_t *vn;
+	const char *var;
+
+	p_advance(p);
+	var = p_intern(p, p_cur(p));
+	p_advance(p);
+	p_expect(p, TOK_KW_IN);
+	lo = parse_expr(p);
+	p_expect(p, TOK_DOTDOT);
+	hi = parse_expr(p);
+	p_expect(p, TOK_LBRACE);
+	body = parse_statement_list(p);
+	p_expect(p, TOK_RBRACE);
+	node = kdal_ast_new(p->arena, KDAL_NODE_FOR_STMT, line, col);
+	vn = kdal_arena_alloc(p->arena, sizeof(*vn));
+	vn->base.type = KDAL_NODE_EXPR_IDENT;
+	vn->base.line = line;
+	vn->base.col = col;
+	vn->u.sval = var;
+	kdal_ast_add_child(node, &vn->base);
+	kdal_ast_add_child(node, lo);
+	kdal_ast_add_child(node, hi);
+	if (body)
+		kdal_ast_add_child(node, body);
+	return node;
+}
+
+static kdal_ast_t *parse_assignment_statement(parser_t *p, int line, int col,
+					      const kdal_token_t *t)
+{
+	kdal_ast_t *node, *lval, *rval;
+
+	lval = parse_expr(p);
+	if (p_cur(p)->type == TOK_EQ) {
+		p_advance(p);
+		rval = parse_expr(p);
+		p_expect(p, TOK_SEMICOLON);
+		node = kdal_ast_new(p->arena, KDAL_NODE_ASSIGN_STMT, line, col);
+		kdal_ast_add_child(node, lval);
+		kdal_ast_add_child(node, rval);
+		return node;
+	}
+
+	kdal_error(p->filename, line, col, "unexpected token '%s' in statement",
+		   kdal_tok_name(t->type));
+	p->had_error = 1;
+	return NULL;
+}
+
 static kdal_ast_t *parse_statement(parser_t *p)
 {
 	const kdal_token_t *t = p_cur(p);
 	int line = t->line, col = t->col;
-	kdal_ast_t *node;
 
-	switch (t->type) {
-	case TOK_KW_LET: {
-		p_advance(p);
-		const kdal_token_t *name_tok = p_cur(p);
-		if (name_tok->type != TOK_IDENT) {
-			kdal_error(p->filename, line, col,
-				   "expected identifier after 'let'");
-			p->had_error = 1;
-			return NULL;
-		}
-		const char *name = p_intern(p, name_tok);
-		p_advance(p);
-		/* optional : type */
-		if (p_cur(p)->type == TOK_COLON)
-			p_advance(p), p_advance(p); /* skip type for now */
-		p_expect(p, TOK_EQ);
-		kdal_ast_t *val = parse_expr(p);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_LET_STMT, line, col);
-		/* store name as first child (as a fake IDENT expr), val as second */
-		kdal_expr_node_t *nm = kdal_arena_alloc(p->arena, sizeof(*nm));
-		nm->base.type = KDAL_NODE_EXPR_IDENT;
-		nm->base.line = line;
-		nm->base.col = col;
-		nm->u.sval = name;
-		kdal_ast_add_child(node, &nm->base);
-		kdal_ast_add_child(node, val);
-		return node;
-	}
-
-	case TOK_KW_WRITE: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		kdal_ast_t *reg = parse_expr(p);
-		p_expect(p, TOK_COMMA);
-		kdal_ast_t *val = parse_expr(p);
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_REG_WRITE_STMT, line,
-				    col);
-		kdal_ast_add_child(node, reg);
-		kdal_ast_add_child(node, val);
-		return node;
-	}
-
-	case TOK_KW_EMIT: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		kdal_ast_t *sig = parse_expr(p);
-		kdal_ast_t *val = NULL;
-		if (p_cur(p)->type == TOK_COMMA) {
-			p_advance(p);
-			val = parse_expr(p);
-		}
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_EMIT_STMT, line, col);
-		kdal_ast_add_child(node, sig);
-		if (val)
-			kdal_ast_add_child(node, val);
-		return node;
-	}
-
-	case TOK_KW_WAIT: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		kdal_ast_t *sig = parse_expr(p);
-		p_expect(p, TOK_COMMA);
-		kdal_ast_t *ms = parse_expr(p);
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_WAIT_STMT, line, col);
-		kdal_ast_add_child(node, sig);
-		kdal_ast_add_child(node, ms);
-		return node;
-	}
-
-	case TOK_KW_ARM: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		kdal_ast_t *timer = parse_expr(p);
-		p_expect(p, TOK_COMMA);
-		kdal_ast_t *ms = parse_expr(p);
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_ARM_STMT, line, col);
-		kdal_ast_add_child(node, timer);
-		kdal_ast_add_child(node, ms);
-		return node;
-	}
-
-	case TOK_KW_CANCEL: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		kdal_ast_t *timer = parse_expr(p);
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_CANCEL_STMT, line, col);
-		kdal_ast_add_child(node, timer);
-		return node;
-	}
-
-	case TOK_KW_RETURN: {
-		p_advance(p);
-		kdal_ast_t *val = NULL;
-		if (p_cur(p)->type != TOK_SEMICOLON)
-			val = parse_expr(p);
-		p_expect(p, TOK_SEMICOLON);
-		node = kdal_ast_new(p->arena, KDAL_NODE_RETURN_STMT, line, col);
-		if (val)
-			kdal_ast_add_child(node, val);
-		return node;
-	}
-
-	case TOK_KW_LOG: {
-		p_advance(p);
-		p_expect(p, TOK_LPAREN);
-		node = kdal_ast_new(p->arena, KDAL_NODE_LOG_STMT, line, col);
-		kdal_ast_t *arg;
-		while ((arg = parse_expr(p)) != NULL) {
-			kdal_ast_add_child(node, arg);
-			if (p_cur(p)->type != TOK_COMMA)
-				break;
-			p_advance(p);
-		}
-		p_expect(p, TOK_RPAREN);
-		p_expect(p, TOK_SEMICOLON);
-		return node;
-	}
-
-	case TOK_KW_IF: {
-		node = kdal_ast_new(p->arena, KDAL_NODE_IF_STMT, line, col);
-		while (p_cur(p)->type == TOK_KW_IF ||
-		       p_cur(p)->type == TOK_KW_ELIF) {
-			p_advance(p);
-			p_expect(p, TOK_LPAREN);
-			kdal_ast_t *cond = parse_expr(p);
-			p_expect(p, TOK_RPAREN);
-			p_expect(p, TOK_LBRACE);
-			kdal_ast_t *body = parse_statement_list(p);
-			p_expect(p, TOK_RBRACE);
-			kdal_ast_add_child(node, cond);
-			kdal_ast_add_child(
-				node,
-				body ? body :
-				       kdal_ast_new(p->arena, KDAL_NODE_INVALID,
-						    line, col));
-			if (p_cur(p)->type != TOK_KW_ELIF)
-				break;
-		}
-		if (p_cur(p)->type == TOK_KW_ELSE) {
-			p_advance(p);
-			p_expect(p, TOK_LBRACE);
-			kdal_ast_t *body = parse_statement_list(p);
-			p_expect(p, TOK_RBRACE);
-			kdal_ast_add_child(
-				node,
-				body ? body :
-				       kdal_ast_new(p->arena, KDAL_NODE_INVALID,
-						    line, col));
-		}
-		return node;
-	}
-
-	case TOK_KW_FOR: {
-		p_advance(p);
-		const char *var = p_intern(p, p_cur(p));
-		p_advance(p); /* ident */
-		p_expect(p, TOK_KW_IN);
-		kdal_ast_t *lo = parse_expr(p);
-		p_expect(p, TOK_DOTDOT);
-		kdal_ast_t *hi = parse_expr(p);
-		p_expect(p, TOK_LBRACE);
-		kdal_ast_t *body = parse_statement_list(p);
-		p_expect(p, TOK_RBRACE);
-		node = kdal_ast_new(p->arena, KDAL_NODE_FOR_STMT, line, col);
-		kdal_expr_node_t *vn = kdal_arena_alloc(p->arena, sizeof(*vn));
-		vn->base.type = KDAL_NODE_EXPR_IDENT;
-		vn->base.line = line;
-		vn->base.col = col;
-		vn->u.sval = var;
-		kdal_ast_add_child(node, &vn->base);
-		kdal_ast_add_child(node, lo);
-		kdal_ast_add_child(node, hi);
-		if (body)
-			kdal_ast_add_child(node, body);
-		return node;
-	}
-
-	default:
-		/* Fallback: treat as assignment: lvalue = expr ; */
-		{
-			kdal_ast_t *lval = parse_expr(p);
-			if (p_cur(p)->type == TOK_EQ) {
-				p_advance(p);
-				kdal_ast_t *rval = parse_expr(p);
-				p_expect(p, TOK_SEMICOLON);
-				node = kdal_ast_new(p->arena,
-						    KDAL_NODE_ASSIGN_STMT, line,
-						    col);
-				kdal_ast_add_child(node, lval);
-				kdal_ast_add_child(node, rval);
-				return node;
-			}
-			/* Not a recognised statement */
-			kdal_error(p->filename, line, col,
-				   "unexpected token '%s' in statement",
-				   kdal_tok_name(t->type));
-			p->had_error = 1;
-			return NULL;
-		}
-	}
+	if (t->type == TOK_KW_LET)
+		return parse_let_statement(p, line, col);
+	if (t->type == TOK_KW_WRITE)
+		return parse_write_statement(p, line, col);
+	if (t->type == TOK_KW_EMIT)
+		return parse_emit_statement(p, line, col);
+	if (t->type == TOK_KW_WAIT)
+		return parse_wait_statement(p, line, col);
+	if (t->type == TOK_KW_ARM)
+		return parse_arm_statement(p, line, col);
+	if (t->type == TOK_KW_CANCEL)
+		return parse_cancel_statement(p, line, col);
+	if (t->type == TOK_KW_RETURN)
+		return parse_return_statement(p, line, col);
+	if (t->type == TOK_KW_LOG)
+		return parse_log_statement(p, line, col);
+	if (t->type == TOK_KW_IF)
+		return parse_if_statement(p, line, col);
+	if (t->type == TOK_KW_FOR)
+		return parse_for_statement(p, line, col);
+	return parse_assignment_statement(p, line, col, t);
 }
 
 /* ── Device class body parsers ────────────────────────────────────── */
@@ -669,7 +721,7 @@ static kdal_access_t parse_access(parser_t *p)
 	}
 }
 
-/* Parse bitfield members: name : bit_range [= val] ; */
+/* Parse bitfield members using name, bit range, and optional reset. */
 static kdal_ast_t *parse_bitfield_members(parser_t *p)
 {
 	kdal_ast_t *members = NULL;
@@ -683,7 +735,7 @@ static kdal_ast_t *parse_bitfield_members(parser_t *p)
 		m->name = p_intern(p, p_cur(p));
 		p_advance(p);
 		p_expect(p, TOK_COLON);
-		/* bit range: INT [.. INT] */
+		/* Parse a single bit or a low/high bit range. */
 		if (p_cur(p)->type == TOK_INT || p_cur(p)->type == TOK_HEX) {
 			m->bit_lo = (int)p_cur(p)->v.ival;
 			m->bit_hi = m->bit_lo;
@@ -697,7 +749,7 @@ static kdal_ast_t *parse_bitfield_members(parser_t *p)
 				}
 			}
 		}
-		/* optional reset value */
+		/* Parse an optional reset value. */
 		if (p_cur(p)->type == TOK_EQ) {
 			p_advance(p);
 			m->reset_val = parse_expr(p);
@@ -723,7 +775,7 @@ static kdal_ast_t *parse_register_decl(parser_t *p, int simplified)
 	p_advance(p);
 
 	if (simplified || p_cur(p)->type != TOK_COLON) {
-		/* Simplified form: NAME OFFSET ACCESS ; */
+		/* Compact register declaration with offset and access. */
 		if (p_cur(p)->type == TOK_HEX || p_cur(p)->type == TOK_INT) {
 			reg->offset = (uint64_t)p_cur(p)->v.ival;
 			p_advance(p);
@@ -731,7 +783,7 @@ static kdal_ast_t *parse_register_decl(parser_t *p, int simplified)
 		reg->access = parse_access(p);
 		p_expect(p, TOK_SEMICOLON);
 	} else {
-		/* Full form: NAME : TYPE [@ OFFSET] [ACCESS] [= RESET] ; */
+		/* Structured register declaration with type and optional metadata. */
 		p_expect(p, TOK_COLON);
 		if (p_cur(p)->type == TOK_KW_BITFIELD) {
 			reg->is_bitfield = 1;
@@ -752,7 +804,7 @@ static kdal_ast_t *parse_register_decl(parser_t *p, int simplified)
 			p_expect(p, TOK_RBRACE);
 			p_expect(p, TOK_SEMICOLON);
 		} else {
-			/* scalar type: u8/u16/u32/u64 */
+			/* Scalar register width. */
 			switch (p_cur(p)->type) {
 			case TOK_KW_U8:
 				reg->width = 8;
@@ -812,7 +864,7 @@ static kdal_ast_t *parse_signal_decl(parser_t *p)
 	p_advance(p);
 
 	if (p_cur(p)->type == TOK_COLON) {
-		/* Full form: name : dir trigger ; */
+		/* Structured signal declaration with direction and trigger. */
 		p_advance(p);
 		/* direction */
 		if (p_cur(p)->type == TOK_KW_IN) {
@@ -870,7 +922,7 @@ static kdal_ast_t *parse_signal_decl(parser_t *p)
 			p_expect(p, TOK_RPAREN);
 		}
 	}
-	/* else: simplified form - just name, defaults applied above */
+	/* Otherwise the simplified declaration uses the default signal settings. */
 	p_expect(p, TOK_SEMICOLON);
 	return &sig->base;
 }
@@ -887,11 +939,11 @@ static kdal_ast_t *parse_capability_decl(parser_t *p)
 	p_advance(p);
 
 	if (p_cur(p)->type == TOK_EQ) {
-		/* Full form: name = value ; */
+		/* Explicit capability value. */
 		p_advance(p);
 		cap->value = parse_expr(p);
 	} else if (p_cur(p)->type != TOK_SEMICOLON) {
-		/* Simplified form: name value ; (no =) */
+		/* Compact capability declaration without an equals token. */
 		cap->value = parse_expr(p);
 	}
 	p_expect(p, TOK_SEMICOLON);
@@ -918,7 +970,7 @@ static kdal_ast_t *parse_power_state_decl(parser_t *p, int simplified)
 	p_advance(p);
 
 	if (!simplified && p_cur(p)->type == TOK_COLON) {
-		/* Full form: name : spec ; */
+		/* Structured power-state declaration with a spec name. */
 		p_advance(p);
 		ps->spec = p_intern(p, p_cur(p));
 		p_advance(p);
@@ -927,7 +979,7 @@ static kdal_ast_t *parse_power_state_decl(parser_t *p, int simplified)
 	return &ps->base;
 }
 
-/* Parse a single config field declaration: name : type [= val] [in lo..hi] ; */
+/* Parse a config field with type plus optional default and range. */
 static kdal_ast_t *parse_config_field_decl(parser_t *p)
 {
 	int line = p_cur(p)->line, col = p_cur(p)->col;
@@ -938,15 +990,15 @@ static kdal_ast_t *parse_config_field_decl(parser_t *p)
 	cf->name = p_intern(p, p_cur(p));
 	p_advance(p);
 	p_expect(p, TOK_COLON);
-	/* type keyword */
+	/* Parse the type keyword. */
 	cf->type_kw = (int)p_cur(p)->type;
 	p_advance(p);
-	/* optional default value */
+	/* Parse an optional default value. */
 	if (p_cur(p)->type == TOK_EQ) {
 		p_advance(p);
 		cf->default_val = parse_expr(p);
 	}
-	/* optional range: in lo..hi */
+	/* Parse an optional inclusive range. */
 	if (p_cur(p)->type == TOK_KW_IN) {
 		p_advance(p);
 		cf->range_lo = parse_expr(p);
@@ -962,7 +1014,7 @@ static void parse_device_class_body(parser_t *p, kdal_device_node_t *dev)
 {
 	while (p_cur(p)->type != TOK_RBRACE && p_cur(p)->type != TOK_EOF) {
 		if (p_cur(p)->type == TOK_KW_CLASS) {
-			/* class <ident>; - device class type (simplified) */
+			/* Simplified class declaration for the device class type. */
 			p_advance(p);
 			if (p_cur(p)->type == TOK_IDENT)
 				dev->device_class_type = p_intern(p, p_cur(p));
@@ -970,7 +1022,7 @@ static void parse_device_class_body(parser_t *p, kdal_device_node_t *dev)
 			p_expect(p, TOK_SEMICOLON);
 
 		} else if (p_is_ident(p, "compatible")) {
-			/* compatible "string"; */
+			/* Compatible string declaration. */
 			p_advance(p);
 			if (p_cur(p)->type == TOK_STRING)
 				dev->compatible = p_intern(p, p_cur(p));
@@ -1087,17 +1139,31 @@ static void parse_device_class_body(parser_t *p, kdal_device_node_t *dev)
 kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 			     int ntokens, const char *filename)
 {
+	char *filename_copy;
+	size_t filename_len;
+
+	if (!arena || !tokens || ntokens < 0 || !filename)
+		return NULL;
+
+	filename_len = strlen(filename) + 1;
+	filename_copy = kdal_arena_alloc(arena, filename_len);
+	if (!filename_copy)
+		return NULL;
+	memcpy(filename_copy, filename, filename_len);
+
 	parser_t p = {
 		.tokens = tokens,
 		.ntokens = ntokens,
 		.pos = 0,
 		.arena = arena,
-		.filename = filename,
+		.filename = filename_copy,
 	};
 
 	kdal_file_node_t *file = kdal_arena_alloc(arena, sizeof(*file));
+	if (!file)
+		return NULL;
 	file->base.type = KDAL_NODE_FILE;
-	file->filename = filename;
+	file->filename = filename_copy;
 
 	/* version_decl? */
 	if (p_cur(&p)->type == TOK_KW_KDAL_VERSION) {
