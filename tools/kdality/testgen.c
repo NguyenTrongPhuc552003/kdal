@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+#include <unistd.h>
 
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
@@ -358,8 +359,35 @@ int kdality_testgen(int argc, char *const argv[])
 		return 1;
 	}
 
+	char cwd[PATH_MAX];
+	char resolved_input[PATH_MAX];
+	char resolved_cwd[PATH_MAX];
+	size_t cwd_len;
+
+	if (!getcwd(cwd, sizeof(cwd))) {
+		perror("test-gen: getcwd");
+		return 1;
+	}
+
+	if (!realpath(cwd, resolved_cwd)) {
+		perror("test-gen: realpath(cwd)");
+		return 1;
+	}
+
+	if (!realpath(input, resolved_input)) {
+		perror("test-gen: realpath(input)");
+		return 1;
+	}
+
+	cwd_len = strlen(resolved_cwd);
+	if (strncmp(resolved_input, resolved_cwd, cwd_len) != 0 ||
+	    (resolved_input[cwd_len] != '\0' && resolved_input[cwd_len] != '/')) {
+		fprintf(stderr, "test-gen: input path escapes working directory: '%s'\n", input);
+		return 1;
+	}
+
 	struct kdc_info info;
-	if (parse_kdc(input, &info) != 0)
+	if (parse_kdc(resolved_input, &info) != 0)
 		return 1;
 
 	if (generate_kunit(&info, outdir) != 0)
