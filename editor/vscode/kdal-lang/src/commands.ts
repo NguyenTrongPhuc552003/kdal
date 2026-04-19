@@ -60,10 +60,33 @@ export async function installSDKCommand(): Promise<void> {
     'curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh'
   );
 
-  // Watch for terminal close to trigger re-detection
+  // Poll for the binaries every 3 s for up to 5 minutes.
+  // This is more reliable than onDidCloseTerminal because the user may leave
+  // the terminal open after the install script finishes.
+  const kdalcPath = require("path").join(
+    process.env["KDAL_HOME"] || require("path").join(process.env["HOME"] || "", ".kdal"),
+    "bin", "kdalc"
+  );
+  const fs = require("fs") as typeof import("fs");
+  let elapsed = 0;
+  const POLL_MS = 3000;
+  const MAX_MS = 5 * 60 * 1000;
+  const poll = setInterval(() => {
+    elapsed += POLL_MS;
+    if (fs.existsSync(kdalcPath)) {
+      clearInterval(poll);
+      vscode.commands.executeCommand("kdal.redetectToolchain");
+      vscode.window.showInformationMessage("KDAL SDK installed successfully.");
+    } else if (elapsed >= MAX_MS) {
+      clearInterval(poll);
+    }
+  }, POLL_MS);
+
+  // Also re-detect when the terminal is closed (belt-and-suspenders)
   const disposable = vscode.window.onDidCloseTerminal((t) => {
     if (t === terminal) {
       disposable.dispose();
+      clearInterval(poll);
       vscode.commands.executeCommand("kdal.redetectToolchain");
     }
   });
