@@ -10,9 +10,12 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 /* ── Simple .kdh scanner ─────────────────────────────────────────
  *
@@ -44,6 +47,54 @@ struct kdh_info {
 	char signals[MAX_SIGNALS][NAME_LEN];
 	int nsignals;
 };
+
+static int is_safe_filename_component(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+	for (; *s; s++) {
+		if (!(('a' <= *s && *s <= 'z') || ('A' <= *s && *s <= 'Z') ||
+		      ('0' <= *s && *s <= '9') || *s == '_' || *s == '-'))
+			return 0;
+	}
+	return 1;
+}
+
+static FILE *open_output_in_dir(const char *outdir, const char *filename,
+				char *full_path, size_t full_path_size)
+{
+	int dirfd, fd;
+	FILE *fp;
+
+	if (!is_safe_filename_component(filename)) {
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (snprintf(full_path, full_path_size, "%s/%s", outdir, filename) >=
+	    (int)full_path_size) {
+		errno = ENAMETOOLONG;
+		return NULL;
+	}
+
+	dirfd = open(outdir, O_RDONLY | O_DIRECTORY);
+	if (dirfd < 0)
+		return NULL;
+
+	fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
+		    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	close(dirfd);
+	if (fd < 0)
+		return NULL;
+
+	fp = fdopen(fd, "w");
+	if (!fp) {
+		close(fd);
+		return NULL;
+	}
+
+	return fp;
+}
 
 static int parse_kdh(const char *path, struct kdh_info *info)
 {
@@ -143,7 +194,7 @@ static int parse_kdh(const char *path, struct kdh_info *info)
 			continue;
 		}
 
-		/* register entries: NAME 0xOFFSET mode; */
+		/* Parse register entries in the compact header format. */
 		if (in_regmap && info->nregs < MAX_REGS) {
 			char rname[NAME_LEN];
 			unsigned long off;
@@ -156,7 +207,7 @@ static int parse_kdh(const char *path, struct kdh_info *info)
 			continue;
 		}
 
-		/* signal entries: name; */
+		/* Parse signal names from the compact header format. */
 		if (in_signals && info->nsignals < MAX_SIGNALS) {
 			char sname[NAME_LEN];
 			if (sscanf(p, "%63[^; \t\n]", sname) == 1) {
@@ -187,7 +238,8 @@ static int parse_kdh(const char *path, struct kdh_info *info)
 static int generate_dtso(const struct kdh_info *info, const char *outdir,
 			 unsigned long base_addr, int irq_num)
 {
-	char path[512];
+	char filename[NAME_LEN + 6];
+	char path[PATH_MAX];
 	FILE *fp;
 	unsigned long reg_size;
 
@@ -205,8 +257,19 @@ static int generate_dtso(const struct kdh_info *info, const char *outdir,
 			reg_size = 0x100;
 	}
 
-	snprintf(path, sizeof(path), "%s/%s.dtso", outdir, info->device_name);
-	fp = fopen(path, "w");
+	if (!is_safe_filename_component(info->device_name)) {
+		fprintf(stderr, "dt-gen: invalid device name '%s'\n",
+			info->device_name);
+		return -1;
+	}
+
+	if (snprintf(filename, sizeof(filename), "%s.dtso",
+		     info->device_name) >= (int)sizeof(filename)) {
+		fprintf(stderr, "dt-gen: output filename too long\n");
+		return -1;
+	}
+
+	fp = open_output_in_dir(outdir, filename, path, sizeof(path));
 	if (!fp) {
 		fprintf(stderr, "dt-gen: cannot create '%s': %s\n", path,
 			strerror(errno));
@@ -294,24 +357,42 @@ int kdality_dtgen(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	const char *outdir = ".";
+	char resolved_input[PATH_MAX];
+	char resolved_outdir[PATH_MAX];
 	unsigned long base_addr = 0x10000000;
 	int irq_num = -1;
 	struct kdh_info info;
+	int argi = 0;
 
-	for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-h") == 0 ||
-		    strcmp(argv[i], "--help") == 0) {
+	while (argi < argc) {
+		const char *arg = argv[argi++];
+
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			dtgen_help();
 			return 0;
-		} else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-			outdir = argv[++i];
-		} else if (strcmp(argv[i], "--base-addr") == 0 &&
-			   i + 1 < argc) {
-			base_addr = strtoul(argv[++i], NULL, 0);
-		} else if (strcmp(argv[i], "--irq") == 0 && i + 1 < argc) {
-			irq_num = atoi(argv[++i]);
-		} else if (argv[i][0] != '-') {
-			input = argv[i];
+		} else if (strcmp(arg, "-o") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"dt-gen: missing value for '-o'\n");
+				return 1;
+			}
+			outdir = argv[argi++];
+		} else if (strcmp(arg, "--base-addr") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"dt-gen: missing value for '--base-addr'\n");
+				return 1;
+			}
+			base_addr = strtoul(argv[argi++], NULL, 0);
+		} else if (strcmp(arg, "--irq") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"dt-gen: missing value for '--irq'\n");
+				return 1;
+			}
+			irq_num = atoi(argv[argi++]);
+		} else if (arg[0] != '-') {
+			input = arg;
 		}
 	}
 
@@ -321,13 +402,26 @@ int kdality_dtgen(int argc, char *const argv[])
 		return 1;
 	}
 
-	if (parse_kdh(input, &info) != 0)
+	if (!realpath(input, resolved_input)) {
+		fprintf(stderr, "dt-gen: cannot resolve '%s': %s\n", input,
+			strerror(errno));
+		return 1;
+	}
+
+	if (!realpath(outdir, resolved_outdir)) {
+		fprintf(stderr,
+			"dt-gen: cannot resolve output directory '%s': %s\n",
+			outdir, strerror(errno));
+		return 1;
+	}
+
+	if (parse_kdh(resolved_input, &info) != 0)
 		return 1;
 
-	if (generate_dtso(&info, outdir, base_addr, irq_num) != 0)
+	if (generate_dtso(&info, resolved_outdir, base_addr, irq_num) != 0)
 		return 1;
 
-	printf("Generated %s/%s.dtso\n", outdir, info.device_name);
+	printf("Generated %s/%s.dtso\n", resolved_outdir, info.device_name);
 	printf("  compatible: %s\n", info.compatible);
 	printf("  base addr:  0x%lx\n", base_addr);
 	printf("  reg size:   0x%lx\n",
@@ -338,7 +432,7 @@ int kdality_dtgen(int argc, char *const argv[])
 	if (irq_num >= 0)
 		printf("  irq:        %d\n", irq_num);
 	printf("\nCompile with: dtc -I dts -O dtb -o %s.dtbo %s/%s.dtso\n",
-	       info.device_name, outdir, info.device_name);
+	       info.device_name, resolved_outdir, info.device_name);
 
 	return 0;
 }
