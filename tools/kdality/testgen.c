@@ -17,6 +17,25 @@
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
 
+static int is_safe_filename_component(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+	if (strstr(s, "..") || strchr(s, '/') || strchr(s, '\\'))
+		return 0;
+	return 1;
+}
+
+static int is_safe_outdir(const char *s)
+{
+	if (!s || !*s)
+		return 0;
+	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
+	    strchr(s, '\r'))
+		return 0;
+	return 1;
+}
+
 struct handler_info {
 	char event[NAME_LEN]; /* e.g. "probe", "read", "power on" */
 	char label[NAME_LEN]; /* e.g. "probe", "read", "power_on" */
@@ -91,6 +110,13 @@ static int parse_kdc(const char *path, struct kdc_info *info)
 		return -1;
 	}
 
+	if (!is_safe_filename_component(info->driver_name)) {
+		fprintf(stderr,
+			"test-gen: invalid driver name '%s' in '%s'\n",
+			info->driver_name, path);
+		return -1;
+	}
+
 	return 0;
 }
 
@@ -100,6 +126,18 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 {
 	char path[512];
 	FILE *fp;
+
+	if (!is_safe_outdir(outdir)) {
+		fprintf(stderr, "test-gen: invalid output directory '%s'\n",
+			outdir ? outdir : "(null)");
+		return -1;
+	}
+
+	if (!is_safe_filename_component(info->driver_name)) {
+		fprintf(stderr, "test-gen: invalid driver name '%s'\n",
+			info->driver_name);
+		return -1;
+	}
 
 	snprintf(path, sizeof(path), "%s/test_%s.c", outdir, info->driver_name);
 	fp = fopen(path, "w");
