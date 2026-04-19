@@ -41,7 +41,10 @@ docker info >/dev/null 2>&1 || die "Docker daemon is not running"
 test_deb() {
     info "Testing DEB packaging (ubuntu:latest, matches CI build-deb job)"
 
-    docker run --rm \
+    # NOTE: Use explicit if/return — NOT relying on set -e propagation.
+    # POSIX set -e is suppressed inside functions called with "|| FAILED=1",
+    # so docker run failure would be silently swallowed without this guard.
+    if ! docker run --rm \
         -v "$REPO_ROOT:/workspace:ro" \
         -w /tmp/kdal-deb \
         ubuntu:latest \
@@ -57,6 +60,13 @@ test_deb() {
 
             # Mirror CI: Prepare Debian source tree
             cp -r packaging/debian .
+
+            # Mirror CI: Validate source format (mirrors CI validation step)
+            FORMAT="$(cat debian/source/format)"
+            if [ "$FORMAT" != "3.0 (quilt)" ]; then
+                echo "ERROR: debian/source/format must be [3.0 (quilt)], got: [$FORMAT]" >&2
+                exit 1
+            fi
 
             # Mirror CI: Build DEB package with -d (skip dep re-check)
             dpkg-buildpackage -us -uc -b -d
@@ -76,7 +86,10 @@ test_deb() {
                 dpkg -c "$deb"
                 echo ""
             done
-        '
+        '; then
+        fail "DEB packaging: FAILED (docker run exited non-zero)"
+        return 1
+    fi
 
     ok "DEB packaging: passed"
 }
@@ -86,7 +99,7 @@ test_deb() {
 test_rpm() {
     info "Testing RPM packaging (fedora:latest, matches CI build-rpm job)"
 
-    docker run --rm \
+    if ! docker run --rm \
         -v "$REPO_ROOT:/workspace:ro" \
         -w /tmp/kdal-rpm \
         fedora:latest \
@@ -125,7 +138,10 @@ test_rpm() {
             echo ""
             echo "==> RPM contents:"
             find rpmbuild/RPMS -name "*.rpm" -exec rpm -qlp {} \;
-        '
+        '; then
+        fail "RPM packaging: FAILED (docker run exited non-zero)"
+        return 1
+    fi
 
     ok "RPM packaging: passed"
 }
