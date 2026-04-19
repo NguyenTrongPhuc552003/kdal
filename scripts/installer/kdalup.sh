@@ -112,22 +112,40 @@ download() {
 
 # ── Version resolution ────────────────────────────────────────────────
 
-# Resolve "latest" to an actual tag via the GitHub API redirect.
+# Resolve "latest" to an actual tag via the GitHub Releases API.
+# Primary: JSON API endpoint (works even if the redirect returns 404).
+# Fallback: HTML redirect trick for environments without JSON parsing.
 resolve_latest_version() {
-	_dl="$(downloader)"
+	_api_url="https://api.github.com/repos/${KDAL_GITHUB}/releases/latest"
+	_tag=""
 
-	case "$_dl" in
-	curl)
-		_tag="$(curl -fsSL -o /dev/null -w '%{url_effective}' \
-			"${KDAL_RELEASES}/latest" 2>/dev/null |
-			grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9._-]*$')" || true
-		;;
-	wget)
-		_tag="$(wget -q --max-redirect=0 -O /dev/null \
-			"${KDAL_RELEASES}/latest" 2>&1 |
-			grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9._-]*')" || true
-		;;
-	esac
+	# ── Primary: GitHub Releases JSON API ────────────────────────────
+	if command -v curl >/dev/null 2>&1; then
+		_tag="$(curl -fsSL --retry 3 --retry-delay 2 \
+			-H 'Accept: application/vnd.github+json' \
+			"$_api_url" 2>/dev/null |
+			grep '"tag_name"' | head -1 |
+			sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')" || true
+	elif command -v wget >/dev/null 2>&1; then
+		_tag="$(wget -q -O - \
+			--header='Accept: application/vnd.github+json' \
+			"$_api_url" 2>/dev/null |
+			grep '"tag_name"' | head -1 |
+			sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')" || true
+	fi
+
+	# ── Fallback: redirect URL trick ─────────────────────────────────
+	if [ -z "${_tag:-}" ]; then
+		if command -v curl >/dev/null 2>&1; then
+			_tag="$(curl -fsSL -o /dev/null -w '%{url_effective}' \
+				"${KDAL_RELEASES}/latest" 2>/dev/null |
+				grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9._-]*$')" || true
+		elif command -v wget >/dev/null 2>&1; then
+			_tag="$(wget -q --max-redirect=0 -O /dev/null \
+				"${KDAL_RELEASES}/latest" 2>&1 |
+				grep -oE 'v[0-9]+\.[0-9]+\.[0-9]+[a-zA-Z0-9._-]*')" || true
+		fi
+	fi
 
 	if [ -z "${_tag:-}" ]; then
 		err "Could not determine latest version from GitHub."
