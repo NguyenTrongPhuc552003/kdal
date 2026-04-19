@@ -451,6 +451,9 @@ int kdality_lint(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	int strict = 0;
+	char base_resolved[PATH_MAX];
+	char resolved_input[PATH_MAX];
+	const char *safe_input;
 
 	for (int i = 0; i < argc; i++) {
 		if (strcmp(argv[i], "-h") == 0 ||
@@ -476,15 +479,34 @@ int kdality_lint(int argc, char *const argv[])
 		return 1;
 	}
 
+	if (realpath(".", base_resolved) == NULL) {
+		perror("lint: failed to resolve base directory");
+		return 1;
+	}
+
+	if (realpath(input, resolved_input) == NULL) {
+		perror("lint: failed to resolve input path");
+		return 1;
+	}
+
+	size_t base_len = strlen(base_resolved);
+	if (strncmp(resolved_input, base_resolved, base_len) != 0 ||
+	    (resolved_input[base_len] != '\0' && resolved_input[base_len] != '/')) {
+		fprintf(stderr, "lint: input path escapes current working directory\n");
+		return 1;
+	}
+
+	safe_input = resolved_input;
+
 	struct lint_ctx ctx;
 	memset(&ctx, 0, sizeof(ctx));
-	ctx.filename = input;
+	ctx.filename = safe_input;
 	ctx.strict = strict;
 
 	/* Determine file type */
-	size_t len = strlen(input);
-	int is_kdh = (len > 4 && strcmp(input + len - 4, ".kdh") == 0);
-	int is_kdc = (len > 4 && strcmp(input + len - 4, ".kdc") == 0);
+	size_t len = strlen(safe_input);
+	int is_kdh = (len > 4 && strcmp(safe_input + len - 4, ".kdh") == 0);
+	int is_kdc = (len > 4 && strcmp(safe_input + len - 4, ".kdc") == 0);
 
 	if (!is_kdh && !is_kdc) {
 		fprintf(stderr,
@@ -494,9 +516,9 @@ int kdality_lint(int argc, char *const argv[])
 
 	int rc;
 	if (is_kdh)
-		rc = lint_kdh(&ctx, input);
+		rc = lint_kdh(&ctx, safe_input);
 	else
-		rc = lint_kdc(&ctx, input);
+		rc = lint_kdc(&ctx, safe_input);
 
 	if (rc != 0)
 		return 1;
@@ -504,7 +526,7 @@ int kdality_lint(int argc, char *const argv[])
 	print_warnings(&ctx);
 
 	if (ctx.nwarns == 0)
-		printf("%s: OK (0 warnings)\n", input);
+		printf("%s: OK (0 warnings)\n", safe_input);
 	else
 		printf("\n%d warning(s)\n", ctx.nwarns);
 
