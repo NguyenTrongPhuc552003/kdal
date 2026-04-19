@@ -12,9 +12,34 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdbool.h>
 
 /* libkdalc public API */
 #include "../../compiler/include/codegen.h"
+
+static bool is_safe_output_dir(const char *dir)
+{
+	const char *p;
+
+	if (!dir || dir[0] == '\0')
+		return false;
+
+	/* Disallow absolute paths */
+	if (dir[0] == '/' || dir[0] == '\\')
+		return false;
+
+	/* Disallow any ".." path segment */
+	p = dir;
+	while (*p) {
+		if (p[0] == '.' && p[1] == '.' &&
+		    (p == dir || p[-1] == '/' || p[-1] == '\\') &&
+		    (p[2] == '\0' || p[2] == '/' || p[2] == '\\'))
+			return false;
+		p++;
+	}
+
+	return true;
+}
 
 static void compile_help(void)
 {
@@ -51,7 +76,14 @@ int kdality_compile(int argc, char *const argv[])
 		} else if (strcmp(argv[i], "-v") == 0) {
 			opts.verbose = 1;
 		} else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-			opts.output_dir = argv[++i];
+			const char *out_dir = argv[++i];
+			if (!is_safe_output_dir(out_dir)) {
+				fprintf(stderr,
+					"kdality compile: invalid output directory '%s'\n",
+					out_dir);
+				return 1;
+			}
+			opts.output_dir = out_dir;
 		} else if (strcmp(argv[i], "-K") == 0 && i + 1 < argc) {
 			opts.kernel_dir = argv[++i];
 		} else if (strcmp(argv[i], "-x") == 0 && i + 1 < argc) {
