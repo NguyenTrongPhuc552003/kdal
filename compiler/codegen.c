@@ -18,6 +18,7 @@
 #include <stdarg.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <limits.h>
 #include <unistd.h>
 #include <sys/stat.h>
 
@@ -300,18 +301,54 @@ static void emit_stmts(writer_t *w, const kdal_ast_t *stmts)
 
 /* ── Top-level codegen ───────────────────────────────────────────── */
 
-static int emit_c_file(const kdal_file_node_t *file, const char *out_path)
+static FILE *open_output_in_dir(const char *dir, const char *filename,
+				char *full_path, size_t full_path_size)
 {
-	int fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-	if (fd < 0) {
-		fprintf(stderr, "kdalc: cannot open output '%s': %s\n",
-			out_path, strerror(errno));
-		return -1;
+	char resolved_dir[PATH_MAX];
+	int dirfd, fd;
+	FILE *fp;
+
+	if (!filename || filename[0] == '\0' || strchr(filename, '/') ||
+	    strchr(filename, '\\')) {
+		errno = EINVAL;
+		return NULL;
 	}
 
-	FILE *fp = fdopen(fd, "w");
+	if (!realpath(dir ? dir : ".", resolved_dir))
+		return NULL;
+
+	if (snprintf(full_path, full_path_size, "%s/%s", resolved_dir,
+		     filename) >= (int)full_path_size) {
+		errno = ENAMETOOLONG;
+		return NULL;
+	}
+
+	dirfd = open(resolved_dir, O_RDONLY | O_DIRECTORY);
+	if (dirfd < 0)
+		return NULL;
+
+	fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
+		    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
+	close(dirfd);
+	if (fd < 0)
+		return NULL;
+
+	fp = fdopen(fd, "w");
 	if (!fp) {
 		close(fd);
+		return NULL;
+	}
+
+	return fp;
+}
+
+static int emit_c_file(const kdal_file_node_t *file, const char *out_dir,
+		       const char *out_name)
+{
+	char out_path[PATH_MAX];
+	FILE *fp = open_output_in_dir(out_dir, out_name, out_path,
+				      sizeof(out_path));
+	if (!fp) {
 		fprintf(stderr, "kdalc: cannot open output '%s': %s\n",
 			out_path, strerror(errno));
 		return -1;
@@ -462,16 +499,16 @@ static int emit_c_file(const kdal_file_node_t *file, const char *out_path)
 	return 0;
 }
 
-static int emit_kbuild(const kdal_file_node_t *file, const char *out_path,
-		       const char *kernel_dir, const char *cross_compile)
+static int emit_kbuild(const kdal_file_node_t *file, const char *out_dir,
+		       const char *out_name, const char *kernel_dir,
+		       const char *cross_compile)
 {
-	int fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
-	FILE *fp;
-	if (fd < 0)
-		return -1;
-	fp = fdopen(fd, "w");
+	char out_path[PATH_MAX];
+	FILE *fp = open_output_in_dir(out_dir, out_name, out_path,
+				      sizeof(out_path));
 	if (!fp) {
-		close(fd);
+		fprintf(stderr, "kdalc: cannot open output '%s': %s\n",
+			out_path, strerror(errno));
 		return -1;
 	}
 	const kdal_driver_node_t *drv =
@@ -504,19 +541,25 @@ int kdal_generate(const kdal_file_node_t *file, const char *src_path,
 		(const kdal_driver_node_t *)file->driver;
 	const char *name = drv ? drv->name : "unknown";
 
-	char c_path[512], mk_path[512];
+	char c_name[256];
 	const char *dir = opts->output_dir ? opts->output_dir : ".";
-	snprintf(c_path, sizeof(c_path), "%s/%s.c", dir, name);
-	snprintf(mk_path, sizeof(mk_path), "%s/Makefile.kbuild", dir);
+
+	if (snprintf(c_name, sizeof(c_name), "%s.c", name) >=
+	    (int)sizeof(c_name)) {
+		fprintf(stderr, "kdalc: generated filename too long for '%s'\n",
+			name);
+		return -1;
+	}
 
 	if (opts->verbose)
-		fprintf(stderr, "kdalc: generating %s and %s\n", c_path,
-			mk_path);
+		fprintf(stderr,
+			"kdalc: generating %s/%s and %s/Makefile.kbuild\n", dir,
+			c_name, dir);
 
-	if (emit_c_file(file, c_path) < 0)
+	if (emit_c_file(file, dir, c_name) < 0)
 		return -1;
-	if (emit_kbuild(file, mk_path, opts->kernel_dir, opts->cross_compile) <
-	    0)
+	if (emit_kbuild(file, dir, "Makefile.kbuild", opts->kernel_dir,
+			opts->cross_compile) < 0)
 		return -1;
 	return 0;
 }
@@ -525,10 +568,18 @@ int kdal_generate(const kdal_file_node_t *file, const char *src_path,
 
 int kdal_compile_file(const char *src_path, const kdal_codegen_opts_t *opts)
 {
+	char resolved_src[PATH_MAX];
+
+	if (!realpath(src_path, resolved_src)) {
+		fprintf(stderr, "kdalc: cannot resolve '%s': %s\n", src_path,
+			strerror(errno));
+		return -1;
+	}
+
 	/* Read source */
-	FILE *fp = fopen(src_path, "r");
+	FILE *fp = fopen(resolved_src, "r");
 	if (!fp) {
-		fprintf(stderr, "kdalc: cannot open '%s': %s\n", src_path,
+		fprintf(stderr, "kdalc: cannot open '%s': %s\n", resolved_src,
 			strerror(errno));
 		return -1;
 	}
@@ -554,27 +605,28 @@ int kdal_compile_file(const char *src_path, const kdal_codegen_opts_t *opts)
 
 	/* Lex */
 	kdal_token_t *tokens = NULL;
-	int ntokens = kdal_lex(arena, src, nread, &tokens, src_path);
+	int ntokens = kdal_lex(arena, src, nread, &tokens, resolved_src);
 	if (ntokens < 0) {
 		rc = -1;
 		goto out;
 	}
 
 	/* Parse */
-	kdal_file_node_t *file = kdal_parse(arena, tokens, ntokens, src_path);
+	kdal_file_node_t *file =
+		kdal_parse(arena, tokens, ntokens, resolved_src);
 	if (!file) {
 		rc = -1;
 		goto out;
 	}
 
 	/* Sema */
-	if (kdal_sema(file, src_path) < 0) {
+	if (kdal_sema(file, resolved_src) < 0) {
 		rc = -1;
 		goto out;
 	}
 
 	/* Codegen */
-	rc = kdal_generate(file, src_path, opts);
+	rc = kdal_generate(file, resolved_src, opts);
 
 out:
 	kdal_arena_free(arena);
