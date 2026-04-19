@@ -28,11 +28,42 @@ static int is_safe_filename_component(const char *s)
 
 static int is_safe_outdir(const char *s)
 {
+	const char *p, *seg;
+
 	if (!s || !*s)
 		return 0;
-	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
-	    strchr(s, '\r'))
+
+	/* Only allow relative paths. */
+	if (s[0] == '/')
 		return 0;
+
+	/* Reject obvious dangerous characters/patterns. */
+	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
+	    strchr(s, '\r') || strchr(s, ':') || strstr(s, "//"))
+		return 0;
+
+	/* Validate each path segment. */
+	seg = s;
+	for (p = s; ; p++) {
+		if (*p == '/' || *p == '\0') {
+			size_t len = (size_t)(p - seg);
+
+			/* Empty segment (e.g. "a//b" or trailing "/"). */
+			if (len == 0)
+				return 0;
+
+			/* Reject "." and ".." segments explicitly. */
+			if ((len == 1 && seg[0] == '.') ||
+			    (len == 2 && seg[0] == '.' && seg[1] == '.'))
+				return 0;
+
+			if (*p == '\0')
+				break;
+
+			seg = p + 1;
+		}
+	}
+
 	return 1;
 }
 
