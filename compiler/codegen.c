@@ -25,6 +25,36 @@
 #include "include/ast.h"
 #include "include/codegen.h"
 
+static int is_safe_output_dir(const char *dir)
+{
+	const char *p;
+
+	if (!dir || dir[0] == '\0')
+		return 0;
+
+	/* Reject absolute paths. */
+	if (dir[0] == '/')
+		return 0;
+
+	/*
+	 * Reject any ".." path component:
+	 * "..", "../x", "x/..", "x/../y", etc.
+	 */
+	p = dir;
+	while ((p = strstr(p, "..")) != NULL) {
+		char prev = (p == dir) ? '/' : p[-1];
+		char next = p[2];
+		int prev_sep = (prev == '/');
+		int next_sep_or_end = (next == '/' || next == '\0');
+
+		if (prev_sep && next_sep_or_end)
+			return 0;
+		p += 2;
+	}
+
+	return 1;
+}
+
 /* ── Diagnostic implementation ───────────────────────────────────── */
 
 void kdal_error(const char *filename, int line, int col, const char *fmt, ...)
@@ -506,6 +536,10 @@ int kdal_generate(const kdal_file_node_t *file, const char *src_path,
 
 	char c_path[512], mk_path[512];
 	const char *dir = opts->output_dir ? opts->output_dir : ".";
+	if (!is_safe_output_dir(dir)) {
+		fprintf(stderr, "kdalc: invalid output directory '%s'\n", dir);
+		return -1;
+	}
 	snprintf(c_path, sizeof(c_path), "%s/%s.c", dir, name);
 	snprintf(mk_path, sizeof(mk_path), "%s/Makefile.kbuild", dir);
 
