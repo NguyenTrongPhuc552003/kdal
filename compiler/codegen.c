@@ -465,9 +465,15 @@ static int emit_c_file(const kdal_file_node_t *file, const char *out_path)
 static int emit_kbuild(const kdal_file_node_t *file, const char *out_path,
 		       const char *kernel_dir, const char *cross_compile)
 {
-	FILE *fp = fopen(out_path, "w");
-	if (!fp)
+	int fd = open(out_path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	FILE *fp;
+	if (fd < 0)
 		return -1;
+	fp = fdopen(fd, "w");
+	if (!fp) {
+		close(fd);
+		return -1;
+	}
 	const kdal_driver_node_t *drv =
 		(const kdal_driver_node_t *)file->driver;
 	const char *name = drv ? drv->name : "unknown";
