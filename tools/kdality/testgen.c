@@ -200,7 +200,7 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 {
 	char path[PATH_MAX];
 	char base[PATH_MAX];
-	size_t base_len;
+	char filename[NAME_LEN + 16];
 	FILE *fp;
 
 	if (!is_safe_outdir(outdir)) {
@@ -221,27 +221,35 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		return -1;
 	}
 
-	if (snprintf(path, sizeof(path), "%s/test_%s.c", base,
-		     info->driver_name) >= (int)sizeof(path)) {
+	if (snprintf(filename, sizeof(filename), "test_%s.c",
+		     info->driver_name) >= (int)sizeof(filename)) {
+		fprintf(stderr, "test-gen: output filename too long\n");
+		return -1;
+	}
+
+	if (snprintf(path, sizeof(path), "%s/%s", base, filename) >= (int)sizeof(path)) {
 		fprintf(stderr, "test-gen: output path too long\n");
 		return -1;
 	}
 
-	base_len = strlen(base);
-	if (strncmp(path, base, base_len) != 0 ||
-	    (path[base_len] != '/' && path[base_len] != '\0')) {
-		fprintf(stderr, "test-gen: output path escapes output directory\n");
-		return -1;
-	}
-
 	{
-		int fd = open(path, O_WRONLY | O_CREAT | O_TRUNC,
-			      S_IRUSR | S_IWUSR);
+		int dirfd = open(base, O_RDONLY | O_DIRECTORY);
+		int fd;
+		if (dirfd < 0) {
+			fprintf(stderr, "test-gen: cannot open output directory '%s': %s\n",
+				base, strerror(errno));
+			return -1;
+		}
+
+		fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
+			    S_IRUSR | S_IWUSR);
 		if (fd < 0) {
 			fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
 				strerror(errno));
+			close(dirfd);
 			return -1;
 		}
+		close(dirfd);
 
 		fp = fdopen(fd, "w");
 		if (!fp) {
