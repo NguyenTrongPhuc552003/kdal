@@ -10,9 +10,13 @@
  */
 
 #include <errno.h>
+#include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
@@ -100,10 +104,19 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 {
 	char path[512];
 	FILE *fp;
+	int fd;
 
 	snprintf(path, sizeof(path), "%s/test_%s.c", outdir, info->driver_name);
-	fp = fopen(path, "w");
+	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+	if (fd < 0) {
+		fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
+			strerror(errno));
+		return -1;
+	}
+
+	fp = fdopen(fd, "w");
 	if (!fp) {
+		close(fd);
 		fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
 			strerror(errno));
 		return -1;
