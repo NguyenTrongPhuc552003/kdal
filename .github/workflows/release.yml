@@ -212,13 +212,21 @@ jobs:
       - name: Install build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y debhelper cmake gcc
+          sudo apt-get install -y build-essential debhelper cmake gcc
 
       - name: Prepare Debian source tree
         run: cp -r packaging/debian .
 
+      - name: Validate Debian source format
+        run: |
+          FORMAT="$(cat debian/source/format)"
+          if [ "$FORMAT" != "3.0 (quilt)" ]; then
+            echo "::error::debian/source/format must be exactly '3.0 (quilt)', got: '$FORMAT'"
+            exit 1
+          fi
+
       - name: Build DEB package
-        run: dpkg-buildpackage -us -uc -b
+        run: dpkg-buildpackage -us -uc -b -d
 
       - name: Collect DEB artifacts
         run: |

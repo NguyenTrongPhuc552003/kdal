@@ -264,6 +264,21 @@ cmd_verify() {
         ok "CHANGELOG.md: section for v$VERSION present"
     fi
 
+    # Local packaging smoke test (requires Docker)
+    if command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
+        info "Docker available — running local packaging tests (DEB + RPM)"
+        if [ "$DRY_RUN" -eq 1 ]; then
+            drymsg "Would run: $REPO_ROOT/scripts/ci/test_packaging.sh all"
+        else
+            "$REPO_ROOT/scripts/ci/test_packaging.sh" all \
+                && ok "Packaging smoke tests: passed" \
+                || die "Packaging smoke tests failed — fix before shipping"
+        fi
+    else
+        warn "Docker not running — skipping local DEB/RPM packaging tests"
+        warn "Run 'scripts/ci/test_packaging.sh' manually before pushing the tag"
+    fi
+
     ok "verify: all local checks passed"
 }
 
