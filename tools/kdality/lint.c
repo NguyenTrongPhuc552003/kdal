@@ -18,7 +18,9 @@
  *   W009  Magic number in reg_write (use named constants)
  */
 
+#include <ctype.h>
 #include <errno.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -405,6 +407,46 @@ static void lint_help(void)
 			"  W009  Magic number in reg_write (--strict)\n");
 }
 
+static int is_safe_lint_path(const char *path)
+{
+	size_t len;
+	const char *p;
+
+	if (!path || path[0] == '\0')
+		return 0;
+
+	len = strlen(path);
+	if (len >= PATH_MAX)
+		return 0;
+
+	/* Reject absolute paths (POSIX and Windows drive-letter style). */
+	if (path[0] == '/')
+		return 0;
+	if (isalpha((unsigned char)path[0]) && path[1] == ':')
+		return 0;
+
+	/* Reject Windows separators to prevent alternate traversal encoding. */
+	if (strchr(path, '\\') != NULL)
+		return 0;
+
+	/* Reject any ".." path segment. */
+	if (strcmp(path, "..") == 0)
+		return 0;
+	if (strncmp(path, "../", 3) == 0)
+		return 0;
+	if (len >= 3 && strcmp(path + len - 3, "/..") == 0)
+		return 0;
+	if (strstr(path, "/../") != NULL)
+		return 0;
+
+	for (p = path; *p; p++) {
+		if (*p == '\n' || *p == '\r')
+			return 0;
+	}
+
+	return 1;
+}
+
 int kdality_lint(int argc, char *const argv[])
 {
 	const char *input = NULL;
@@ -425,6 +467,12 @@ int kdality_lint(int argc, char *const argv[])
 	if (!input) {
 		fprintf(stderr, "lint: no input file\n\n");
 		lint_help();
+		return 1;
+	}
+
+	if (!is_safe_lint_path(input)) {
+		fprintf(stderr,
+			"lint: invalid input path (must be a safe relative path)\n");
 		return 1;
 	}
 
