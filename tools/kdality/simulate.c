@@ -422,6 +422,25 @@ static int simulate_file(const char *path, const char *target_event, int trace)
 	return 0;
 }
 
+static int is_safe_kdc_path(const char *path)
+{
+	size_t len;
+
+	if (!path || path[0] == '\0')
+		return 0;
+
+	/* Reject absolute or traversal-style inputs. */
+	if (path[0] == '/' || strchr(path, '\\') || strstr(path, ".."))
+		return 0;
+
+	/* Keep expected file type for this command. */
+	len = strlen(path);
+	if (len < 4 || strcmp(path + len - 4, ".kdc") != 0)
+		return 0;
+
+	return 1;
+}
+
 /* ── help ────────────────────────────────────────────────────────── */
 
 static void simulate_help(void)
@@ -462,6 +481,13 @@ int kdality_simulate(int argc, char *const argv[])
 	if (!input) {
 		fprintf(stderr, "simulate: no input .kdc file\n\n");
 		simulate_help();
+		return 1;
+	}
+
+	if (!is_safe_kdc_path(input)) {
+		fprintf(stderr,
+			"simulate: invalid input path '%s' (must be a relative .kdc path without '..')\n",
+			input);
 		return 1;
 	}
 
