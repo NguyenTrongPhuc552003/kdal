@@ -1,6 +1,6 @@
 {
     "name": "kdal-lang",
-    "displayName": "KDAL Language Support",
+    "displayName": "KDAL - Kernel Driver Abstraction Language",
     "description": "Full IDE experience for KDAL device headers (.kdh) and driver files (.kdc) - syntax highlighting, lint, compile, simulate, and more.",
     "version": "0.1.0",
     "publisher": "phuctrong552003",
