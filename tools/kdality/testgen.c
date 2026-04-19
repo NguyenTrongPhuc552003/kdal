@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
@@ -194,7 +195,9 @@ static int parse_kdc(const char *path, struct kdc_info *info)
 
 static int generate_kunit(const struct kdc_info *info, const char *outdir)
 {
-	char path[512];
+	char path[PATH_MAX];
+	char base[PATH_MAX];
+	size_t base_len;
 	FILE *fp;
 
 	if (!is_safe_outdir(outdir)) {
@@ -209,7 +212,25 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 		return -1;
 	}
 
-	snprintf(path, sizeof(path), "%s/test_%s.c", outdir, info->driver_name);
+	if (!realpath(outdir, base)) {
+		fprintf(stderr, "test-gen: cannot resolve output directory '%s': %s\n",
+			outdir, strerror(errno));
+		return -1;
+	}
+
+	if (snprintf(path, sizeof(path), "%s/test_%s.c", base,
+		     info->driver_name) >= (int)sizeof(path)) {
+		fprintf(stderr, "test-gen: output path too long\n");
+		return -1;
+	}
+
+	base_len = strlen(base);
+	if (strncmp(path, base, base_len) != 0 ||
+	    (path[base_len] != '/' && path[base_len] != '\0')) {
+		fprintf(stderr, "test-gen: output path escapes output directory\n");
+		return -1;
+	}
+
 	fp = fopen(path, "w");
 	if (!fp) {
 		fprintf(stderr, "test-gen: cannot create '%s': %s\n", path,
