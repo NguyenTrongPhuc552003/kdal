@@ -23,12 +23,26 @@
 
 /* ── helpers ─────────────────────────────────────────────────────── */
 
+static int is_safe_path_component(const char *s)
+{
+	if (!s || !s[0])
+		return 0;
+	if (strstr(s, "..") || strchr(s, '/') || strchr(s, '\\'))
+		return 0;
+	return 1;
+}
+
 static int write_file(const char *dir, const char *filename,
 		      const char *content)
 {
 	char path[512];
 	FILE *fp;
 	int fd;
+
+	if (!is_safe_path_component(dir) || !is_safe_path_component(filename)) {
+		fprintf(stderr, "cannot create file: invalid path component\n");
+		return -1;
+	}
 
 	snprintf(path, sizeof(path), "%s/%s", dir, filename);
 	fd = open(path, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
