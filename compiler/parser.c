@@ -1097,7 +1097,9 @@ kdal_file_node_t *kdal_parse(kdal_arena_t *arena, const kdal_token_t *tokens,
 
 	kdal_file_node_t *file = kdal_arena_alloc(arena, sizeof(*file));
 	file->base.type = KDAL_NODE_FILE;
-	file->filename = filename;
+	kdal_token_t fn_tok = {0};
+	fn_tok.lexeme = filename ? filename : "";
+	file->filename = p_intern(&p, &fn_tok);
 
 	/* version_decl? */
 	if (p_cur(&p)->type == TOK_KW_KDAL_VERSION) {
