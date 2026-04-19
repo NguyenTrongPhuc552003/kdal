@@ -16,7 +16,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
+#include <limits.h>
 
 #include "include/token.h"
 #include "include/ast.h"
@@ -125,6 +127,19 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "%s: invalid input path\n", argv[0]);
 		return 1;
 	}
+
+	/*
+	 * Canonicalize the path to resolve symlinks and relative components.
+	 * This also serves as a sanitizer for static analysis (CodeQL) since
+	 * realpath() validates the path against the actual filesystem.
+	 */
+	char resolved[PATH_MAX];
+	if (!realpath(src_path, resolved)) {
+		fprintf(stderr, "%s: cannot resolve '%s': %s\n", argv[0],
+			src_path, strerror(errno));
+		return 1;
+	}
+	src_path = resolved;
 
 	/* Basic extension check */
 	const char *ext = strrchr(src_path, '.');
