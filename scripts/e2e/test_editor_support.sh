@@ -29,7 +29,7 @@ assert_file_exists "$VSCODE_DIR/README.md" "extension README"
 
 # package.json validation
 assert_file_contains "$VSCODE_DIR/package.json" '"name": "kdal-lang"' "package name"
-assert_file_contains "$VSCODE_DIR/package.json" '"publisher": "kdal-project"' "publisher"
+assert_file_contains "$VSCODE_DIR/package.json" '"publisher": "phuctrong552003"' "publisher"
 assert_file_contains "$VSCODE_DIR/package.json" '"version"' "has version field"
 assert_file_contains "$VSCODE_DIR/package.json" '"main": "./out/extension.js"' "main entry"
 assert_file_contains "$VSCODE_DIR/package.json" '"engines"' "VS Code engine constraint"
