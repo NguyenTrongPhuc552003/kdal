@@ -1,0 +1,56 @@
+#!/bin/sh
+# Validate commit message format against Conventional Commits.
+# Installed by: scripts/dev/install-hooks.sh
+#
+# Enforced pattern:
+#   <type>(<scope>): <description>
+#
+# Where type is one of:
+#   feat | fix | docs | style | refactor | test | chore | ci | build | perf | revert
+
+set -eu
+
+MSG_FILE="$1"
+FIRST_LINE=$(head -1 "$MSG_FILE")
+
+# Allow merge commits, revert commits, fixup/squash (created by git itself)
+case "$FIRST_LINE" in
+    Merge\ *|Revert\ *|fixup!*|squash!*) exit 0 ;;
+esac
+
+PATTERN='^(feat|fix|docs|style|refactor|test|chore|ci|build|perf|revert)(\(.+\))?(!)?: .{1,100}'
+
+if ! printf '%s' "$FIRST_LINE" | grep -qE "$PATTERN"; then
+    cat >&2 <<'EOF'
+─────────────────────────────────────────────────────────────────────
+KDAL: commit message does not follow Conventional Commits format.
+
+Expected format:
+  <type>(<scope>): <short description>
+
+Allowed types:
+  feat      New feature
+  fix       Bug fix
+  docs      Documentation only
+  style     Formatting, no logic change
+  refactor  Refactoring, no feature or fix
+  test      Adding or updating tests
+  chore     Build, tooling, or maintenance
+  ci        CI/CD pipeline changes
+  build     Build system changes
+  perf      Performance improvement
+  revert    Revert a previous commit
+
+Examples:
+  feat(compiler): add RISCV64 backend support
+  fix(installer): resolve path detection on macOS aarch64
+  docs(kernel): update architecture overview
+  chore(release): v0.2.0
+  ci(actions): add release artifact validation job
+
+Your message was:
+EOF
+    printf '  %s\n' "$FIRST_LINE" >&2
+    printf '─────────────────────────────────────────────────────────────────────\n' >&2
+    exit 1
+fi

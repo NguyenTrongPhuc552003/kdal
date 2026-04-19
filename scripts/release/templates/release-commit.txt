@@ -1,0 +1,13 @@
+chore(release): v{{VERSION}}
+
+Release KDAL v{{VERSION}} — {{DATE}}.
+
+Packaging targets:
+  SDK tarballs:  linux-x86_64  linux-aarch64  linux-riscv64
+                 darwin-aarch64  darwin-x86_64
+  Packages:      kdal_{{VERSION}}-1_amd64.deb
+                 kdal-{{VERSION}}-1.x86_64.rpm
+  Extension:     kdal-lang-{{VERSION}}.vsix
+
+See CHANGELOG.md for the full list of changes in this release.
+Artifacts: {{REPO_URL}}/releases/tag/v{{VERSION}}

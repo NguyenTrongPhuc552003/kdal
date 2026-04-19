@@ -1,0 +1,23 @@
+KDAL v{{VERSION}} — {{DATE}}
+
+Kernel Device Abstraction Layer v{{VERSION}}
+
+KDAL is a Linux kernel driver framework providing a DSL compiler (kdalc),
+CLI toolchain (kdality), and runtime library for portable, type-safe
+kernel driver development.
+
+Release artifacts:
+  SDK tarballs:  linux-x86_64, linux-aarch64, linux-riscv64,
+                 darwin-aarch64, darwin-x86_64
+  Packages:      kdal_{{VERSION}}-1_amd64.deb
+                 kdal-{{VERSION}}-1.x86_64.rpm
+  Extension:     kdal-lang-{{VERSION}}.vsix
+
+Installation:
+  curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
+
+Full release notes and checksums:
+  {{REPO_URL}}/releases/tag/v{{VERSION}}
+
+CHANGELOG:
+  {{REPO_URL}}/blob/v{{VERSION}}/CHANGELOG.md
