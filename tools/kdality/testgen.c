@@ -67,6 +67,45 @@ static int is_safe_outdir(const char *s)
 	return 1;
 }
 
+static int is_safe_input_path(const char *s)
+{
+	const char *p, *seg;
+
+	if (!s || !*s)
+		return 0;
+
+	/* Require relative path for input to avoid arbitrary absolute file access. */
+	if (s[0] == '/')
+		return 0;
+
+	/* Reject dangerous patterns/characters. */
+	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
+	    strchr(s, '\r') || strchr(s, ':') || strstr(s, "//"))
+		return 0;
+
+	/* Validate path segments and reject "." / ".." / empty segments. */
+	seg = s;
+	for (p = s; ; p++) {
+		if (*p == '/' || *p == '\0') {
+			size_t len = (size_t)(p - seg);
+
+			if (len == 0)
+				return 0;
+
+			if ((len == 1 && seg[0] == '.') ||
+			    (len == 2 && seg[0] == '.' && seg[1] == '.'))
+				return 0;
+
+			if (*p == '\0')
+				break;
+
+			seg = p + 1;
+		}
+	}
+
+	return 1;
+}
+
 struct handler_info {
 	char event[NAME_LEN]; /* e.g. "probe", "read", "power on" */
 	char label[NAME_LEN]; /* e.g. "probe", "read", "power_on" */
@@ -290,6 +329,11 @@ int kdality_testgen(int argc, char *const argv[])
 	if (!input) {
 		fprintf(stderr, "test-gen: no input .kdc file\n\n");
 		testgen_help();
+		return 1;
+	}
+
+	if (!is_safe_input_path(input)) {
+		fprintf(stderr, "test-gen: invalid input path '%s'\n", input);
 		return 1;
 	}
 
