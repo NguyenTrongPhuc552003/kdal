@@ -3,7 +3,7 @@
     "displayName": "KDAL Language Support",
     "description": "Full IDE experience for KDAL device headers (.kdh) and driver files (.kdc) - syntax highlighting, lint, compile, simulate, and more.",
     "version": "0.1.0",
-    "publisher": "kdal-project",
+    "publisher": "phuctrong552003",
     "license": "GPL-3.0-or-later",
     "icon": "icons/kdal-icon.png",
     "engines": {

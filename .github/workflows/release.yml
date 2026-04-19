@@ -300,6 +300,12 @@ jobs:
           npx @vscode/vsce package --no-dependencies
           mv ./*.vsix "$GITHUB_WORKSPACE/"
 
+      - name: Publish to VS Code Marketplace
+        working-directory: editor/vscode/kdal-lang
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: npx @vscode/vsce publish --no-dependencies --pat "$VSCE_PAT"
+
       - name: Upload VSIX artifact
         uses: actions/upload-artifact@v4
         with:
