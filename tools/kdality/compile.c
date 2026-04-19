@@ -11,8 +11,10 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <limits.h>
 
 /* libkdalc public API */
 #include "../../compiler/include/codegen.h"
@@ -67,16 +69,25 @@ int kdality_compile(int argc, char *const argv[])
 	};
 
 	const char *input = NULL;
+	char resolved_input[PATH_MAX];
+	int argi = 0;
 
-	for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-h") == 0 ||
-		    strcmp(argv[i], "--help") == 0) {
+	while (argi < argc) {
+		const char *arg = argv[argi++];
+
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			compile_help();
 			return 0;
-		} else if (strcmp(argv[i], "-v") == 0) {
+		} else if (strcmp(arg, "-v") == 0) {
 			opts.verbose = 1;
-		} else if (strcmp(argv[i], "-o") == 0 && i + 1 < argc) {
-			const char *out_dir = argv[++i];
+		} else if (strcmp(arg, "-o") == 0) {
+			const char *out_dir;
+			if (argi >= argc) {
+				fprintf(stderr,
+					"kdality compile: missing value for '-o'\n");
+				return 1;
+			}
+			out_dir = argv[argi++];
 			if (!is_safe_output_dir(out_dir)) {
 				fprintf(stderr,
 					"kdality compile: invalid output directory '%s'\n",
@@ -84,16 +95,25 @@ int kdality_compile(int argc, char *const argv[])
 				return 1;
 			}
 			opts.output_dir = out_dir;
-		} else if (strcmp(argv[i], "-K") == 0 && i + 1 < argc) {
-			opts.kernel_dir = argv[++i];
-		} else if (strcmp(argv[i], "-x") == 0 && i + 1 < argc) {
-			opts.cross_compile = argv[++i];
-		} else if (argv[i][0] != '-') {
-			input = argv[i];
+		} else if (strcmp(arg, "-K") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"kdality compile: missing value for '-K'\n");
+				return 1;
+			}
+			opts.kernel_dir = argv[argi++];
+		} else if (strcmp(arg, "-x") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"kdality compile: missing value for '-x'\n");
+				return 1;
+			}
+			opts.cross_compile = argv[argi++];
+		} else if (arg[0] != '-') {
+			input = arg;
 		} else {
 			fprintf(stderr,
-				"kdality compile: unknown option '%s'\n",
-				argv[i]);
+				"kdality compile: unknown option '%s'\n", arg);
 			return 1;
 		}
 	}
@@ -104,10 +124,16 @@ int kdality_compile(int argc, char *const argv[])
 		return 1;
 	}
 
-	int rc = kdal_compile_file(input, &opts);
+	if (!realpath(input, resolved_input)) {
+		fprintf(stderr, "kdality compile: cannot resolve '%s'\n",
+			input);
+		return 1;
+	}
+
+	int rc = kdal_compile_file(resolved_input, &opts);
 	if (rc != 0) {
 		fprintf(stderr, "kdality compile: failed to compile '%s'\n",
-			input);
+			resolved_input);
 		return 1;
 	}
 
