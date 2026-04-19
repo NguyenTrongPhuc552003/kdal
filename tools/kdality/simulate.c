@@ -12,6 +12,7 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -133,78 +134,74 @@ static unsigned long sim_eval(struct sim_state *s, const kdal_ast_t *expr)
 	if (!expr)
 		return 0;
 	const kdal_expr_node_t *e = (const kdal_expr_node_t *)expr;
+	unsigned long l, r, v;
 
-	switch (expr->type) {
-	case KDAL_NODE_EXPR_LITERAL_INT:
+	if (expr->type == KDAL_NODE_EXPR_LITERAL_INT)
 		return (unsigned long)e->u.ival;
-	case KDAL_NODE_EXPR_LITERAL_BOOL:
+	if (expr->type == KDAL_NODE_EXPR_LITERAL_BOOL)
 		return e->u.bval ? 1 : 0;
-	case KDAL_NODE_EXPR_LITERAL_STR:
+	if (expr->type == KDAL_NODE_EXPR_LITERAL_STR)
 		return 0;
-	case KDAL_NODE_EXPR_REG_PATH:
+	if (expr->type == KDAL_NODE_EXPR_REG_PATH)
 		return sim_reg_read(s, e->u.path.parts[e->u.path.nparts - 1]);
-	case KDAL_NODE_EXPR_IDENT:
+	if (expr->type == KDAL_NODE_EXPR_IDENT)
 		return sim_reg_read(s, e->u.sval);
-	case KDAL_NODE_EXPR_READ:
+	if (expr->type == KDAL_NODE_EXPR_READ)
 		return sim_reg_read(s, expr_reg_name(e->u.read_path));
-	case KDAL_NODE_EXPR_BINOP: {
-		unsigned long l = sim_eval(s, e->u.binop.lhs);
-		unsigned long r = sim_eval(s, e->u.binop.rhs);
-		switch (e->u.binop.op) {
-		case KDAL_BINOP_ADD:
+	if (expr->type == KDAL_NODE_EXPR_BINOP) {
+		l = sim_eval(s, e->u.binop.lhs);
+		r = sim_eval(s, e->u.binop.rhs);
+		if (e->u.binop.op == KDAL_BINOP_ADD)
 			return l + r;
-		case KDAL_BINOP_SUB:
+		if (e->u.binop.op == KDAL_BINOP_SUB)
 			return l - r;
-		case KDAL_BINOP_MUL:
+		if (e->u.binop.op == KDAL_BINOP_MUL)
 			return l * r;
-		case KDAL_BINOP_DIV:
+		if (e->u.binop.op == KDAL_BINOP_DIV)
 			return r ? l / r : 0;
-		case KDAL_BINOP_MOD:
+		if (e->u.binop.op == KDAL_BINOP_MOD)
 			return r ? l % r : 0;
-		case KDAL_BINOP_SHL:
+		if (e->u.binop.op == KDAL_BINOP_SHL)
 			return l << r;
-		case KDAL_BINOP_SHR:
+		if (e->u.binop.op == KDAL_BINOP_SHR)
 			return l >> r;
-		case KDAL_BINOP_AND:
+		if (e->u.binop.op == KDAL_BINOP_AND)
 			return l & r;
-		case KDAL_BINOP_OR:
+		if (e->u.binop.op == KDAL_BINOP_OR)
 			return l | r;
-		case KDAL_BINOP_XOR:
+		if (e->u.binop.op == KDAL_BINOP_XOR)
 			return l ^ r;
-		case KDAL_BINOP_EQ:
+		if (e->u.binop.op == KDAL_BINOP_EQ)
 			return l == r;
-		case KDAL_BINOP_NEQ:
+		if (e->u.binop.op == KDAL_BINOP_NEQ)
 			return l != r;
-		case KDAL_BINOP_LT:
+		if (e->u.binop.op == KDAL_BINOP_LT)
 			return l < r;
-		case KDAL_BINOP_LE:
+		if (e->u.binop.op == KDAL_BINOP_LE)
 			return l <= r;
-		case KDAL_BINOP_GT:
+		if (e->u.binop.op == KDAL_BINOP_GT)
 			return l > r;
-		case KDAL_BINOP_GE:
+		if (e->u.binop.op == KDAL_BINOP_GE)
 			return l >= r;
-		case KDAL_BINOP_LAND:
+		if (e->u.binop.op == KDAL_BINOP_LAND)
 			return l && r;
-		case KDAL_BINOP_LOR:
+		if (e->u.binop.op == KDAL_BINOP_LOR)
 			return l || r;
-		}
 		return 0;
 	}
-	case KDAL_NODE_EXPR_UNOP: {
-		unsigned long v = sim_eval(s, e->u.unop.operand);
-		switch (e->u.unop.op) {
-		case KDAL_UNOP_NEG:
+
+	if (expr->type == KDAL_NODE_EXPR_UNOP) {
+		v = sim_eval(s, e->u.unop.operand);
+		if (e->u.unop.op == KDAL_UNOP_NEG)
 			return (unsigned long)(-(long)v);
-		case KDAL_UNOP_NOT:
+		if (e->u.unop.op == KDAL_UNOP_NOT)
 			return !v;
-		case KDAL_UNOP_INV:
+		if (e->u.unop.op == KDAL_UNOP_INV)
 			return ~v;
-		}
 		return 0;
 	}
-	default:
-		return 0;
-	}
+
+	return 0;
 }
 
 /* ── AST statement interpreter ───────────────────────────────────── */
@@ -422,16 +419,18 @@ static int simulate_file(const char *path, const char *target_event, int trace)
 	return 0;
 }
 
-static int is_safe_kdc_path(const char *path)
+static int is_expected_kdc_path(const char *path)
 {
 	size_t len;
+	const unsigned char *p = (const unsigned char *)path;
 
 	if (!path || path[0] == '\0')
 		return 0;
 
-	/* Reject absolute or traversal-style inputs. */
-	if (path[0] == '/' || strchr(path, '\\') || strstr(path, ".."))
-		return 0;
+	for (; *p; ++p) {
+		if (*p < 32 || *p == '\\')
+			return 0;
+	}
 
 	/* Keep expected file type for this command. */
 	len = strlen(path);
@@ -462,19 +461,27 @@ int kdality_simulate(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	const char *target_event = NULL;
+	char resolved_input[PATH_MAX];
 	int trace = 0;
+	int argi = 0;
 
-	for (int i = 0; i < argc; i++) {
-		if (strcmp(argv[i], "-h") == 0 ||
-		    strcmp(argv[i], "--help") == 0) {
+	while (argi < argc) {
+		const char *arg = argv[argi++];
+
+		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			simulate_help();
 			return 0;
-		} else if (strcmp(argv[i], "--trace") == 0) {
+		} else if (strcmp(arg, "--trace") == 0) {
 			trace = 1;
-		} else if (strcmp(argv[i], "--event") == 0 && i + 1 < argc) {
-			target_event = argv[++i];
-		} else if (argv[i][0] != '-') {
-			input = argv[i];
+		} else if (strcmp(arg, "--event") == 0) {
+			if (argi >= argc) {
+				fprintf(stderr,
+					"simulate: missing value for '--event'\n");
+				return 1;
+			}
+			target_event = argv[argi++];
+		} else if (arg[0] != '-') {
+			input = arg;
 		}
 	}
 
@@ -484,12 +491,18 @@ int kdality_simulate(int argc, char *const argv[])
 		return 1;
 	}
 
-	if (!is_safe_kdc_path(input)) {
+	if (!is_expected_kdc_path(input)) {
 		fprintf(stderr,
-			"simulate: invalid input path '%s' (must be a relative .kdc path without '..')\n",
+			"simulate: invalid input path '%s' (expected a .kdc file path)\n",
 			input);
 		return 1;
 	}
 
-	return simulate_file(input, target_event, trace);
+	if (!realpath(input, resolved_input)) {
+		fprintf(stderr, "simulate: cannot resolve '%s': %s\n", input,
+			strerror(errno));
+		return 1;
+	}
+
+	return simulate_file(resolved_input, target_event, trace);
 }
