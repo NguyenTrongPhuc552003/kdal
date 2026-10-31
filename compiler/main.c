@@ -50,7 +50,7 @@ static int is_safe_source_path(const char *path)
 		return 0;
 
 	/*
-	 * Absolute paths are allowed — this is a CLI compiler invoked
+	 * Absolute paths are allowed - this is a CLI compiler invoked
 	 * directly by the user or build systems that always pass full paths.
 	 *
 	 * Reject ".." path traversal components to prevent unintended

@@ -38,7 +38,7 @@ The compiler produces two files in the output directory:
 
 ## Compiler Pipeline
 
-`kdalc` implements a four-stage pipeline with **zero external dependencies** —
+`kdalc` implements a four-stage pipeline with **zero external dependencies** -
 no lex/yacc, no LLVM, just portable C99.
 
 ```

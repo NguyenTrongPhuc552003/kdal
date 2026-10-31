@@ -501,7 +501,7 @@ cmd_list() {
 	_check "${KDAL_HOME}/bin/kdality" "kdality      - unified CLI tool"
 	_check "${KDAL_HOME}/bin/kdalup" "kdalup       - SDK manager (this tool)"
 	_check "${KDAL_HOME}/include/kdal" "kdal headers - kernel-space API"
-	_check "${KDAL_HOME}/include/kdalc" "kdalc headers— compiler API"
+	_check "${KDAL_HOME}/include/kdalc" "kdalc headers- compiler API"
 	_check "${KDAL_HOME}/lib/libkdalc.a" "libkdalc.a   - compiler library"
 	_check "${KDAL_HOME}/share/kdal/stdlib" "stdlib       - .kdh standard library"
 	_check "${KDAL_HOME}/lib/cmake/KDAL" "CMake        - find_package(KDAL)"
