@@ -76,6 +76,15 @@ insmod /mnt/shared/kdal.ko
 
 See [docs/architecture.md](docs/architecture.md) for full details.
 
+## Scope in the HAVEN thesis
+
+KDAL is one of three components of the HAVEN Master's thesis. Its role is the
+device-access driver inside HAVEN's Linux partition: the kernel module
+(`src/`, `include/`) and the `kdality` runtime CLI are active. The KDAL
+language, the `kdalc` compiler (`compiler/`, `lang/`) and the editor plugins
+(`editor/`) are frozen as of 2026-11-01: kept, still built and checked by CI,
+but not developed further unless the thesis needs them.
+
 ## Repository Layout
 
 ```
