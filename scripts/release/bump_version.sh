@@ -78,7 +78,7 @@ fi
 # 8. Homebrew formula URL
 if [ -f packaging/homebrew/kdal.rb ]; then
 	info "Updating Homebrew formula version..."
-	sed -i.bak "s|/archive/refs/tags/v[^\"]*\.tar\.gz|/archive/refs/tags/v${NEW_VERSION}.tar.gz|" \
+	sed -i.bak "s|/archive/v[^\"]*\.tar\.gz|/archive/v${NEW_VERSION}.tar.gz|" \
 		packaging/homebrew/kdal.rb
 	rm -f packaging/homebrew/kdal.rb.bak
 fi

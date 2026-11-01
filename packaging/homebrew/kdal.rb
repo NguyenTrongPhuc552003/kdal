@@ -7,11 +7,11 @@
 
 class Kdal < Formula
   desc "Kernel Device Abstraction Layer - compiler and toolchain"
-  homepage "https://github.com/NguyenTrongPhuc552003/kdal"
-  url "https://github.com/NguyenTrongPhuc552003/kdal/archive/refs/tags/v0.1.0.tar.gz"
+  homepage "https://codeberg.org/NguyenTrongPhuc552003/kdal"
+  url "https://codeberg.org/NguyenTrongPhuc552003/kdal/archive/v0.1.0.tar.gz"
   sha256 ""  # Populated by release automation
   license "GPL-3.0-or-later"
-  head "https://github.com/NguyenTrongPhuc552003/kdal.git", branch: "main"
+  head "https://codeberg.org/NguyenTrongPhuc552003/kdal.git", branch: "main"
 
   depends_on "cmake" => :build
 

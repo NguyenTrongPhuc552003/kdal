@@ -2,7 +2,7 @@
 # kdalup - KDAL SDK installer and version manager.
 #
 # Installs the KDAL toolchain (kdalc, kdality, stdlib, headers, CMake
-# files) from pre-built GitHub Release tarballs.
+# files) from pre-built release tarballs on Codeberg.
 #
 # Install layout (KDAL_HOME defaults to ~/.kdal):
 #   $KDAL_HOME/bin/kdalc          Compiler binary
@@ -31,7 +31,7 @@
 #
 # Environment:
 #   KDAL_HOME     Install prefix (default: ~/.kdal)
-#   KDAL_GITHUB   GitHub repo   (default: NguyenTrongPhuc552003/kdal)
+#   KDAL_REPO     Codeberg repo (default: NguyenTrongPhuc552003/kdal)
 
 set -eu
 
@@ -39,8 +39,8 @@ set -eu
 
 KDALUP_VERSION="0.1.0"
 KDAL_HOME="${KDAL_HOME:-$HOME/.kdal}"
-KDAL_GITHUB="${KDAL_GITHUB:-NguyenTrongPhuc552003/kdal}"
-KDAL_RELEASES="https://github.com/${KDAL_GITHUB}/releases"
+KDAL_REPO="${KDAL_REPO:-NguyenTrongPhuc552003/kdal}"
+KDAL_RELEASES="https://codeberg.org/${KDAL_REPO}/releases"
 
 # ── Output helpers ────────────────────────────────────────────────────
 
@@ -112,23 +112,23 @@ download() {
 
 # ── Version resolution ────────────────────────────────────────────────
 
-# Resolve "latest" to an actual tag via the GitHub Releases API.
+# Resolve "latest" to an actual tag via the Codeberg (Forgejo) releases API.
 # Primary: JSON API endpoint (works even if the redirect returns 404).
 # Fallback: HTML redirect trick for environments without JSON parsing.
 resolve_latest_version() {
-	_api_url="https://api.github.com/repos/${KDAL_GITHUB}/releases/latest"
+	_api_url="https://codeberg.org/api/v1/repos/${KDAL_REPO}/releases/latest"
 	_tag=""
 
-	# ── Primary: GitHub Releases JSON API ────────────────────────────
+	# ── Primary: releases JSON API ──────────────────────────────────
 	if command -v curl >/dev/null 2>&1; then
 		_tag="$(curl -fsSL --retry 3 --retry-delay 2 \
-			-H 'Accept: application/vnd.github+json' \
+			-H 'Accept: application/json' \
 			"$_api_url" 2>/dev/null |
 			grep '"tag_name"' | head -1 |
 			sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')" || true
 	elif command -v wget >/dev/null 2>&1; then
 		_tag="$(wget -q -O - \
-			--header='Accept: application/vnd.github+json' \
+			--header='Accept: application/json' \
 			"$_api_url" 2>/dev/null |
 			grep '"tag_name"' | head -1 |
 			sed 's/.*"tag_name"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/')" || true
@@ -148,7 +148,7 @@ resolve_latest_version() {
 	fi
 
 	if [ -z "${_tag:-}" ]; then
-		err "Could not determine latest version from GitHub."
+		err "Could not determine the latest version from Codeberg."
 		err "Try specifying a version: kdalup install v0.1.0"
 		exit 1
 	fi
@@ -458,7 +458,7 @@ cmd_self_update() {
 	info "Updating kdalup..."
 
 	_dl="$(downloader)"
-	_url="https://raw.githubusercontent.com/${KDAL_GITHUB}/main/scripts/installer/kdalup.sh"
+	_url="https://codeberg.org/${KDAL_REPO}/raw/branch/main/scripts/installer/kdalup.sh"
 	_tmpfile="$(mktemp)"
 
 	if ! download "$_url" "$_tmpfile"; then
@@ -683,7 +683,7 @@ PROFILES:
 
 ENVIRONMENT:
     KDAL_HOME           Install directory (default: ~/.kdal)
-    KDAL_GITHUB         GitHub repository (default: NguyenTrongPhuc552003/kdal)
+    KDAL_REPO           Codeberg repository (default: NguyenTrongPhuc552003/kdal)
 
 EXAMPLES:
     kdalup install                       Install latest release (minimal)
@@ -695,7 +695,7 @@ EXAMPLES:
     kdalup uninstall                     Remove everything
 
 MORE INFO:
-    https://github.com/NguyenTrongPhuc552003/kdal
+    https://codeberg.org/NguyenTrongPhuc552003/kdal
 EOF
 }
 

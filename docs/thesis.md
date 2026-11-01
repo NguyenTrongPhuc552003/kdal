@@ -145,7 +145,7 @@ Restate thesis question → summarize findings → highlight contributions.
 
 | Thesis Section    | Repository Artifact                                  |
 | ----------------- | ---------------------------------------------------- |
-| Problem statement | `.github/project/DESCRIPTION.md`                     |
+| Problem statement | `docs/thesis.md`                                    |
 | Architecture      | `docs/architecture.md`, `include/kdal/`              |
 | Implementation    | `src/`, `Makefile`                                   |
 | Testing           | `tests/`, `scripts/ci/test.sh`                       |

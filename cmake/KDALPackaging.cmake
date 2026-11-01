@@ -105,7 +105,7 @@ set(CPACK_RPM_PACKAGE_GROUP     "Development/Tools")
 set(CPACK_RPM_PACKAGE_LICENSE   "GPL-3.0-or-later")
 set(CPACK_RPM_PACKAGE_REQUIRES  "glibc >= 2.17")
 set(CPACK_RPM_PACKAGE_SUMMARY   "${CPACK_PACKAGE_DESCRIPTION_SHORT}")
-set(CPACK_RPM_PACKAGE_URL       "https://github.com/NguyenTrongPhuc552003/kdal")
+set(CPACK_RPM_PACKAGE_URL       "https://codeberg.org/NguyenTrongPhuc552003/kdal")
 
 # ── Install layout ────────────────────────────────────────────────────
 # Follows GNUInstallDirs conventions.

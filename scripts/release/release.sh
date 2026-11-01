@@ -5,7 +5,7 @@
 # Orchestrates the full local release pipeline:
 #   prepare → notes → bump → verify → ship
 #
-# GitHub Actions then builds and publishes all release artifacts automatically
+# CI then builds and publishes all release artifacts automatically
 # when the annotated tag is pushed.
 #
 # Usage:
@@ -288,7 +288,7 @@ cmd_ship() {
     cd "$REPO_ROOT"
 
     today=$(date +%Y-%m-%d)
-    repo_url="https://github.com/NguyenTrongPhuc552003/kdal"
+    repo_url="https://codeberg.org/NguyenTrongPhuc552003/kdal"
 
     # Build commit message from template or inline default
     commit_file=$(mktemp /tmp/kdal-commit.XXXXXX)
@@ -373,7 +373,7 @@ EOF
     trap - EXIT INT TERM
 
     printf '\n'
-    info "ship: done - GitHub Actions is now building release artifacts"
+    info "ship: done - CI is now building release artifacts"
     printf '  CI:      %s/actions\n' "$repo_url"
     printf '  Release: %s/releases/tag/v%s\n\n' "$repo_url" "$VERSION"
 }
@@ -391,14 +391,14 @@ cmd_post_release() {
         return
     fi
 
-    # Verify the GitHub release is already published before trying to download artifacts.
-    info "Checking that release v$VERSION is published on GitHub ..."
+    # Verify the Codeberg release is already published before trying to download artifacts.
+    info "Checking that release v$VERSION is published on Codeberg ..."
     if command -v curl >/dev/null 2>&1; then
-        api_url="https://api.github.com/repos/NguyenTrongPhuc552003/kdal/releases/tags/v$VERSION"
+        api_url="https://codeberg.org/api/v1/repos/NguyenTrongPhuc552003/kdal/releases/tags/v$VERSION"
         http_code=$(curl -s -o /dev/null -w '%{http_code}' "$api_url")
         [ "$http_code" = "200" ] \
-            || die "GitHub release v$VERSION not found (HTTP $http_code). Wait for CI to finish publishing first."
-        ok "GitHub release v$VERSION: published"
+            || die "Codeberg release v$VERSION not found (HTTP $http_code). Wait for CI to finish publishing first."
+        ok "Codeberg release v$VERSION: published"
     else
         warn "curl not available - skipping publish check"
     fi
@@ -434,7 +434,7 @@ cmd_release() {
 
     if [ "$DRY_RUN" -eq 0 ]; then
         info "Release v$VERSION complete!"
-        printf '\nNext: run post-release once GitHub Actions has published the artifacts:\n'
+        printf '\nNext: run post-release once CI has published the artifacts:\n'
         printf '  %s post-release %s\n\n' "$(basename "$0")" "$VERSION"
     fi
 }

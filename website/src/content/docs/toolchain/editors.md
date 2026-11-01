@@ -113,7 +113,7 @@ Plug 'NguyenTrongPhuc552003/kdal', { 'rtp': 'editor/vim/vim-kdal' }
 
 ```bash
 cd ~/.vim/bundle
-git clone https://github.com/NguyenTrongPhuc552003/kdal.git
+git clone https://codeberg.org/NguyenTrongPhuc552003/kdal.git
 # Add to .vimrc:
 # set rtp+=~/.vim/bundle/kdal/editor/vim/vim-kdal
 ```

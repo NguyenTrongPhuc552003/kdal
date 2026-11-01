@@ -171,19 +171,4 @@ else
 fi
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 6: docs.yml workflow"
-# ══════════════════════════════════════════════════════════════════════
-
-DOCS_YML="$E2E_ROOT/.github/workflows/docs.yml"
-
-if [ -f "$DOCS_YML" ]; then
-	e2e_pass "docs.yml workflow exists"
-	assert_file_contains "$DOCS_YML" "npm" "docs workflow uses npm"
-	assert_file_contains "$DOCS_YML" "build" "docs workflow runs build"
-	assert_file_contains "$DOCS_YML" "vercel\|deploy\|pages" "docs workflow deploys"
-else
-	e2e_fail "docs.yml workflow not found"
-fi
-
-# ══════════════════════════════════════════════════════════════════════
 e2e_summary

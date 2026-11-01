@@ -5,7 +5,7 @@
 Install the KDAL SDK with one command:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
+curl -fsSL https://codeberg.org/NguyenTrongPhuc552003/kdal/raw/branch/main/scripts/installer/install.sh | sh
 ```
 
 This downloads and runs `kdalup`, the KDAL version manager. It installs:

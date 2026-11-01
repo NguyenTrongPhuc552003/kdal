@@ -404,7 +404,7 @@ test_cppcheck() {
 		return
 	fi
 
-	# 2. run cppcheck with CI flags (mirrors .github/workflows/ci.yml lint-c job)
+	# 2. run cppcheck with CI flags (mirrors the lint job in .forgejo/workflows/ci.yml)
 	if cppcheck --enable=warning,style,performance,portability \
 		--suppress=missingIncludeSystem \
 		--suppress=missingInclude \

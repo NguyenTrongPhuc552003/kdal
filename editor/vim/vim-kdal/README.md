@@ -39,7 +39,7 @@ Plug 'NguyenTrongPhuc552003/kdal', { 'rtp': 'editor/vim/vim-kdal' }
 
 ```sh
 cd ~/.vim/bundle
-git clone https://github.com/NguyenTrongPhuc552003/kdal.git
+git clone https://codeberg.org/NguyenTrongPhuc552003/kdal.git
 # Add to .vimrc:  set rtp+=~/.vim/bundle/kdal/editor/vim/vim-kdal
 ```
 
@@ -98,4 +98,4 @@ vim-kdal/
 
 ## License
 
-GPL-3.0-or-later - see [LICENSE](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/LICENSE).
+GPL-3.0-or-later - see [LICENSE](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/LICENSE).

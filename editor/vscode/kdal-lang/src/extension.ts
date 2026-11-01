@@ -115,7 +115,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     }
   }
 
-  // Check for a newer extension release on GitHub (once per day, non-blocking)
+  // Check for a newer extension release on Codeberg (once per day, non-blocking)
   checkForExtensionUpdate(context).catch(() => undefined);
 }
 

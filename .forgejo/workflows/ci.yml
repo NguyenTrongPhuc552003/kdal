@@ -1,6 +1,4 @@
-# Codeberg CI (Forgejo Actions). Forgejo reads .forgejo/workflows and ignores
-# .github/workflows, which stay for GitHub. Limits: codeberg-small 2 CPU /
-# 5 min, amd64.
+# Codeberg CI (Forgejo Actions). Limits: codeberg-small 2 CPU / 5 min, amd64.
 name: ci
 
 on:
@@ -46,5 +44,5 @@ jobs:
             --error-exitcode=1 \
             src/backends/generic/ src/backends/qemu/ src/core/ src/drivers/example/ \
             tools/kdality/ compiler/ tests/userspace/ tests/integration/ examples/
-      - name: shellcheck (warnings reported, not fatal, as on GitHub)
+      - name: shellcheck (warnings reported, not fatal)
         run: find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=warning || true

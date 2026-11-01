@@ -6,7 +6,7 @@
 "   - Comment/indent settings via ftplugin/
 "   - Compiler plugins (kdality lint, kdalc compile)
 "
-" See: https://github.com/NguyenTrongPhuc552003/kdal
+" See: https://codeberg.org/NguyenTrongPhuc552003/kdal
 
 " Nothing to do here - all functionality is in:
 "   ftdetect/kdal.vim   - filetype detection

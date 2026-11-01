@@ -175,7 +175,7 @@ and saves reports under the selected variant tree, for example
 
 ## CI Pipeline
 
-GitHub Actions workflows (`.github/workflows/`) run on every push:
+Codeberg CI (`.forgejo/workflows/ci.yml`) runs on every push:
 
 | Workflow | Jobs                                                   |
 | -------- | ------------------------------------------------------ |
