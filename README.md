@@ -9,7 +9,7 @@ that lets developers write portable device drivers and accelerator backends
 ## Features
 
 - **Single control device** (`/dev/kdal`) with per-fd device selection
-- **4 device drivers**: UART, I2C, SPI, GPU (with accelerator ops)
+- **4 example drivers** over the backends: UART, I2C, SPI, GPU (with accelerator ops)
 - **Pluggable backends**: QEMU ring-buffer, generic platform device, Device Tree
 - **6 ioctl commands**: GET_VERSION, GET_INFO, SET_POWER, LIST_DEVICES, POLL_EVENT, SELECT_DEV
 - **debugfs interface**: `/sys/kernel/debug/kdal/` for introspection
