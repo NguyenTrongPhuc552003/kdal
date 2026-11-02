@@ -32,13 +32,13 @@ dmesg | grep "kunit"
 
 ### Test Suites
 
-| Suite                | Test Cases                                | Coverage         |
-| -------------------- | ----------------------------------------- | ---------------- |
-| `kdal_registry_test` | Registration, lookup, duplicate rejection | `registry.c`     |
-| `kdal_event_test`    | Emit, poll, overflow, shutdown            | `event.c`        |
-| `kdal_power_test`    | State transitions, event emission         | `power.c`        |
-| `kdal_chardev_test`  | Open, ioctl dispatch, per-fd state        | `chardev.c`      |
-| `kdal_driver_test`   | Probe, remove, read, write ops            | Driver lifecycle |
+| Suite (file) | Cases | What they cover |
+| - | - | - |
+| `kdal-registry` (`test_registry.c`) | 9 | backend, driver and device registration, lookup, snapshot, iteration, null parameters |
+| `kdal-event` (`test_event.c`) | 6 | emit, poll, null device and parameters, shutdown, overflow |
+| `kdal-core` (`test_core.c`) | 10 | snapshot after init, device lookup per class, driver and backend binding, power transitions |
+| `kdal-driver` (`test_driver.c`) | 8 | driver lookup per class, ops present, attach with null parameters, double attach |
+| `kdal-accel` (`test_accel.c`) | 5 | queue creation, buffer map and unmap, submit, null parameters |
 
 Total: **38 test cases** across 5 suites.
 
