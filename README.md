@@ -209,10 +209,15 @@ build/
 
 ## Target Platforms
 
-| Platform            | Status          | Backend               |
-| ------------------- | --------------- | --------------------- |
-| QEMU aarch64 `virt` | **Implemented** | `qemu` (ring buffer)  |
-| Radxa Orion O6      | Planned         | `generic` (MMIO + DT) |
+| Platform | Status | Backend |
+| - | - | - |
+| QEMU aarch64 `virt` | **Implemented** | `qemu` (ring buffer) |
+| CIX P1: Orange Pi 6 Plus | Planned (thesis board, end of 2026) | `generic` (MMIO + DT) |
+| CIX P1: Radxa Orion O6 / O6N, Orange Pi 6 | Reference variants | `generic` (MMIO + DT) |
+
+The HAVEN thesis targets the CIX P1 SoC only. KDAL does not yet run inside a
+HAVEN partition: that needs a Linux guest under HAVEN, which is not started
+(HAVEN's current partitions are bare-metal test guests).
 
 ## Testing Without Hardware
 
