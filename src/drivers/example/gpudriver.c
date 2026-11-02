@@ -122,7 +122,7 @@ static void gpu_buffer_unmap(struct kdal_device *device,
 }
 
 static int gpu_submit(struct kdal_device *device,
-		      const struct kdal_accel_queue *queue, const void *cmd,
+		      struct kdal_accel_queue *queue, const void *cmd,
 		      size_t cmd_len)
 {
 	struct gpu_state *gs;

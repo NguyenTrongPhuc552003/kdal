@@ -38,11 +38,18 @@ int kdal_attach_driver(struct kdal_device *device, struct kdal_driver *driver)
 	if (device->driver)
 		return -EBUSY;
 
-	ret = driver->ops->probe(device);
-	if (ret)
-		return ret;
-
+	/*
+	 * Drivers reach their state through device->driver during probe
+	 * (uartdriver.c sets device->driver->priv), so bind before probing
+	 * and unbind if probe fails. Binding after probe made every example
+	 * driver dereference NULL on load.
+	 */
 	device->driver = driver;
+	ret = driver->ops->probe(device);
+	if (ret) {
+		device->driver = NULL;
+		return ret;
+	}
 
 	return 0;
 }

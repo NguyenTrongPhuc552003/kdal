@@ -27,6 +27,12 @@ clean:
 
 obj-m += kdal.o
 
+# Out of tree, the kernel's Kconfig never sees ./Kconfig, so these options
+# are unset; default them as Kconfig does. kdal.c calls both parts
+# unconditionally, so building without them fails at modpost.
+CONFIG_KDAL_QEMU_BACKEND ?= y
+CONFIG_KDAL_EXAMPLE_DRIVERS ?= y
+
 kdal-y := \
 	src/core/module.o \
 	src/core/kdal.o \
