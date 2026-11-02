@@ -29,11 +29,12 @@ int kdal_register_backend(struct kdal_backend *backend)
 	if (!backend || !backend->name || !backend->ops)
 		return -EINVAL;
 
-	INIT_LIST_HEAD(&backend->node);
-
 	mutex_lock(&kdal_registry_lock);
 	list_for_each_entry(iter, &kdal_backend_list, node) {
 		if (kdal_name_match(iter->name, backend->name)) {
+			/* Never reinitialise a node that is on the list. */
+			if (iter != backend)
+				INIT_LIST_HEAD(&backend->node);
 			mutex_unlock(&kdal_registry_lock);
 			return -EEXIST;
 		}
@@ -62,11 +63,12 @@ int kdal_register_driver(struct kdal_driver *driver)
 	if (!driver || !driver->name || !driver->ops)
 		return -EINVAL;
 
-	INIT_LIST_HEAD(&driver->node);
-
 	mutex_lock(&kdal_registry_lock);
 	list_for_each_entry(iter, &kdal_driver_list, node) {
 		if (kdal_name_match(iter->name, driver->name)) {
+			/* Never reinitialise a node that is on the list. */
+			if (iter != driver)
+				INIT_LIST_HEAD(&driver->node);
 			mutex_unlock(&kdal_registry_lock);
 			return -EEXIST;
 		}
@@ -95,11 +97,12 @@ int kdal_register_device(struct kdal_device *device)
 	if (!device || !device->name)
 		return -EINVAL;
 
-	INIT_LIST_HEAD(&device->node);
-
 	mutex_lock(&kdal_registry_lock);
 	list_for_each_entry(iter, &kdal_device_list, node) {
 		if (kdal_name_match(iter->name, device->name)) {
+			/* Never reinitialise a node that is on the list. */
+			if (iter != device)
+				INIT_LIST_HEAD(&device->node);
 			mutex_unlock(&kdal_registry_lock);
 			return -EEXIST;
 		}

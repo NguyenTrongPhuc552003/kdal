@@ -57,4 +57,15 @@ kdal-$(CONFIG_KDAL_EXAMPLE_DRIVERS) += \
 	src/drivers/example/spidriver.o \
 	src/drivers/example/gpudriver.o
 
+# KUnit suites, built into kdal.ko so they can call its internal API (KDAL
+# exports no symbols). Needs a kernel with CONFIG_KUNIT=y; the suites run
+# when the module loads and report in KTAP on the kernel log:
+#   make KDAL_KUNIT=y
+kdal-$(KDAL_KUNIT) += \
+	tests/kunit/test_registry.o \
+	tests/kunit/test_event.o \
+	tests/kunit/test_core.o \
+	tests/kunit/test_driver.o \
+	tests/kunit/test_accel.o
+
 ccflags-y += -I$(PWD)/include
