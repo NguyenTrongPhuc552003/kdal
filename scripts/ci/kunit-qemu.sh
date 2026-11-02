@@ -32,7 +32,7 @@ python3 "$ROOT/scripts/ci/mkcpio.py" "$OUT/initramfs.cpio" "$OUT/init" "$ROOT/kd
 
 echo "== boot in QEMU"
 timeout 300 qemu-system-aarch64 -M virt -cpu cortex-a72 -smp 2 -m 512 \
-	-nographic -no-reboot -kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
+	-nographic -no-reboot -nic none -kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
 	-append "console=ttyAMA0 panic=-1 rdinit=/init" >"$OUT/console.raw" 2>&1 || true
 tr -d '\r' <"$OUT/console.raw" >"$OUT/console.log"
 
