@@ -46,3 +46,26 @@ jobs:
             tools/kdality/ compiler/ tests/userspace/ tests/integration/ examples/
       - name: shellcheck (warnings reported, not fatal)
         run: find scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck --severity=warning || true
+
+  kunit:
+    name: kernel module build and KUnit in QEMU (Linux v6.18 arm64)
+    runs-on: codeberg-medium
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends \
+            clang lld llvm make bc flex bison libelf-dev libssl-dev \
+            python3 xz-utils curl qemu-system-arm
+      - name: Prepare the pinned kernel (prebuilt Image, v6.18 source, modules_prepare)
+        run: |
+          set -o pipefail
+          mkdir -p build
+          scripts/ci/kernel-prepare.sh build/ci-kernel | tail -2 > build/kpaths
+          cat build/kpaths
+      - name: Build kdal.ko with KUnit and run it in QEMU
+        run: scripts/ci/kunit-qemu.sh "$(sed -n 1p build/kpaths)" "$(sed -n 2p build/kpaths)" build/kunit
+      - name: Show the console log on failure
+        if: failure()
+        run: tail -150 build/kunit/console.log || true
