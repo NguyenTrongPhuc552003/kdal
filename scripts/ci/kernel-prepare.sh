@@ -19,6 +19,7 @@ TAG=ci-kernel-v6.18-kunit
 BASE=${KDAL_CI_KERNEL_URL:-https://codeberg.org/NguyenTrongPhuc552003/kdal/releases/download/$TAG}
 SRC_URL=${KDAL_CI_KERNEL_SRC:-https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz}
 mkdir -p "$WORK"
+WORK=$(cd "$WORK" && pwd)
 cd "$WORK"
 
 for f in SHA256SUMS Image.gz config Module.symvers kernel.release; do
