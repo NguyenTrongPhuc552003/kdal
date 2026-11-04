@@ -6,12 +6,15 @@
  *   backends  – one-line summary per registered backend
  *   events    – running event log (most recent first)
  *   version   – KDAL version string
+ *   demand    – resource demand of every device that declares one, as JSON
+ *               in the FF-A partition manifest vocabulary
  *
  * The files are read-only and safe to cat at any time.
  */
 
 #include <linux/debugfs.h>
 #include <linux/seq_file.h>
+#include <linux/slab.h>
 #include <linux/string.h>
 
 #include <kdal/core/kdal.h>
@@ -67,6 +70,23 @@ static int snapshot_show(struct seq_file *s, void *v)
 }
 DEFINE_SHOW_ATTRIBUTE(snapshot);
 
+/* ── demand ─────────────────────────────────────────────────────── */
+
+#define KDAL_DEMAND_BUF	8192
+
+static int demand_show(struct seq_file *s, void *v)
+{
+	char *buf = kmalloc(KDAL_DEMAND_BUF, GFP_KERNEL);
+
+	if (!buf)
+		return -ENOMEM;
+	kdal_demand_format(buf, KDAL_DEMAND_BUF);
+	seq_puts(s, buf);
+	kfree(buf);
+	return 0;
+}
+DEFINE_SHOW_ATTRIBUTE(demand);
+
 /* ── init / exit ────────────────────────────────────────────────── */
 
 int kdal_debugfs_init(void)
@@ -82,6 +102,7 @@ int kdal_debugfs_init(void)
 	debugfs_create_file("version", 0444, kdal_dbgdir, NULL, &version_fops);
 	debugfs_create_file("snapshot", 0444, kdal_dbgdir, NULL,
 			    &snapshot_fops);
+	debugfs_create_file("demand", 0444, kdal_dbgdir, NULL, &demand_fops);
 
 	pr_info("kdal: debugfs mounted at /sys/kernel/debug/kdal\n");
 	return 0;

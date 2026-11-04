@@ -52,6 +52,10 @@ void kdal_get_registry_snapshot(struct kdal_registry_snapshot *snapshot);
 typedef int (*kdal_device_iter_fn)(struct kdal_device *device, void *data);
 int kdal_for_each_device(kdal_device_iter_fn fn, void *data);
 
+/* ── resource demand (FF-A vocabulary, JSON) ────────────────────── */
+
+size_t kdal_demand_format(char *buf, size_t len);
+
 /* ── events ─────────────────────────────────────────────────────── */
 
 int kdal_emit_event(enum kdal_event_type type, const char *device_name,

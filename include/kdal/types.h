@@ -49,6 +49,28 @@ struct kdal_event {
 struct kdal_backend;
 struct kdal_driver;
 
+#define KDAL_DEMAND_MAX_IRQS	4
+#define KDAL_DEMAND_MAX_STREAMS	4
+
+/*
+ * Resource demand of one device, in the vocabulary of Arm's FF-A partition
+ * manifest binding (device-regions: base-address, pages-count, attributes,
+ * interrupts, smmu-id, stream-ids). A hypervisor grant written in the same
+ * vocabulary can be checked against it (HAVEN: tools/readback/grant.py).
+ * Addresses are the ones the kernel sees (guest-physical under a
+ * hypervisor). Interrupt IDs are GIC INTIDs. size == 0: no MMIO demand.
+ */
+struct kdal_demand {
+	u64 base;
+	u64 size;
+	u32 attributes;			/* FF-A: 0x1 read, 0x2 write */
+	u32 nr_irqs;
+	u32 irqs[KDAL_DEMAND_MAX_IRQS];
+	u32 smmu_id;
+	u32 nr_streams;
+	u32 streams[KDAL_DEMAND_MAX_STREAMS];
+};
+
 struct kdal_device {
 	const char *name;
 	enum kdal_device_class class_id;
@@ -58,6 +80,7 @@ struct kdal_device {
 	void *priv;
 	struct kdal_backend *backend;
 	struct kdal_driver *driver;
+	const struct kdal_demand *demand;	/* NULL: no hardware demand */
 	struct list_head node;
 };
 

@@ -41,6 +41,7 @@ kdal-y := \
 	src/core/registry.o \
 	src/core/event.o \
 	src/core/power.o \
+	src/core/demand.o \
 	src/backends/generic/platdev.o \
 	src/backends/generic/socglue.o \
 	src/backends/generic/devicetree.o
@@ -66,6 +67,7 @@ kdal-$(KDAL_KUNIT) += \
 	tests/kunit/test_event.o \
 	tests/kunit/test_core.o \
 	tests/kunit/test_driver.o \
-	tests/kunit/test_accel.o
+	tests/kunit/test_accel.o \
+	tests/kunit/test_demand.o
 
 ccflags-y += -I$(PWD)/include

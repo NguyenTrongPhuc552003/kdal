@@ -9,7 +9,10 @@
 #   IMAGE  arm64 kernel Image built from the same tree, CONFIG_KUNIT=y
 #   OUTDIR where the log and summary go (default: build/kunit)
 #
-# Needs clang, ld.lld, GNU make 4+, python3 and qemu-system-aarch64.
+# Needs clang, ld.lld, GNU make 4+, python3, dtc and qemu-system-aarch64.
+# The guest device tree gets one "kdal,device" node over QEMU's PL061 GPIO
+# (MMIO 0x9030000, SPI 7 = INTID 39), so the run also checks the resource
+# demand KDAL reports for it (debugfs "demand", FF-A vocabulary).
 # Exit 0 only if every expected suite ran and no case failed.
 set -euo pipefail
 
@@ -17,7 +20,7 @@ KDIR=$(cd "$1" && pwd)
 IMAGE=$2
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 OUT=${3:-$ROOT/build/kunit}
-SUITES="kdal-registry kdal-event kdal-core kdal-driver kdal-accel"
+SUITES="kdal-registry kdal-event kdal-core kdal-driver kdal-accel kdal-demand"
 mkdir -p "$OUT"
 
 echo "== build kdal.ko (KDAL_KUNIT=y) against $KDIR"
@@ -30,9 +33,29 @@ clang --target=aarch64-linux-gnu -ffreestanding -nostdlib -static -O2 \
 	-o "$OUT/init" "$ROOT/scripts/ci/kunit-init.c"
 python3 "$ROOT/scripts/ci/mkcpio.py" "$OUT/initramfs.cpio" "$OUT/init" "$ROOT/kdal.ko"
 
+echo "== device tree with a kdal,device node"
+QEMU_MACHINE=(-M virt -cpu cortex-a72 -smp 2 -m 512 -nographic -no-reboot -nic none)
+qemu-system-aarch64 "${QEMU_MACHINE[@]}" -machine dumpdtb="$OUT/virt.dtb" >/dev/null 2>&1
+dtc -q -I dtb -O dts -o "$OUT/virt.dts" "$OUT/virt.dtb"
+python3 - "$OUT/virt.dts" <<'PY'
+import sys
+p = sys.argv[1]
+s = open(p).read().rstrip()
+assert s.endswith("};")
+node = """
+	kdal-gpio@9030000 {
+		compatible = "kdal,device";
+		reg = <0x00 0x9030000 0x00 0x1000>;
+		interrupts = <0x00 0x07 0x04>;
+	};
+"""
+open(p, "w").write(s[:-2] + node + "};\n")
+PY
+dtc -q -I dts -O dtb -o "$OUT/kdal.dtb" "$OUT/virt.dts"
+
 echo "== boot in QEMU"
-timeout 300 qemu-system-aarch64 -M virt -cpu cortex-a72 -smp 2 -m 512 \
-	-nographic -no-reboot -nic none -kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
+timeout 300 qemu-system-aarch64 "${QEMU_MACHINE[@]}" -dtb "$OUT/kdal.dtb" \
+	-kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
 	-append "console=ttyAMA0 panic=-1 rdinit=/init" >"$OUT/console.raw" 2>&1 || true
 tr -d '\r' <"$OUT/console.raw" >"$OUT/console.log"
 
@@ -54,6 +77,18 @@ for s in $SUITES; do
 	*) fail=1 ;;
 	esac
 done
+sed -n '/^KDAL-DEMAND-BEGIN$/,/^KDAL-DEMAND-END$/p' "$OUT/console.log" | sed '1d;$d' >"$OUT/demand.json"
+if python3 - "$OUT/demand.json" <<'PY'
+import json, sys
+d = json.load(open(sys.argv[1]))
+regs = [r for r in d["device-regions"] if r["description"].startswith("kdal-gpio")]
+assert regs, d
+r = regs[0]
+assert r["base-address"] == "0x9030000" and r["pages-count"] == 1, r
+assert r["interrupts"] == [{"id": 39}], r
+print("demand: kdal-gpio@9030000 reports MMIO 0x9030000 (1 page) and INTID 39")
+PY
+then :; else echo "demand: FAIL ($OUT/demand.json)"; fail=1; fi
 grep -E "not ok [0-9]+ test_" "$OUT/console.log" || true
 grep -E "Oops|BUG:|KDAL-CI:" "$OUT/console.log" || true
 {

@@ -14,6 +14,12 @@
 
 int kdal_qemu_backend_init(void);
 void kdal_qemu_backend_exit(void);
+int kdal_soc_glue_init(void);
+void kdal_soc_glue_exit(void);
+int kdal_generic_platdev_init(void);
+void kdal_generic_platdev_exit(void);
+int kdal_devicetree_scan(void);
+void kdal_devicetree_cleanup(void);
 
 /* ── driver init / exit forward declarations ────────────────────── */
 
@@ -86,6 +92,21 @@ int kdal_core_init(void)
 	if (ret)
 		goto err_debugfs;
 
+	/*
+	 * 3b. generic platform backend: SoC glue, then devices described in
+	 * the device tree ("kdal,device" nodes). Before the KDAL audit (K15)
+	 * none of this was called, so DT devices never appeared.
+	 */
+	ret = kdal_soc_glue_init();
+	if (ret)
+		goto err_qemu;
+	ret = kdal_generic_platdev_init();
+	if (ret)
+		goto err_glue;
+	ret = kdal_devicetree_scan();
+	if (ret)
+		goto err_platdev;
+
 	/* 4. drivers – order does not matter; each driver discovers its
 	 *    backend via kdal_find_backend(). */
 	ret = kdal_uart_driver_init();
@@ -113,6 +134,12 @@ err_i2c:
 err_uart:
 	kdal_uart_driver_exit();
 err_backend:
+	kdal_devicetree_cleanup();
+err_platdev:
+	kdal_generic_platdev_exit();
+err_glue:
+	kdal_soc_glue_exit();
+err_qemu:
 	kdal_qemu_backend_exit();
 err_debugfs:
 	kdal_debugfs_exit();
@@ -127,6 +154,9 @@ void kdal_core_exit(void)
 	kdal_spi_driver_exit();
 	kdal_i2c_driver_exit();
 	kdal_uart_driver_exit();
+	kdal_devicetree_cleanup();
+	kdal_generic_platdev_exit();
+	kdal_soc_glue_exit();
 	kdal_qemu_backend_exit();
 	kdal_debugfs_exit();
 	kdal_chardev_exit();

@@ -4,7 +4,8 @@
 
 Usage: mkcpio.py OUT.cpio INIT KDAL_KO
 
-Contents: /init (mode 0755), /kdal.ko, /dev/console (char 5:1), all owned
+Contents: /init (mode 0755), /kdal.ko, /dev/console (char 5:1), /d (debugfs
+mount point), all owned
 by root. Written directly, so no root, fakeroot or cpio tool is needed.
 """
 import sys
@@ -26,6 +27,7 @@ def main():
     with open(out_path, "wb") as out:
         entry(out, 1, "dev", 0o040755)
         entry(out, 2, "dev/console", 0o020600, rdev=(5, 1))
+        entry(out, 5, "d", 0o040755)  # debugfs mount point
         entry(out, 3, "init", 0o100755, open(init_path, "rb").read())
         entry(out, 4, "kdal.ko", 0o100644, open(ko_path, "rb").read())
         entry(out, 0, "TRAILER!!!", 0)
