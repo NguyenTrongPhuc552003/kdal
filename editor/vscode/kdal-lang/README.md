@@ -9,7 +9,7 @@ lint, compile, and simulate KDAL device headers (`.kdh`) and driver files
 **Step 1 - Install the KDAL SDK:**
 
 ```sh
-curl -fsSL https://codeberg.org/NguyenTrongPhuc552003/kdal/raw/branch/main/scripts/installer/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
 ```
 
 **Step 2 - Install this extension:**
@@ -122,4 +122,4 @@ npm run package   # produces kdal-lang-x.y.z.vsix
 
 ## License
 
-GPL-3.0-or-later - see [LICENSE](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/LICENSE).
+GPL-3.0-or-later - see [LICENSE](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/LICENSE).

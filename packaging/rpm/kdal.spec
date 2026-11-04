@@ -3,7 +3,7 @@ Version: 0.1.0
 Release:        1%{?dist}
 Summary:        Kernel Device Abstraction Layer - compiler and toolchain
 License:        GPL-3.0-or-later
-URL:            https://codeberg.org/NguyenTrongPhuc552003/kdal
+URL:            https://github.com/NguyenTrongPhuc552003/kdal
 Source0:        %{name}-%{version}.tar.gz
 
 BuildRequires:  cmake >= 3.20

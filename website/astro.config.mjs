@@ -14,11 +14,11 @@ export default defineConfig({
         replacesTitle: false,
       },
       social: {
-        codeberg: "https://codeberg.org/NguyenTrongPhuc552003/kdal",
+        github: "https://github.com/NguyenTrongPhuc552003/kdal",
       },
       editLink: {
         baseUrl:
-          "https://codeberg.org/NguyenTrongPhuc552003/kdal/edit/main/website/",
+          "https://github.com/NguyenTrongPhuc552003/kdal/edit/main/website/",
       },
       customCss: ["./src/styles/custom.css"],
       head: [

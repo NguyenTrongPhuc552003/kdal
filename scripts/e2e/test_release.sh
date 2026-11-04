@@ -116,15 +116,40 @@ else
 fi
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 3: CI workflow"
+e2e_section "Step 3: GitHub Actions workflows"
 # ══════════════════════════════════════════════════════════════════════
 
-WF_DIR="$E2E_ROOT/.forgejo/workflows"
+WF_DIR="$E2E_ROOT/.github/workflows"
 
-assert_file_exists "$WF_DIR/ci.yml" "workflows/ci.yml"
+# All workflows should exist
+for wf in build.yml ci.yml test.yml codeql.yml release.yml docs.yml nightly.yml; do
+	assert_file_exists "$WF_DIR/$wf" "workflows/$wf"
+done
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 4: YAML syntax validation"
+e2e_section "Step 4: release.yml content validation"
+# ══════════════════════════════════════════════════════════════════════
+
+RELEASE_YML="$WF_DIR/release.yml"
+
+assert_file_contains "$RELEASE_YML" "release" "workflow name"
+assert_file_contains "$RELEASE_YML" "matrix" "uses build matrix"
+assert_file_contains "$RELEASE_YML" "SHA256\|sha256\|checksum" "generates checksums"
+assert_file_contains "$RELEASE_YML" "upload\|artifact" "uploads artifacts"
+assert_file_contains "$RELEASE_YML" "linux-x86_64\|x86_64" "targets x86_64"
+assert_file_contains "$RELEASE_YML" "aarch64\|arm64" "targets aarch64"
+
+# ══════════════════════════════════════════════════════════════════════
+e2e_section "Step 5: nightly.yml content validation"
+# ══════════════════════════════════════════════════════════════════════
+
+NIGHTLY_YML="$WF_DIR/nightly.yml"
+
+assert_file_contains "$NIGHTLY_YML" "workflow_dispatch" "has manual trigger"
+assert_file_contains "$NIGHTLY_YML" "test\|build\|lint" "runs tests"
+
+# ══════════════════════════════════════════════════════════════════════
+e2e_section "Step 6: YAML syntax validation"
 # ══════════════════════════════════════════════════════════════════════
 
 if require_tool python3; then
@@ -143,7 +168,7 @@ else
 fi
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 5: Simulated tarball layout"
+e2e_section "Step 7: Simulated tarball layout"
 # ══════════════════════════════════════════════════════════════════════
 
 # Build SDK and verify tarball structure (offline simulation)

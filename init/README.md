@@ -25,5 +25,5 @@ sudo insmod output/init_driver.ko
 
 ## Learn More
 
-- [KDAL Language Guide](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/language_guide.md)
-- [KDAL API Reference](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/api_reference.md)
+- [KDAL Language Guide](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/language_guide.md)
+- [KDAL API Reference](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/api_reference.md)

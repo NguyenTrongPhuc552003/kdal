@@ -30,13 +30,13 @@
         "kdc",
         "kdh"
     ],
-    "homepage": "https://codeberg.org/NguyenTrongPhuc552003/kdal",
+    "homepage": "https://github.com/NguyenTrongPhuc552003/kdal",
     "bugs": {
-        "url": "https://codeberg.org/NguyenTrongPhuc552003/kdal/issues"
+        "url": "https://github.com/NguyenTrongPhuc552003/kdal/issues"
     },
     "repository": {
         "type": "git",
-        "url": "https://codeberg.org/NguyenTrongPhuc552003/kdal"
+        "url": "https://github.com/NguyenTrongPhuc552003/kdal"
     },
     "scripts": {
         "vscode:prepublish": "npm run compile",
@@ -253,7 +253,7 @@
                     {
                         "id": "installSDK",
                         "title": "Install the KDAL SDK",
-                        "description": "Run **KDAL: Install SDK** from the Command Palette, or use the one-liner:\n\n```\ncurl -fsSL https://codeberg.org/NguyenTrongPhuc552003/kdal/raw/branch/main/scripts/installer/install.sh | sh\n```\n\nOr [build from source](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/installation.md).",
+                        "description": "Run **KDAL: Install SDK** from the Command Palette, or use the one-liner:\n\n```\ncurl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh\n```\n\nOr [build from source](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/installation.md).",
                         "media": {
                             "markdown": ""
                         },

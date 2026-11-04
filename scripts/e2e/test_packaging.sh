@@ -140,7 +140,7 @@ assert_file_contains "$BREW_FORMULA" 'depends_on "cmake"' "formula depends on cm
 assert_file_contains "$BREW_FORMULA" "def install" "formula has install block"
 assert_file_contains "$BREW_FORMULA" "def test\|test do" "formula has test block"
 
-# Verify the URL references the right repository
+# Verify the URL references the right GitHub repo
 assert_file_contains "$BREW_FORMULA" "NguyenTrongPhuc552003/kdal" "formula URL matches repo"
 
 # Check for head support

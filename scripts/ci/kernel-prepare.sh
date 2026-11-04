@@ -16,14 +16,16 @@ set -euo pipefail
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 WORK=${1:-$ROOT/build/ci-kernel}
 TAG=ci-kernel-v6.18-kunit
-BASE=${KDAL_CI_KERNEL_URL:-https://codeberg.org/NguyenTrongPhuc552003/kdal/releases/download/$TAG}
+BASE=${KDAL_CI_KERNEL_URL:-https://github.com/NguyenTrongPhuc552003/kdal/releases/download/$TAG}
 SRC_URL=${KDAL_CI_KERNEL_SRC:-https://cdn.kernel.org/pub/linux/kernel/v6.x/linux-6.18.tar.xz}
 mkdir -p "$WORK"
 WORK=$(cd "$WORK" && pwd)
 cd "$WORK"
 
+MIRROR=https://codeberg.org/NguyenTrongPhuc552003/kdal/releases/download/$TAG
 for f in SHA256SUMS Image.gz config Module.symvers kernel.release; do
-	[ -s "$f" ] || curl -fsSL -o "$f" "$BASE/$f"
+	# GitHub first; the Codeberg copy of the release if it is not there yet
+	[ -s "$f" ] || curl -fsSL -o "$f" "$BASE/$f" || curl -fsSL -o "$f" "$MIRROR/$f"
 done
 sha256sum -c SHA256SUMS
 

@@ -1,20 +1,32 @@
-# Codeberg CI (Forgejo Actions). Limits: codeberg-small 2 CPU / 5 min, amd64.
+# GitHub Actions. The kernel module and KUnit run on Linux; the userspace
+# tools and smoke tests also run on macOS.
 name: ci
 
 on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   build-and-smoke:
-    name: build tools, compiler and smoke tests
-    runs-on: codeberg-small
+    name: build tools, compiler and smoke tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
-      - name: Install build tools
+      - name: Install build tools (Linux)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y -qq --no-install-recommends cmake ninja-build gcc
+      - name: Install build tools (macOS)
+        if: runner.os == 'macOS'
+        run: brew install ninja
       - name: Smoke tests
         run: sh scripts/ci/test.sh
       - name: Build examples
@@ -24,7 +36,7 @@ jobs:
 
   lint:
     name: style and static analysis
-    runs-on: codeberg-small
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install linters
@@ -49,7 +61,7 @@ jobs:
 
   kunit:
     name: kernel module build and KUnit in QEMU (Linux v6.18 arm64)
-    runs-on: codeberg-medium
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Install tools

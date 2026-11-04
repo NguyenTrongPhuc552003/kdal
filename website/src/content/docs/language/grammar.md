@@ -157,4 +157,4 @@ digit     = "0".."9" ;
 hex_digit = digit | "a".."f" | "A".."F" ;
 ```
 
-Source files: [`lang/grammar/kdh.ebnf`](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/lang/grammar/kdh.ebnf) and [`lang/grammar/kdc.ebnf`](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/lang/grammar/kdc.ebnf).
+Source files: [`lang/grammar/kdh.ebnf`](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/lang/grammar/kdh.ebnf) and [`lang/grammar/kdc.ebnf`](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/lang/grammar/kdc.ebnf).

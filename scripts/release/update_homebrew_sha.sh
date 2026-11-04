@@ -16,7 +16,7 @@ if [ $# -lt 1 ]; then
 fi
 
 VERSION="$1"
-REPO="NguyenTrongPhuc552003/kdal"
+GITHUB_REPO="NguyenTrongPhuc552003/kdal"
 FORMULA="packaging/homebrew/kdal.rb"
 
 info() { printf '\033[1;34m==> %s\033[0m\n' "$1"; }
@@ -27,7 +27,7 @@ if [ ! -f "$FORMULA" ]; then
 fi
 
 # Build the expected source tarball URL
-TARBALL_URL="https://codeberg.org/${REPO}/archive/v${VERSION}.tar.gz"
+TARBALL_URL="https://github.com/${GITHUB_REPO}/archive/refs/tags/v${VERSION}.tar.gz"
 
 info "Downloading source tarball for v${VERSION}..."
 TMPFILE="$(mktemp)"
@@ -57,7 +57,7 @@ info "SHA256: ${SHA256}"
 # Update URL line
 info "Updating ${FORMULA}..."
 sed -i.bak \
-	-e "s|url \"https://codeberg.org/${REPO}/archive/v[^\"]*\.tar\.gz\"|url \"${TARBALL_URL}\"|" \
+	-e "s|url \"https://github.com/${GITHUB_REPO}/archive/refs/tags/v[^\"]*\.tar\.gz\"|url \"${TARBALL_URL}\"|" \
 	-e "s|sha256 \"[a-f0-9]\{64\}\"|sha256 \"${SHA256}\"|" \
 	"$FORMULA"
 rm -f "${FORMULA}.bak"

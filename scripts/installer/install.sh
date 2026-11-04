@@ -2,7 +2,7 @@
 # KDAL SDK bootstrap installer.
 #
 # This is the one-liner entry point:
-#   curl -fsSL https://codeberg.org/NguyenTrongPhuc552003/kdal/raw/branch/main/scripts/installer/install.sh | sh
+#   curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh
 #
 # What it does:
 #   1. Downloads kdalup.sh from the repository
@@ -16,8 +16,8 @@
 set -eu
 
 KDAL_HOME="${KDAL_HOME:-$HOME/.kdal}"
-KDAL_REPO="${KDAL_REPO:-NguyenTrongPhuc552003/kdal}"
-KDALUP_URL="https://codeberg.org/${KDAL_REPO}/raw/branch/main/scripts/installer/kdalup.sh"
+KDAL_GITHUB="${KDAL_GITHUB:-NguyenTrongPhuc552003/kdal}"
+KDALUP_URL="https://raw.githubusercontent.com/${KDAL_GITHUB}/main/scripts/installer/kdalup.sh"
 
 info() { printf '\033[1;34m==> %s\033[0m\n' "$1"; }
 err() { printf '\033[1;31merror: %s\033[0m\n' "$1" >&2; }

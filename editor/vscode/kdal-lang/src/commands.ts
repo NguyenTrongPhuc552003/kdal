@@ -47,7 +47,7 @@ export async function installSDKCommand(): Promise<void> {
 
   if (choice === "Open Documentation") {
     vscode.env.openExternal(vscode.Uri.parse(
-      "https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/installation.md"
+      "https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/installation.md"
     ));
     return;
   }
@@ -57,7 +57,7 @@ export async function installSDKCommand(): Promise<void> {
   const terminal = vscode.window.createTerminal({ name: "KDAL SDK Install" });
   terminal.show();
   terminal.sendText(
-    'curl -fsSL https://codeberg.org/NguyenTrongPhuc552003/kdal/raw/branch/main/scripts/installer/install.sh | sh'
+    'curl -fsSL https://raw.githubusercontent.com/NguyenTrongPhuc552003/kdal/main/scripts/installer/install.sh | sh'
   );
 
   // Poll for the binaries every 3 s for up to 5 minutes.
@@ -101,9 +101,9 @@ const LAST_CHECK_KEY = "kdal.lastUpdateCheck";
 function fetchLatestTag(): Promise<string> {
   return new Promise((resolve, reject) => {
     const options = {
-      hostname: "codeberg.org",
-      path: `/api/v1/repos/${REPO}/releases/latest`,
-      headers: { "User-Agent": "kdal-vscode-extension", "Accept": "application/json" },
+      hostname: "api.github.com",
+      path: `/repos/${REPO}/releases/latest`,
+      headers: { "User-Agent": "kdal-vscode-extension", "Accept": "application/vnd.github+json" },
     };
     https.get(options, (res) => {
       let data = "";
@@ -148,13 +148,13 @@ export async function checkForExtensionUpdate(context: vscode.ExtensionContext):
     if (!isNewer) return;
 
     const choice = await vscode.window.showInformationMessage(
-      `KDAL extension ${latestTag} is available (you have v${currentVersion}). Download the new .vsix from the Codeberg releases page.`,
+      `KDAL extension ${latestTag} is available (you have v${currentVersion}). Download the new .vsix from GitHub Releases.`,
       "Download",
       "Later"
     );
     if (choice === "Download") {
       vscode.env.openExternal(
-        vscode.Uri.parse(`https://codeberg.org/${REPO}/releases/tag/${latestTag}`)
+        vscode.Uri.parse(`https://github.com/${REPO}/releases/tag/${latestTag}`)
       );
     }
   } catch {

@@ -6,7 +6,7 @@ version: 0.1.0
 authors:
   - family-names: Nguyen
     given-names: Trong Phuc
-repository-code: https://codeberg.org/NguyenTrongPhuc552003/kdal
+repository-code: https://github.com/NguyenTrongPhuc552003/kdal
 license: GPL-3.0-or-later
 abstract: >-
   Kernel Device Abstraction Layer for portable embedded driver and accelerator

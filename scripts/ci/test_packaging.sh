@@ -2,7 +2,7 @@
 # scripts/ci/test_packaging.sh
 # Local packaging smoke test - mirrors CI build-deb and build-rpm jobs exactly.
 #
-# Runs inside Docker containers to replicate the CI environment
+# Runs inside Docker containers to replicate the GitHub Actions environment
 # before pushing a tag, so packaging failures are caught locally.
 #
 # Requirements: Docker (running)

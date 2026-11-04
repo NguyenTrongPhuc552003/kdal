@@ -1,7 +1,7 @@
 " Vim syntax file
 " Language:    KDAL Device Header
 " Maintainer:  Trong Phuc Nguyen <trongphuc.ng552003@gmail.com>
-" URL:         https://codeberg.org/NguyenTrongPhuc552003/kdal
+" URL:         https://github.com/NguyenTrongPhuc552003/kdal
 " License:     GPL-3.0-or-later
 " Last Change: 2026-04-12
 

@@ -144,7 +144,7 @@ static const char tmpl_readme[] =
 	"\n"
 	"## Learn More\n"
 	"\n"
-	"- [KDAL Language Guide](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/language_guide.md)\n"
-	"- [KDAL API Reference](https://codeberg.org/NguyenTrongPhuc552003/kdal/src/branch/main/docs/api_reference.md)\n";
+	"- [KDAL Language Guide](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/language_guide.md)\n"
+	"- [KDAL API Reference](https://github.com/NguyenTrongPhuc552003/kdal/blob/main/docs/api_reference.md)\n";
 
 #endif /* KDALITY_TEMPLATES_H */
