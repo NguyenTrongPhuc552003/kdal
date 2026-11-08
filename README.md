@@ -87,6 +87,15 @@ but not developed further unless the thesis needs them.
 
 ## Repository Layout
 
+Where to work:
+
+- **Maintained (the kernel module):** `src/`, `include/`, `tests/` (kunit,
+  integration, userspace) and `scripts/ci/`. New work, fixes and reviews go
+  here.
+- **Frozen since 2026-11-01:** `lang/`, `compiler/`, `editor/` and `tools/`.
+  They are kept and still built by CI, but take no new work unless the
+  thesis needs them.
+
 ```
 include/kdal/       Public API headers (types, ioctl, driver, accel, backend)
 src/core/           Core runtime (lifecycle, registry, events, chardev, debugfs)

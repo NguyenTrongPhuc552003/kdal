@@ -3,6 +3,58 @@
 All notable changes to this project are documented in this file.  
 Format follows [Keep a Changelog](https://keepachangelog.com/).
 
+## [Unreleased]
+
+Changes since v0.1.0. The language, compiler, editor plugins and tools
+(`lang/`, `compiler/`, `editor/`, `tools/`) are frozen since 2026-11-01.
+
+### Added
+
+- Devices report their resource demand (MMIO range, GIC INTIDs, SMMU and
+  StreamIDs) in `struct kdal_demand`; `/sys/kernel/debug/kdal/demand` prints
+  it as JSON with the FF-A partition manifest property names. The
+  device-tree backend fills it from `reg`, `interrupts` and `iommus`
+  (audit K4).
+- KUnit suite `kdal-demand` (2 cases).
+- `make KDAL_KUNIT=y` builds the KUnit suites into `kdal.ko` (audit K12).
+- CI on GitHub Actions: smoke tests on Linux and macOS, lint, and a job that
+  builds `kdal.ko` against Linux v6.18 arm64, runs its KUnit suites in QEMU
+  and checks the reported device demand (audit K1).
+- Local CodeQL runner (`scripts/dev/codeql.sh`).
+- Issue templates and a pull request template.
+
+### Changed
+
+- The KUnit test `find_driver_by_class` checks the driver class, not which
+  driver registers first (audit K11).
+- The project home moved to Codeberg on 2026-11-01 and back to GitHub on
+  2026-11-04; installer, release scripts, packaging and links point to
+  GitHub again.
+- README and docs: KDAL's scope in the HAVEN thesis, the CIX P1 target
+  platforms, the four drivers named example drivers, the KUnit suite table,
+  and which directories are maintained or frozen.
+- Compiler and `kdality` refactors: parser statement handling split, compile
+  option parsing tightened, simulate expression dispatch, testgen parsing and
+  token enum numbering simplified.
+- Em-dashes replaced with ASCII hyphens; local CodeQL artifacts ignored.
+
+### Fixed
+
+- The module builds against Linux v6.18 with clang (`file_operations` and
+  accelerator op signatures) and loads without a crash: a driver is bound to
+  its device before probe. Out-of-tree builds default
+  `CONFIG_KDAL_QEMU_BACKEND` and `CONFIG_KDAL_EXAMPLE_DRIVERS` to y, as
+  Kconfig does (audit K7, K8, K9).
+- Registering an object that is already registered no longer resets its list
+  links and hangs the registry (audit K10).
+- `kdal_core_init` runs the generic backend (SoC glue, platform backend,
+  device-tree scan), so `kdal,device` nodes are found (audit K15).
+- Compiler and `kdality`: input and output paths are validated (CodeQL
+  path-expression alerts), files are created with restricted permissions,
+  and `dt-gen` and `init` file handling is hardened.
+- CI: `kernel-prepare.sh` accepts a relative work directory; QEMU runs
+  without a network card.
+
 ## [0.1.0] - 2025-06-09
 
 ### Added
