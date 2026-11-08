@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   build-and-smoke:
-    name: build tools, compiler and smoke tests (${{ matrix.os }})
+    name: build frozen tools and compiler, smoke tests (${{ matrix.os }})
     strategy:
       fail-fast: false
       matrix:
