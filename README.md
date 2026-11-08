@@ -89,12 +89,12 @@ but not developed further unless the thesis needs them.
 
 Where to work:
 
-- **Maintained (the kernel module):** `src/`, `include/`, `tests/` (kunit,
-  integration, userspace) and `scripts/ci/`. New work, fixes and reviews go
-  here.
-- **Frozen since 2026-11-01:** `lang/`, `compiler/`, `editor/` and `tools/`.
-  They are kept and still built by CI, but take no new work unless the
-  thesis needs them.
+- **Maintained:** the kernel module (`src/`, `include/`, `tests/` with
+  kunit, integration and userspace tests, `scripts/ci/`) and the `kdality`
+  runtime CLI (`tools/`). New work, fixes and reviews go here.
+- **Frozen since 2026-11-01:** `lang/`, `compiler/` and `editor/` (the KDAL
+  language, the `kdalc` compiler and the editor plugins). They are kept and
+  still built by CI, but take no new work unless the thesis needs them.
 
 ```
 include/kdal/       Public API headers (types, ioctl, driver, accel, backend)
