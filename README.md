@@ -15,7 +15,7 @@ that lets developers write portable device drivers and accelerator backends
 - **debugfs interface**: `/sys/kernel/debug/kdal/` for introspection
 - **Event system**: circular buffer with waitqueue-based notification
 - **Power management**: per-device power state transitions
-- **KUnit tests**: 38 in-kernel test cases
+- **KUnit tests**: 40 in-kernel test cases in 6 suites
 - **Userspace tools**: CLI tool, smoke test, integration suite, throughput benchmark
 - **QEMU-first workflow**: fully reproducible on Mac M4 Pro → aarch64 guest
 
@@ -109,7 +109,7 @@ tools/kdality/      Unified CLI + compiler frontend (kdality)
 editor/vscode/      VS Code extension for .kdh/.kdc
 editor/vim/         Vim/Neovim plugin for .kdh/.kdc
 cmake/              8 CMake modules for build integration
-tests/kunit/        In-kernel tests (38 test cases)
+tests/kunit/        In-kernel tests (40 test cases, 6 suites)
 tests/userspace/    Userspace smoke test + benchmark
 tests/integration/  Multi-device integration suite
 scripts/dev/        Development scripts (build, run, test)
