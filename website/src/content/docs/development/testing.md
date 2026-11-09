@@ -39,8 +39,9 @@ dmesg | grep "kunit"
 | `kdal-core` (`test_core.c`) | 10 | snapshot after init, device lookup per class, driver and backend binding, power transitions |
 | `kdal-driver` (`test_driver.c`) | 8 | driver lookup per class, ops present, attach with null parameters, double attach |
 | `kdal-accel` (`test_accel.c`) | 5 | queue creation, buffer map and unmap, submit, null parameters |
+| `kdal-demand` (`test_demand.c`) | 2 | demand regions reported by a driver, too small a buffer |
 
-Total: **38 test cases** across 5 suites.
+Total: **40 test cases** across 6 suites.
 
 ### Writing KUnit Tests
 
