@@ -73,7 +73,7 @@ boundary.
 
 | Test type         | Count    | Purpose                          |
 | ----------------- | -------- | -------------------------------- |
-| KUnit (in-kernel) | 38 cases | Internal API correctness         |
+| KUnit (in-kernel) | 40 cases | Internal API correctness         |
 | Userspace smoke   | 1 suite  | End-to-end ioctl validation      |
 | Integration       | 1 suite  | Multi-device, power, error paths |
 | Benchmark         | 1 tool   | Throughput measurement           |

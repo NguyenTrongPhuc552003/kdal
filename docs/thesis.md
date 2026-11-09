@@ -91,7 +91,7 @@ Driver → Backend → Hardware) with clean contracts at each boundary.
 
 | Test Type         | Count         | Purpose                          |
 | ----------------- | ------------- | -------------------------------- |
-| KUnit (in-kernel) | 38 test cases | Internal API correctness         |
+| KUnit (in-kernel) | 40 test cases | Internal API correctness         |
 | Userspace smoke   | 1 test suite  | End-to-end ioctl validation      |
 | Integration       | 1 test suite  | Multi-device, power, error paths |
 | Benchmark         | 1 tool        | Throughput measurement           |
