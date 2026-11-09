@@ -3,11 +3,14 @@
 #
 # Prepare the pinned arm64 kernel that KDAL's KUnit run builds against.
 #
-# The kernel itself (Image, .config, Module.symvers) is built once by ELMOS
+# The kernel itself (Image, .config, Module.symvers) is built by ELMOS's CI
 # (Linux v6.18, arm64 defconfig + CONFIG_KUNIT=y, LLVM) and published as the
-# release "ci-kernel-v6.18-kunit". This script downloads it, checks the
-# hashes, fetches the matching v6.18 source and runs modules_prepare, so a
-# small CI runner never compiles the kernel.
+# private package ghcr.io/nguyentrongphuc552003/elmos-sdk; KDAL's CI pulls a
+# pinned tag into WORKDIR first (docs/ci-sdk.md). Files already in WORKDIR are
+# used as they are; missing ones are downloaded from the older hand-made
+# release "ci-kernel-v6.18-kunit" (local use). The script checks the hashes,
+# fetches the matching v6.18 source and runs modules_prepare, so a small
+# runner never compiles the kernel.
 #
 # Usage: scripts/ci/kernel-prepare.sh [WORKDIR]   (default: build/ci-kernel)
 # Prints the KDIR and IMAGE paths on its last two lines.
@@ -34,8 +37,9 @@ if [ ! -d linux-6.18 ]; then
 fi
 KDIR=$WORK/linux-6.18
 cp config "$KDIR/.config"
-# The release string must match the Image (it carries ELMOS's "-dirty"
-# from its macOS host patch); LOCALVERSION reproduces it on a clean tree.
+# The release string must match the Image (the old hand-made release
+# carries "-dirty" from ELMOS's macOS host patch; the SDK kernel has none);
+# LOCALVERSION reproduces it on a clean tree.
 REL=$(cat kernel.release)
 LV=${REL#6.18.0}
 make -C "$KDIR" ARCH=arm64 LLVM=1 LOCALVERSION="$LV" olddefconfig >/dev/null
