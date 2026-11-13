@@ -1,6 +1,6 @@
 #!/bin/sh
 # Validate commit message format against Conventional Commits.
-# Installed by: scripts/dev/install-hooks.sh
+# Installed by: scripts/gate install (sets core.hooksPath to .githooks)
 #
 # Enforced pattern:
 #   <type>(<scope>): <description>

@@ -375,12 +375,11 @@ test_e2e() {
 test_lint() {
 	section "lint" 2
 
-	# 1. lint scripts exist
-	if [ -f "${REPO_ROOT}/scripts/ci/checkpatch.sh" ] &&
-		[ -f "${REPO_ROOT}/scripts/ci/static_analysis.sh" ]; then
-		pass "lint scripts exist"
+	# 1. the quality gate exists
+	if [ -x "${REPO_ROOT}/scripts/gate" ]; then
+		pass "quality gate exists"
 	else
-		fail "lint scripts missing"
+		fail "scripts/gate missing"
 		return
 	fi
 

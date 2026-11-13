@@ -2,7 +2,7 @@
   "schema": "haven-gate-config/1",
   "engine": {
     "repo": "https://github.com/NguyenTrongPhuc552003/haven.git",
-    "commit": "400500b9d8e545e57b793f10d9b169a0e84a61a0"
+    "commit": "97605abee90b9ad2da0d87b5d6a9c201b41f8148"
   },
   "c_paths": [
     "src",
@@ -21,7 +21,8 @@
   ],
   "sh_paths": [
     "scripts",
-    "editor"
+    "editor",
+    ".githooks"
   ],
   "tool_paths": {
     "checkpatch": [
@@ -57,7 +58,8 @@
       "const_structs.checkpatch": "ea064f6916a74763468037494aeb270aae34b7c97617e84d424ca5b8733539b2"
     },
     "args": [
-      "--ignore=LONG_LINE,FILE_PATH_CHANGES"
+      "--max-line-length=120",
+      "--ignore=FILE_PATH_CHANGES"
     ]
   },
   "clang_tidy": {
@@ -121,5 +123,21 @@
     "ruff": "0.17.5",
     "shellcheck": "0.11.0",
     "gitleaks": "8.30.1"
-  }
+  },
+  "cppcheck": {
+    "enable": "warning,style,performance,portability",
+    "suppress": [
+      "unusedStructMember",
+      "constParameter",
+      "constVariablePointer",
+      "constParameterPointer",
+      "constParameterCallback",
+      "variableScope"
+    ]
+  },
+  "sh_files": [
+    ".githooks/commit-msg",
+    ".githooks/pre-commit",
+    ".githooks/pre-push"
+  ]
 }

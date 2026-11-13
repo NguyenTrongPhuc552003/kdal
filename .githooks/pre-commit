@@ -1,0 +1,4 @@
+#!/bin/sh
+# Quality gate, commit stage: secrets, personal names and home paths in the
+# staged files. Installed by: scripts/gate install
+exec "$(git rev-parse --show-toplevel)/scripts/gate" pre-commit
