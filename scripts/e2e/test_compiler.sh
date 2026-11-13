@@ -35,7 +35,9 @@ done
 e2e_section "Step 2: Build compiler"
 # ══════════════════════════════════════════════════════════════════════
 
-BUILD_DIR="$E2E_ROOT/build/release"
+# KDAL_BUILD_DIR: another build of the same tree (the quality gate's deep tier
+# points it at a sanitizer build)
+BUILD_DIR="${KDAL_BUILD_DIR:-$E2E_ROOT/build/release}"
 if [ ! -f "${BUILD_DIR}/CMakeCache.txt" ]; then
 	(cd "$E2E_ROOT" && cmake --preset release) >/dev/null 2>&1 || true
 fi

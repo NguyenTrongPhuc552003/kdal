@@ -13,8 +13,16 @@ jobs:
   quality-gate:
     name: quality gate
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: read
     steps:
       - uses: actions/checkout@v4
+      - name: The pinned kernel tree (for sparse and Coccinelle)
+        id: kernel
+        uses: ./.github/actions/kernel-tree
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Install build tools
         run: |
           sudo apt-get -o Acquire::Retries=5 update -qq
@@ -34,6 +42,8 @@ jobs:
       - name: Tool versions
         run: scripts/gate doctor
       - name: Quality gate (whole tree)
+        env:
+          KDAL_KDIR: ${{ steps.kernel.outputs.kdir }}
         run: scripts/gate ci
 
   build-and-smoke:
@@ -68,32 +78,13 @@ jobs:
       packages: read
     steps:
       - uses: actions/checkout@v7
-      - uses: oras-project/setup-oras@v2
-      - name: Pull the pinned ELMOS SDK kernel (private package)
-        env:
-          # pinned run tag: a new SDK build reaches KDAL only through a reviewed change
-          SDK: ghcr.io/nguyentrongphuc552003/elmos-sdk:linux-6.18-4
-        run: |
-          echo "${{ secrets.GITHUB_TOKEN }}" | oras login ghcr.io -u "${{ github.actor }}" --password-stdin
-          mkdir -p build/ci-kernel
-          oras pull "$SDK" -o build/ci-kernel
-          oras logout ghcr.io
-          ls build/ci-kernel
-          python3 -c 'import json;m=json.load(open("build/ci-kernel/manifest.json"));print("SDK", m["linux"]["version_string"], "elmos", m["elmos_commit"], "run", m["run"])'
-      - name: Install tools
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y -qq --no-install-recommends \
-            clang lld llvm make bc flex bison libelf-dev libssl-dev \
-            python3 xz-utils curl qemu-system-arm device-tree-compiler
-      - name: Prepare the pinned kernel (prebuilt Image, v6.18 source, modules_prepare)
-        run: |
-          set -o pipefail
-          mkdir -p build
-          scripts/ci/kernel-prepare.sh build/ci-kernel | tail -2 > build/kpaths
-          cat build/kpaths
+      - name: The pinned kernel tree
+        id: kernel
+        uses: ./.github/actions/kernel-tree
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Build kdal.ko with KUnit and run it in QEMU
-        run: scripts/ci/kunit-qemu.sh "$(sed -n 1p build/kpaths)" "$(sed -n 2p build/kpaths)" build/kunit
+        run: scripts/ci/kunit-qemu.sh "${{ steps.kernel.outputs.kdir }}" "${{ steps.kernel.outputs.image }}" build/kunit
       - name: Show the console log on failure
         if: failure()
         run: tail -150 build/kunit/console.log || true
