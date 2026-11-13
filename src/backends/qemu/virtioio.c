@@ -20,6 +20,7 @@
 #include <linux/virtio.h>
 
 #include <kdal/types.h>
+#include <kdal/core/internal.h>
 
 /* Readiness flag - set to 1 when a real virtio device is negotiated */
 static int virtio_io_ready_flag;

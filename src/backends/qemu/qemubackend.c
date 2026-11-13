@@ -22,6 +22,7 @@
 #include <kdal/api/common.h>
 #include <kdal/backend.h>
 #include <kdal/core/kdal.h>
+#include <kdal/core/internal.h>
 
 /* ── per-device emulated I/O ring ───────────────────────────────── */
 

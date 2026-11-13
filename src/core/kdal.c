@@ -9,28 +9,7 @@
 #include <linux/errno.h>
 
 #include <kdal/core/kdal.h>
-
-/* ── backend init / exit forward declarations ───────────────────── */
-
-int kdal_qemu_backend_init(void);
-void kdal_qemu_backend_exit(void);
-int kdal_soc_glue_init(void);
-void kdal_soc_glue_exit(void);
-int kdal_generic_platdev_init(void);
-void kdal_generic_platdev_exit(void);
-int kdal_devicetree_scan(void);
-void kdal_devicetree_cleanup(void);
-
-/* ── driver init / exit forward declarations ────────────────────── */
-
-int kdal_uart_driver_init(void);
-void kdal_uart_driver_exit(void);
-int kdal_i2c_driver_init(void);
-void kdal_i2c_driver_exit(void);
-int kdal_spi_driver_init(void);
-void kdal_spi_driver_exit(void);
-int kdal_gpu_driver_init(void);
-void kdal_gpu_driver_exit(void);
+#include <kdal/core/internal.h>
 
 /* ── driver attachment ──────────────────────────────────────────── */
 

@@ -2,7 +2,7 @@
   "schema": "haven-gate-config/1",
   "engine": {
     "repo": "https://github.com/NguyenTrongPhuc552003/haven.git",
-    "commit": "97605abee90b9ad2da0d87b5d6a9c201b41f8148"
+    "commit": "537733d34293c62522c8a6763956d830351ef809"
   },
   "c_paths": [
     "src",
@@ -101,7 +101,8 @@
       "lizard",
       "jscpd",
       "ruff",
-      "shellcheck"
+      "shellcheck",
+      "sparse"
     ],
     "deep": [
       "scan",
@@ -112,7 +113,10 @@
       "lizard",
       "jscpd",
       "ruff",
-      "shellcheck"
+      "shellcheck",
+      "sanitizers",
+      "sparse",
+      "coccinelle"
     ]
   },
   "versions": {
@@ -122,7 +126,9 @@
     "jscpd": "5.4.3",
     "ruff": "0.17.5",
     "shellcheck": "0.11.0",
-    "gitleaks": "8.30.1"
+    "gitleaks": "8.30.1",
+    "sparse": "0.6.4",
+    "spatch": "1.1.1"
   },
   "cppcheck": {
     "enable": "warning,style,performance,portability",
@@ -139,5 +145,28 @@
     ".githooks/commit-msg",
     ".githooks/pre-commit",
     ".githooks/pre-push"
-  ]
+  ],
+  "sanitizers": {
+    "preset": "debug",
+    "build": "build-deep",
+    "test": [
+      "sh",
+      "scripts/e2e/test_compiler.sh"
+    ],
+    "env": {
+      "KDAL_BUILD_DIR": "{build}"
+    }
+  },
+  "kernel": {
+    "env": "KDAL_KDIR",
+    "make": [
+      "make",
+      "-C",
+      "{kdir}",
+      "M={root}",
+      "ARCH=arm64",
+      "LLVM=1",
+      "KDAL_KUNIT=y"
+    ]
+  }
 }

@@ -16,6 +16,7 @@
 #include <linux/virtio.h>
 
 #include <kdal/types.h>
+#include <kdal/core/internal.h>
 
 static int virtio_accel_ready_flag;
 

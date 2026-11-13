@@ -64,3 +64,4 @@ codeql-results.sarif
 
 # Quality gate (scripts/gate)
 /build-gate/
+/build-deep/

@@ -17,6 +17,7 @@
 #include <linux/clk.h>
 #include <linux/of.h>
 #include <linux/reset.h>
+#include <kdal/core/internal.h>
 
 static struct clk *soc_peri_clk;
 static struct reset_control *soc_reset;
