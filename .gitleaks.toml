@@ -1,0 +1,14 @@
+# gitleaks configuration for the quality gate (scripts/gate): the default
+# rules, without the files that only look like secrets: the gate's baseline
+# (finding keys are hex hashes) and build or cache output that is not tracked.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "gate baseline, untracked build and cache output"
+paths = [
+  '''^quality/baseline\.json$''',
+  '''(^|/)__pycache__/''',
+  '''(^|/)build[^/]*/''',
+  '''(^|/)\.task/''',
+]

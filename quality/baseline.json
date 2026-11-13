@@ -1,0 +1,3785 @@
+{
+ "schema": "haven-gate-baseline/2",
+ "findings": [
+  {
+   "key": "026fbc9c3439caee3a9aaf08",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "039cd783ec26a71e390021cd",
+   "tool": "checkpatch",
+   "rule": "OPEN_BRACE",
+   "file": "tests/kunit/test_registry.c",
+   "severity": "MAJOR",
+   "message": "that open brace { should be on the previous line",
+   "count": 1
+  },
+  {
+   "key": "03d7669b806e151c9f2c0241",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "0590f42a9b50206b91cb6827",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "063089042c06d520effb5e4c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "0642e59ed044d3ea1d870c9d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "0708e74330308a090e1e6002",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "079f0e647febc457c57fd9d1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "07f7047c7cd7892e50dcce45",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/backend.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "08ac550a72e2900bf99ed43f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "09378ad5f17dfb5cbade1c56",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "examples/accel_demo/npudemo.c",
+   "severity": "MAJOR",
+   "message": "19 lines duplicated from examples/accel_demo/gpudemo.c:67",
+   "count": 1
+  },
+  {
+   "key": "098d4dd119e74d7962210b04",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "09f2801246a2b6a20cd1ce61",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "generate_kunit: 143 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "0a335ea4cc3101ece4499efe",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "0c0e9e6bdb6cbb68f0b2bc7a",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "kdality_testgen: cyclomatic complexity 18 > 15",
+   "count": 1
+  },
+  {
+   "key": "0c1a2182bc517f115d12566a",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "0c1d5d0e7a87e54e9e13979e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "0c346985f37378293d020834",
+   "tool": "clang-tidy",
+   "rule": "bugprone-unsafe-functions",
+   "file": "compiler/codegen.c",
+   "severity": "CRITICAL",
+   "message": "function 'rewind' has no error detection; 'fseek' should be used instead",
+   "count": 1
+  },
+  {
+   "key": "0d383b88ba7320e29c9cd926",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "2 adjacent parameters of 'generate_dtso' of convertible types are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "0d6545f6d03678a019a205a9",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/i2cdriver.c",
+   "severity": "MAJOR",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "count": 1
+  },
+  {
+   "key": "0da3623c40e5754f6824bd21",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "0eb84049164ad6546b5d9cfd",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "0f5f2081a6b09228a0670c65",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1016a3340b86d254732ca3f4",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 6
+  },
+  {
+   "key": "12fbb46291826316d8d47215",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "13322c3006de5357ae7779b0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "133afae505b0b64a452b14a7",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "140cbcbc1427ca0fa807616c",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "2 adjacent parameters of 'cmd_read' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "14b17c8998e64403a8def44f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "14ec1680cce0fd8e752b8960",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "simulate_file: cyclomatic complexity 21 > 15",
+   "count": 1
+  },
+  {
+   "key": "1590dd1c34f216c672d2e68c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "16303193879e7f05e51074ef",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "is_safe_outdir: cyclomatic complexity 20 > 15",
+   "count": 1
+  },
+  {
+   "key": "1764ff1e0a455b30ecb3ff92",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "17783f92117bb2eb655f457d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "17b9139dbe60dc22977a55d0",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/drivers/example/i2cdriver.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "18d9c9bb8937f6eef829b7d3",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "19b778b1cab71f695cffef7f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "19c2ae96702a933505cff0f3",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1ab2b9839aa19ce3f663e550",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1c02d8283d8040dce8f4105e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1c730536d42e2780b9e150ee",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1c81c85362eb068b6ce3397b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1d2abc1ac3d1227250399e18",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 2
+  },
+  {
+   "key": "1d63d357f1228738535b12b9",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "2 adjacent parameters of 'emit_warning' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "1db0757f4b00c27f46f9f587",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "1dfe3d22a0d632b29ccb62e9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1e4a8165fb69f7a8c48e8459",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 6
+  },
+  {
+   "key": "1ebeee842246d41f29669203",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "1ef3afa1f5377f92ffc4f0e5",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "emit_c_file: 156 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "20277e1cbf7453b7e73f97e8",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "parse_device_class_body: 123 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "2135c010b6b8a9e02887c480",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "21787eb4a09b6bad1eeeb2bb",
+   "tool": "shellcheck",
+   "rule": "SC2034",
+   "file": "editor/vim/vim-kdal/install-vim.sh",
+   "severity": "MAJOR",
+   "message": "FILES_INSTALLED appears unused. Verify use (or export if used externally).",
+   "count": 1
+  },
+  {
+   "key": "226a2fb50c09ee4f302e2468",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/ci/checkpatch.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 4
+  },
+  {
+   "key": "23253c84929c3344aaa0dfa6",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "253288953720294259e8599a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2588d638f75ad083c79335ad",
+   "tool": "checkpatch",
+   "rule": "REPEATED_WORD",
+   "file": "examples/accel_demo/gpudemo.c",
+   "severity": "MINOR",
+   "message": "Possible repeated word: 'gpudemo'",
+   "count": 1
+  },
+  {
+   "key": "258c59050765e943a31e4b36",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "26a0b6306bdfe99a570d5bf2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "27d2fe30e8766950d7ce1120",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "281bb65823a26805f3f726b0",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/dev/run.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./common.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "28b8f07a1e188aadea3f4c4d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "299f3744065ce55b29af9e79",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "3 adjacent parameters of 'kdal_ast_new' of convertible types are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "2a3335d124b28d8aac488d59",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "2a7e037c7ec71e0f9b99bbef",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2be30017ec54c9faecdf9e8c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2be510d66308468fc4c0b7de",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/lexer.c",
+   "severity": "MAJOR",
+   "message": "kdal_lex: 177 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "2c321a2dcacc55c0923423eb",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2cb72c07f658155c5849c4b4",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2dd5e4f2120bed8caf87d86e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2ddaa7ec827518bfec26e5c2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2e04c0534fe3361e02402fb1",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "parse_kdh: cyclomatic complexity 36 > 15",
+   "count": 1
+  },
+  {
+   "key": "2f3c526807638619a770f60c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "2f4eb26e8da577e2e125cac5",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "303765bb757d21eed6a007ba",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "313774cc41ab7caac5efda28",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "318d3d0eaa94e6fd668c6361",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "324150e35cb147e164302227",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "32ae0b895ad3fe38db9b86a8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "32d14002f5fd72a7e8e84bb2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "335e9dd28b7eba67660d5df7",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "18 lines duplicated from tests/integration/kdaltest.c:35",
+   "count": 1
+  },
+  {
+   "key": "3373910acd213743bbad5f81",
+   "tool": "ruff",
+   "rule": "SIM115",
+   "file": "scripts/ci/mkcpio.py",
+   "severity": "MINOR",
+   "message": "Use a context manager for opening files",
+   "count": 1
+  },
+  {
+   "key": "33c52b2848ed7b2a146d310c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "342f70ad4db93c55f96cdafa",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "tests/kunit/test_registry.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "34495bd5164be8c1a58d8295",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/debugfs.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "348736172f5929191612a4fc",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MAJOR",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "count": 1
+  },
+  {
+   "key": "34d6cf9a765c47f7b5650acc",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "34dfbc139f9f310067cb5035",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "36dc43532973fec6a125ce3c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "36fe32b4e44e0278057b73ec",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/core/version.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "3832759e6a9a37c870fc2991",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/ci/static_analysis.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "38712241ce3e4c6d5d140ca9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "38865a685127b346af790f7d",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/drivers/example/uartdriver.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "3935c0c58cdec556b42f8897",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "3a08a09624c60632b0319736",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3a764918d3b2ca12f096e653",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/dev/test.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./common.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "3aab6d4589513bb58046c62d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3ac3a8a800c9cbaf3905ef6b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3b57713174b1b4856afe5913",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3bc060ae6173901017feaed9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3cb4d27d24fe35de496d5545",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "3cd13bfb1a37c170e9eb2187",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "compiler/sema.c",
+   "severity": "MAJOR",
+   "message": "3 adjacent parameters of 'symtab_push' of convertible types are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "3dd212e072b72dee4e202fb9",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "tests/kunit/test_event.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "3dd32d1ad3e0896edf34ddb6",
+   "tool": "checkpatch",
+   "rule": "OPEN_BRACE",
+   "file": "src/core/registry.c",
+   "severity": "MAJOR",
+   "message": "that open brace { should be on the previous line",
+   "count": 1
+  },
+  {
+   "key": "3e8cefd999b87174fa7f9af9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3ea8a59cedf89f2dec7c41a2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "3f71300e11d78ed3611a8248",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 5
+  },
+  {
+   "key": "4022dfeebe829a7bb57f6ce5",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "407d2684349ea61929992da2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "41ae05190e5ddb9652b4e236",
+   "tool": "checkpatch",
+   "rule": "SPLIT_STRING",
+   "file": "tests/kunit/test_demand.c",
+   "severity": "MINOR",
+   "message": "quoted string split across lines",
+   "count": 1
+  },
+  {
+   "key": "41bd7a2c261c1d1961c7605b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "425bae1446e3603aa1279a49",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "42862ea438f7c6144e56656f",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "42d940af7032d7a5f7f85851",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "42da7303eeddb03b1a1f2787",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-security.ArrayBound",
+   "file": "tools/kdality/lint.c",
+   "severity": "CRITICAL",
+   "message": "Potential out of bound access to the heap area with tainted index",
+   "count": 1
+  },
+  {
+   "key": "433565e7e9606ee5ad7b8e7f",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "compiler/lexer.c",
+   "severity": "MAJOR",
+   "message": "3 adjacent parameters of 'lx_emit' of convertible types are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "433c8c298e83c4cc436138fa",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4595c162b64eed3e3d4c5527",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "45dc1dd57f38889b881fc9bc",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "45deea4879754a5796b16e3e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "46db0202dd9a3677639dee8d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "46db5a6d98ed74f0078494c9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "48c07b97db5ae8af6f005bc7",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4972a544e8a55283bf37d806",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "49cff5346501d487fec18c18",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4a10ef387a05cffc6a633220",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/qemu/qemubackend.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "4a65326e2f37cfc3e88855a2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4bdaa420f5de78a009c4de05",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4ca0ce8c93954890afa6998b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4cce681f641fd0d871798577",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4d39e4b9aad77c681f5a640c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4d3a9ed7eff1ecfbd4eaba9e",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "4ee0007807ce8d4ec1fe84aa",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4f2618322bdece66423e4af0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "4f27144e534156bc35fb3094",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "503e3ea4d41f819a5157e54f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "508ea1a6fb13f03b3a4cc492",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/qemu/virtioaccel.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "512601ad4d734cce0e295c78",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "512e7cb48b46d97e4d2a1fa3",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/generic/socglue.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "5148bca1fd17f3aeeecd3e90",
+   "tool": "checkpatch",
+   "rule": "BLOCK_COMMENT_STYLE",
+   "file": "examples/minimaldriver/driver.c",
+   "severity": "MINOR",
+   "message": "Block comments use * on subsequent lines",
+   "count": 1
+  },
+  {
+   "key": "525d160dd49ce451ce564907",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "53430aaf44d37e7ff29fc3a5",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5397d60af9c7a15e9be5e377",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "542718e13621f147ea05acaf",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "54841dae6338e8bb6bb2735b",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/lexer.c",
+   "severity": "MAJOR",
+   "message": "kdal_tok_name: cyclomatic complexity 29 > 15",
+   "count": 1
+  },
+  {
+   "key": "55cd6b29750e363d37f11e96",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5616bbeec2be99d53d5945a8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "563c9416a79b41631796a746",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "56ba4984782817e729ebfd91",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/core/kdal.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "5852ceae887a1d5acedf0077",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-security.ArrayBound",
+   "file": "compiler/codegen.c",
+   "severity": "CRITICAL",
+   "message": "Potential out of bound access to the heap area with tainted index",
+   "count": 1
+  },
+  {
+   "key": "58a39c8454fa9dc5658ba425",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "emit_stmt: cyclomatic complexity 30 > 15",
+   "count": 1
+  },
+  {
+   "key": "5937d9e69a2842675e4a6a98",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 2
+  },
+  {
+   "key": "59ba04be9fe13e0ae044ef0b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5bd154fbf292aaa72dfee031",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5c1d7baeff0f97fb5a915423",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5c5ce281b7b548aba0e78c87",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5d7582b9975d776abc3f426f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5ecc0e00ce9bc5d7b11421f4",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/drivers/example/i2cdriver.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "5f52dcf3e148f76fc9b17f6e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "5fd2b3aa2671a8e29aa839a0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6075985bab957c2d849ea3db",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6139381205eabef8645e5fa3",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/event.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "61482a794e22332235a4956c",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "61bdf3f02062f00f5af7deec",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "62d7bf00d8bb13f192b89c4e",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_website.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "630c85dd9441ce845bab65c3",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6391f95eab3e39db55199134",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "63eb54b53e1310b2b167d88d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "66d235162775fbc17fe3c0c8",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/sema.c",
+   "severity": "MAJOR",
+   "message": "sema_check_expr: cyclomatic complexity 16 > 15",
+   "count": 1
+  },
+  {
+   "key": "66f63c7745919905520db163",
+   "tool": "shellcheck",
+   "rule": "SC2015",
+   "file": "scripts/release/release.sh",
+   "severity": "MINOR",
+   "message": "Note that A && B || C is not if-then-else. C may run when A is true.",
+   "count": 1
+  },
+  {
+   "key": "6712e3caf5a5058a1d384ec5",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6732ec0dc25e26a82a070945",
+   "tool": "checkpatch",
+   "rule": "REPEATED_WORD",
+   "file": "examples/accel_demo/npudemo.c",
+   "severity": "MINOR",
+   "message": "Possible repeated word: 'npudemo'",
+   "count": 1
+  },
+  {
+   "key": "6738847a3d289af922212f86",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-core.NullDereference",
+   "file": "compiler/lexer.c",
+   "severity": "CRITICAL",
+   "message": "Dereference of null pointer",
+   "count": 3
+  },
+  {
+   "key": "67978848a94b8f859eddb726",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/api/driver.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "69278d7295e925ce5c8f7b66",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "6a012b85921d54055705f302",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6a09aca001a21a7e88779aef",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6b9d69bfd3fdbf48aac35988",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "6bfac5bbca1bec47827e5e6d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6c3bb519e1507a0639a763aa",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6eb0f6848cfdb8299b051719",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "6f16607d81db159d93bf329d",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_release.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "7071bef4551090f03e218203",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "71cb1171168c5b035ba8c3a3",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "71f8656877fc9e2c6f0e218f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "725fe86521b0b00461bbe299",
+   "tool": "ruff",
+   "rule": "SIM115",
+   "file": "scripts/ci/mkcpio.py",
+   "severity": "MINOR",
+   "message": "Use a context manager for opening files",
+   "count": 1
+  },
+  {
+   "key": "744640cc87168c26a4699918",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "74dd9c831677e55f962ebe17",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "75a9f7e97d34590687fd0909",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "parse_primary: cyclomatic complexity 19 > 15",
+   "count": 1
+  },
+  {
+   "key": "75ef8cc26b3867a3fea77f40",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "75fdd7b13e03b4851115ae48",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "examples/accel_demo/gpudemo.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "7605e4dccb7d8865a887cc6f",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tests/userspace/benchmark.c",
+   "severity": "MAJOR",
+   "message": "main: cyclomatic complexity 16 > 15",
+   "count": 1
+  },
+  {
+   "key": "7646b5aa38764e162b725cbc",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "76760d7df21765fdf1558a40",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "772fec18e61c18a50b0256c4",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "kdality_compile: cyclomatic complexity 17 > 15",
+   "count": 1
+  },
+  {
+   "key": "775601c9da9d978a77acc515",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "parse_primary: 111 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "7769a2c3d4bab0827944c8ff",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "786a7eca83680b9bc6cea55f",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/i2cdriver.c",
+   "severity": "MAJOR",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "count": 1
+  },
+  {
+   "key": "78f64a690d59ee2322a363a4",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "791329ffeabd67ab6e6d5ef9",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_developer_journey.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "7925e8d8d66bdb022478d3cc",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MAJOR",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "count": 1
+  },
+  {
+   "key": "7a60e021136a5c26a4945f10",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "7aa58e2b8d0c13abac751b03",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "7bd86ca975253c5820b65c0c",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/sema.c",
+   "severity": "MAJOR",
+   "message": "sema_populate_device: cyclomatic complexity 25 > 15",
+   "count": 1
+  },
+  {
+   "key": "7c6580ed1e72af685086e690",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/dev/test.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "7cb2377295b80b694faa2c72",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/ioctl.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "7d1db747aa751766dcf7c631",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "7d8ef4fd9288f25b744f9e0b",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/drivers/example/gpudriver.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "7dfb25e834f7c15fbcdb77a5",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MAJOR",
+   "message": "17 lines duplicated from src/drivers/example/i2cdriver.c:40",
+   "count": 1
+  },
+  {
+   "key": "7e518baef75ac349834c5dfa",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "7e61ab2ac57335b3e2f99b34",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "kdality_dtgen: cyclomatic complexity 19 > 15",
+   "count": 1
+  },
+  {
+   "key": "7e8884a641c71915a9e1e3c8",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "7ebdea3b8f9bed0f3e86be83",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "emit_c_file: cyclomatic complexity 20 > 15",
+   "count": 1
+  },
+  {
+   "key": "7ecf1c6955311377fdc51538",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "800cf1dc1b45d677b6b2f1f8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "80aecb1c641c5d5d1bf5fa53",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "814374698f39436c9de3a700",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 5
+  },
+  {
+   "key": "81a05df4cabf1be98c6057aa",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "82568943db641ca29d537ab1",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/ci/test.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "826e0cdfdfcd1c919545dc4b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "857fc16e6b19cabba29b401e",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MAJOR",
+   "message": "17 lines duplicated from src/drivers/example/i2cdriver.c:11",
+   "count": 1
+  },
+  {
+   "key": "864a1192d85bc784f7d2268e",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "89755fb8ec2d9c9ce4d91e0a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 6
+  },
+  {
+   "key": "899b556647c379a53fdae6ba",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "8a7582b269154d3e4681b205",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "8ba2f148a7eda92408bd2cf1",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "kdality_init: 103 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "8bf2c6f359268c61e86761d9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "8c4dc6ffc29d7aac9d2f61e7",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "8d8fe96c8da530de150e55b0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "8e5593513f1f206cfbeb5e1b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "8ea8768392b6fe5c7a756372",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/env/run.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "8eaa51130e805134087bb894",
+   "tool": "checkpatch",
+   "rule": "SPLIT_STRING",
+   "file": "src/core/demand.c",
+   "severity": "MINOR",
+   "message": "quoted string split across lines",
+   "count": 1
+  },
+  {
+   "key": "90ed0e8c725b6fd921d9635b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "916e1693736b6b13b3c92257",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "sim_exec: cyclomatic complexity 36 > 15",
+   "count": 1
+  },
+  {
+   "key": "92cccb53c338e9c9af65c6f3",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-security.ArrayBound",
+   "file": "tools/kdality/simulate.c",
+   "severity": "CRITICAL",
+   "message": "Potential out of bound access to the heap area with tainted index",
+   "count": 1
+  },
+  {
+   "key": "9326abbf48a360b09ce64513",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "sim_eval: cyclomatic complexity 36 > 15",
+   "count": 1
+  },
+  {
+   "key": "93dc519f32b69f226989d875",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "943663fc583db336c5c7da8c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "952cf668b96113317fd6f7ed",
+   "tool": "checkpatch",
+   "rule": "BLOCK_COMMENT_STYLE",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "Block comments use a trailing */ on a separate line",
+   "count": 1
+  },
+  {
+   "key": "953af5b18100e8548ee5a5e0",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "examples/accel_demo/npudemo.c",
+   "severity": "MAJOR",
+   "message": "26 lines duplicated from examples/accel_demo/gpudemo.c:16",
+   "count": 1
+  },
+  {
+   "key": "961402807147d5aa73a8024b",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "96e9121451a46a34fefcd109",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-unix.Errno",
+   "file": "compiler/codegen.c",
+   "severity": "CRITICAL",
+   "message": "Value of 'errno' was not checked and may be overwritten by function 'malloc'",
+   "count": 1
+  },
+  {
+   "key": "96efd3e34f3ec286a0fd4ec1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "9702ecdb6fe0dea0fe40817f",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/dev/build.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "9715bbd33bfeeeee7b7f5ccd",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "98cd74784e8c333c8f80dfa0",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/backends/generic/platdev.c",
+   "severity": "MAJOR",
+   "message": "16 lines duplicated from src/backends/generic/platdev.c:49",
+   "count": 1
+  },
+  {
+   "key": "98e76db944c3467378729c92",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "9a53cdfdedf93f2eb7e4481e",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "emit_stmt: 139 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "9b31cbeef61fa882bd260080",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/backends/qemu/qemubackend.c",
+   "severity": "MAJOR",
+   "message": "16 lines duplicated from src/backends/qemu/qemubackend.c:112",
+   "count": 1
+  },
+  {
+   "key": "9be9c9eae09074c3d6760536",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "9cef8ed7bdfda194ebf0af93",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "p_tok_to_binop: cyclomatic complexity 19 > 15",
+   "count": 1
+  },
+  {
+   "key": "9dc18547681b56867d56f691",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "9ebfae58ca587b558ba6d5ed",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "tests/userspace/testapp.c",
+   "severity": "MAJOR",
+   "message": "26 lines duplicated from tests/integration/kdaltest.c:21",
+   "count": 1
+  },
+  {
+   "key": "9f9dad7093fa606077e85819",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/generic/devicetree.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "9fae3faddad43a33d0d53487",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a08a79bbc8341f7c0faa4fa1",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "parse_kdh: 136 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "a1121749a0a843882df231ce",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a201ed425d2d4e38f7d75b8e",
+   "tool": "shellcheck",
+   "rule": "SC2013",
+   "file": "scripts/dev/test.sh",
+   "severity": "MINOR",
+   "message": "To read lines rather than words, pipe/redirect to a 'while read' loop.",
+   "count": 1
+  },
+  {
+   "key": "a233df22a9b0690d1f100d46",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a2830dace43acff9d1e6c530",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "a3dfa078c840ac74d5327755",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a4b012d43fd5543582949f6d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a5597b69dd06aad845553c15",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "a578d1f9fd52204a9e944bc9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a69b54fa8df7b609bcf5477c",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-optin.portability.UnixAPI",
+   "file": "compiler/codegen.c",
+   "severity": "CRITICAL",
+   "message": "Call to 'malloc' has an allocation size of 0 bytes",
+   "count": 1
+  },
+  {
+   "key": "a7f4a89773210e0a5616372e",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/e2e/run_all.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 2
+  },
+  {
+   "key": "a875f6a049358188b68799c0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "a951109f2bac5818086731fd",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/drivers/example/uartdriver.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "a96685a617892d155f1b4e0a",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "examples/accel_demo/npudemo.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "ab511e365d9e4af64d919f4f",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "ac035ad284a37392b3ba850a",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/drivers/example/gpudriver.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "ad382184d03819cda8c180a1",
+   "tool": "checkpatch",
+   "rule": "BRACES",
+   "file": "examples/accel_demo/gpudemo.c",
+   "severity": "MINOR",
+   "message": "braces {} are not necessary for any arm of this statement",
+   "count": 1
+  },
+  {
+   "key": "ae5c983990f3aaa774d5f098",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "af14179c37a94d453aabcc3a",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "af1962bde95e3fce74486412",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "afc7f22619392673af4d1f9f",
+   "tool": "shellcheck",
+   "rule": "SC2015",
+   "file": "scripts/release/release.sh",
+   "severity": "MINOR",
+   "message": "Note that A && B || C is not if-then-else. C may run when A is true.",
+   "count": 1
+  },
+  {
+   "key": "afcde29029671025b23fc177",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_user_journey.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "b142a5b833b195f71b4a7d1e",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/dev/codeql.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./common.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "b1b71bf1eb7fa9edf4905fb3",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "b20cc0e64feb40009ca29837",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b3db2854a2471f2280c21999",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "b3fbb4291628e8844d746152",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b40e38b94033b4574fe4ec7d",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/generic/platdev.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "b41bc1904d3a418324d0af24",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b457937923294d907f1eedcb",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b4aedfb83900bd7d5aff2a9a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b5cf12c36d7117a74316eaa8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b5f15a07c44ef272ec30a38d",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "is_safe_lint_path: cyclomatic complexity 16 > 15",
+   "count": 1
+  },
+  {
+   "key": "b61202b7ffbae1a56c743a2e",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_compiler.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "b6530e7afc8f252dd78db645",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 5
+  },
+  {
+   "key": "b71f4932d1a4f833803f09a4",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b7305124afe2bc25e04a33e0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b77ddf3bf05dcf6475cfbc28",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b77ffdcac17c6b0a438cba15",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "b795d7cefe7425fd28bfefa8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ba42130b36a4b3196cb23741",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ba71d13a8e30e3af5505f858",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ba9a18d3a83c7c51eb9e4421",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/chardev.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "bb27364b03e6d53db140b8d2",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/uartdriver.c",
+   "severity": "MAJOR",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "count": 1
+  },
+  {
+   "key": "bc7712e5a5eb7570efa6bd99",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "20 lines duplicated from tests/integration/kdaltest.c:31",
+   "count": 1
+  },
+  {
+   "key": "bc78e45e7fc42e8346c07968",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "3 adjacent parameters of 'emit_kbuild' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "bc962cba3cb0d153cc71aaf1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "bd0c2c6c676f0338bd1fbc58",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "bd47ffa0c8b8755b0d3c1b8c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "be138232db80679c6cad7c61",
+   "tool": "shellcheck",
+   "rule": "SC2015",
+   "file": "scripts/e2e/test_user_journey.sh",
+   "severity": "MINOR",
+   "message": "Note that A && B || C is not if-then-else. C may run when A is true.",
+   "count": 1
+  },
+  {
+   "key": "be30a7b2331accec394d3f11",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "bf8aec58220b7488698d4f9a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c00a12fbcfe8635e7c7e0301",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "lint_kdc: cyclomatic complexity 26 > 15",
+   "count": 1
+  },
+  {
+   "key": "c08c3ddba20e9c5048f26110",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c09718db2e25a373a747b879",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c31e43e1b687152afa065045",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c3dc82ce2689a816e623b551",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/lexer.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c47aff2b6b6a336793000a2d",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-core.NullDereference",
+   "file": "compiler/lexer.c",
+   "severity": "CRITICAL",
+   "message": "Dereference of null pointer",
+   "count": 1
+  },
+  {
+   "key": "c588c8be659c0eef39dbf028",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c62659b77500024a21ba1498",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c65a714c2a730f63130e3ebe",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "c733b859343ffdf6ecb70ebe",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c742b251082a8222f6c987cb",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c8c3a1d521bfef176ac02129",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "c9b9e86cbf751ec7f7460db1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "c9fe4ad4341650132b46626f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "cb2fb73862263b5758209887",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cb69f876857e5bc5d8fb512f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ccd85633f27ed715afe3e297",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cd48ddc81788ea2f0a489216",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cd7517d040e6a1e0e10a6cd1",
+   "tool": "checkpatch",
+   "rule": "SPLIT_STRING",
+   "file": "src/core/demand.c",
+   "severity": "MINOR",
+   "message": "quoted string split across lines",
+   "count": 1
+  },
+  {
+   "key": "ce0207c102b8770d1acf3e44",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ce29cf342903aa815fcdc5f9",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cf16bcb558fbd7eaed6b258a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cf3acb3ce821898d8edbc7e3",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "cf7ab4c126bc1c602e1a7b8a",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "cff8c8a073c4fb822a60d8d6",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "d0de2604b7466c2a1d87daf1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "d12314cdce9c95d201377841",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/types.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "d32eaade9e5d7c81e902e9b4",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "d446c9b0de292c2d75f89697",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "d45873b87ff611ff68742548",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "lint_walk_stmts: cyclomatic complexity 22 > 15",
+   "count": 1
+  },
+  {
+   "key": "d5aea2f08b339371b40a0f7e",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "d6a33d3eae8239bc9fbc8658",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "3 adjacent parameters of 'write_file' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "d6a6b40397e4744ff0e02aea",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "d6ce55294b464c62e57e5df1",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "d7879f746991024a84f1c32a",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/dev/build.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./common.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "d9dfc15c4eeccf8d4747c73c",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "parse_register_decl: cyclomatic complexity 17 > 15",
+   "count": 1
+  },
+  {
+   "key": "dba1e1df2f989e1a752cbb06",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "dbc15acb772b9e982f6f8af8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "dc8366c08930779fd66c8877",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/uartdriver.c",
+   "severity": "MAJOR",
+   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:100",
+   "count": 1
+  },
+  {
+   "key": "dcc220f039ec0977ae5e2e8b",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_editor_support.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "dd3d7aeebd223aaa1bce92da",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/qemu/virtioio.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "dd900524520579d124475ccd",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "de10932d92d75ebce5de2992",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "de6853c6f3b1d0e19ba40d03",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "df4335ea935a3c4e88dc7b7b",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/ci/test.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "df6dde4b61d610ceb67468f3",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/lint.c",
+   "severity": "MAJOR",
+   "message": "kdality_lint: cyclomatic complexity 21 > 15",
+   "count": 1
+  },
+  {
+   "key": "dfb4147679ad42e00c617ecd",
+   "tool": "shellcheck",
+   "rule": "SC2059",
+   "file": "scripts/dev/test.sh",
+   "severity": "MINOR",
+   "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
+   "count": 1
+  },
+  {
+   "key": "dfd1743e0fb04d6f73505b40",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MAJOR",
+   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:100",
+   "count": 1
+  },
+  {
+   "key": "e05040fe1ca3372ae0e7f564",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "e0a6aa9e8f0e5398f9d56a6d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e0d68e2e898ad60788a045e6",
+   "tool": "shellcheck",
+   "rule": "SC2086",
+   "file": "scripts/ci/test.sh",
+   "severity": "MINOR",
+   "message": "Double quote to prevent globbing and word splitting.",
+   "count": 1
+  },
+  {
+   "key": "e1853cb9bf80b7ceb5c21fba",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e208cd0fb96a48870d93710f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/compile.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e29fd90f02fd00f079a8dfef",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "31 lines duplicated from tools/kdality/lint.c:71",
+   "count": 1
+  },
+  {
+   "key": "e3130531285b5ea86f37920d",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/api/accel.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "e36fb4a3e29cbe7e9459bdbf",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e45c8ca31e091c98638bd105",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  },
+  {
+   "key": "e465358fd7e30e49f3072437",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/power.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "e5b1acb4cbf595e339137060",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/main.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e6e996d0000ed00091fa4dad",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/simulate.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e6ee6faaf518db6c5a571057",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "e7c6a8a50a8d5a0850bb6aea",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "2 adjacent parameters of 'open_output_in_dir' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "e7d6e47343ffeb3852e9cb5a",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "parse_device_class_body: cyclomatic complexity 29 > 15",
+   "count": 1
+  },
+  {
+   "key": "e82980d681a06c40c084b0ba",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 3
+  },
+  {
+   "key": "e86b837774f9f6dc9d3d8591",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "tests/kunit/test_accel.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "e86e176d6476f6641f396c06",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e88679491cfd8caf5d6c8584",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e89882733220347dc609a198",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e8af28b549df0bd5e08f32a0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "e90dd93a07d19a1b801dfbfe",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "kdal_parse: 224 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "e98a5d3cf37fadc251264104",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ea621116fc603b1835a360a3",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "tests/kunit/test_driver.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "eac1ed4a15450df2d43bd610",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "tests/kunit/test_core.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "ec7c6a9bfb67587c3161e689",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ee119a8e69c9b5df6fbf4b66",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ee40007b6c608d4ec6ca4689",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "include/kdal/api/common.h",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "ee8235438331fa8669163cbd",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "src/drivers/example/uartdriver.c",
+   "severity": "MAJOR",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "count": 1
+  },
+  {
+   "key": "eebf25813f76723a4029c834",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 2
+  },
+  {
+   "key": "eee561712a9be3d1d36898e0",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/registry.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "eef9f63c9922460793da49c8",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ef351d2bbbdb8f68fce2d714",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ef5d8c74bbffb660edeb7ed1",
+   "tool": "jscpd",
+   "rule": "duplicate",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "20 lines duplicated from compiler/codegen.c:326",
+   "count": 1
+  },
+  {
+   "key": "efc817de70f4d46fc90f0345",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f03ae875992c62cf285e279b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f1aee81113ca1fb6bb4417ad",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f3ba1ba64205aadeba8ec47c",
+   "tool": "lizard",
+   "rule": "function-length",
+   "file": "compiler/sema.c",
+   "severity": "MAJOR",
+   "message": "sema_populate_device: 122 lines > 100",
+   "count": 1
+  },
+  {
+   "key": "f42eb98f5ac332ef8fd5326c",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f455c975286b1a062f23550f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f4c577ac9e44ca77498bee7c",
+   "tool": "clang-tidy",
+   "rule": "bugprone-unchecked-string-to-number-conversion",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "CRITICAL",
+   "message": "'sscanf' used to convert a string to an unsigned integer value, but function will not report conversion errors; consider using 'strtoul' instead",
+   "count": 1
+  },
+  {
+   "key": "f51ee1883dac1f489221e7ce",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/sema.c",
+   "severity": "MAJOR",
+   "message": "sema_check_stmts: cyclomatic complexity 24 > 15",
+   "count": 1
+  },
+  {
+   "key": "f60c8942fa14bf74b76e801f",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 6
+  },
+  {
+   "key": "f65243fbf5d5bd8e42eefacd",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/lexer.c",
+   "severity": "MAJOR",
+   "message": "kdal_lex: cyclomatic complexity 37 > 15",
+   "count": 1
+  },
+  {
+   "key": "f652ba193daca45cd80334b0",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 6
+  },
+  {
+   "key": "f7029c2a217ddb760e657fe0",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/core/module.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "f744a98611b49e3b9ec696c1",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/testgen.c",
+   "severity": "MAJOR",
+   "message": "is_safe_input_path: cyclomatic complexity 20 > 15",
+   "count": 1
+  },
+  {
+   "key": "f74a4ccf30b895f98c2159c5",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/drivers/example/spidriver.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "f76815eb947e9a270a188113",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "f8bdab351036dd34e7f9baee",
+   "tool": "checkpatch",
+   "rule": "SPDX_LICENSE_TAG",
+   "file": "src/backends/qemu/mmio.c",
+   "severity": "MINOR",
+   "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
+   "count": 1
+  },
+  {
+   "key": "f9efa13d5fc045bbed37ce9b",
+   "tool": "clang-tidy",
+   "rule": "bugprone-easily-swappable-parameters",
+   "file": "tools/kdality/kdalctl.c",
+   "severity": "MAJOR",
+   "message": "2 adjacent parameters of 'cmd_write' of similar type ('const char *') are easily swapped by mistake",
+   "count": 1
+  },
+  {
+   "key": "fa1227d43b902130a1f40f30",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "kdal_parse: cyclomatic complexity 40 > 15",
+   "count": 1
+  },
+  {
+   "key": "fb8329b3dd26881efd11d47b",
+   "tool": "clang-tidy",
+   "rule": "bugprone-unchecked-string-to-number-conversion",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "CRITICAL",
+   "message": "'atoi' used to convert a string to an integer value, but function will not report conversion errors; consider using 'strtol' instead",
+   "count": 1
+  },
+  {
+   "key": "fbaf1bae65acd8f679d32ab2",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fbb84f02b2d830b9c19fbc5d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fbd4169b11b716c89e49454f",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "compiler/parser.c",
+   "severity": "MAJOR",
+   "message": "p_binop_prec: cyclomatic complexity 19 > 15",
+   "count": 1
+  },
+  {
+   "key": "fc3315b2bd05db75d47e3208",
+   "tool": "clang-tidy",
+   "rule": "clang-analyzer-unix.Malloc",
+   "file": "compiler/lexer.c",
+   "severity": "CRITICAL",
+   "message": "Potential leak of memory pointed to by 'lx.tokens'",
+   "count": 1
+  },
+  {
+   "key": "fc4102fa9bcd8ff8dfc103ed",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/dtgen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fcc8b1139038e2701b7cab4c",
+   "tool": "shellcheck",
+   "rule": "SC1091",
+   "file": "scripts/e2e/test_packaging.sh",
+   "severity": "MINOR",
+   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
+   "count": 1
+  },
+  {
+   "key": "fd3341b3f7071352641b9e6b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fd3fbc92691300a819e6b14b",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fd70dcaa74890be771351edf",
+   "tool": "lizard",
+   "rule": "complexity",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "kdality_init: cyclomatic complexity 18 > 15",
+   "count": 1
+  },
+  {
+   "key": "fd8325c84648aec98ae25199",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "feb65378200d6b7e5e11132d",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "compiler/codegen.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "ff8e8b891283c46e3447f388",
+   "tool": "clang-tidy",
+   "rule": "cert-err33-c",
+   "file": "tools/kdality/init.c",
+   "severity": "MAJOR",
+   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
+   "count": 1
+  },
+  {
+   "key": "fff0939786cf7ec7d5ce6492",
+   "tool": "checkpatch",
+   "rule": "AVOID_EXTERNS",
+   "file": "src/core/kdal.c",
+   "severity": "MINOR",
+   "message": "externs should be avoided in .c files",
+   "count": 1
+  }
+ ]
+}

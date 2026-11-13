@@ -61,3 +61,6 @@ unknown.*
 .codeql-db/
 codeql-results.sarif
 
+
+# Quality gate (scripts/gate)
+/build-gate/

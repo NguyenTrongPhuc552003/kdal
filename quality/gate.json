@@ -1,0 +1,125 @@
+{
+  "schema": "haven-gate-config/1",
+  "engine": {
+    "repo": "https://github.com/NguyenTrongPhuc552003/haven.git",
+    "commit": "400500b9d8e545e57b793f10d9b169a0e84a61a0"
+  },
+  "c_paths": [
+    "src",
+    "include",
+    "compiler",
+    "tools",
+    "tests",
+    "examples"
+  ],
+  "c_include": [
+    "include",
+    "compiler/include"
+  ],
+  "py_paths": [
+    "scripts"
+  ],
+  "sh_paths": [
+    "scripts",
+    "editor"
+  ],
+  "tool_paths": {
+    "checkpatch": [
+      "src",
+      "include",
+      "tests/kunit",
+      "examples"
+    ],
+    "clang-tidy": [
+      "compiler",
+      "tools/kdality"
+    ]
+  },
+  "exclude": [],
+  "scan_exclude": [],
+  "jscpd_formats": "c",
+  "jscpd_ignore": [],
+  "limits": {
+    "ccn": 15,
+    "length": 100,
+    "dup_lines": 15
+  },
+  "tool_dirs": [
+    "/opt/homebrew/opt/llvm/bin",
+    "~/.local/bin"
+  ],
+  "checkpatch": {
+    "tag": "v6.18",
+    "dir": "~/.local/share/haven-gate/checkpatch-v6.18",
+    "sha256": {
+      "checkpatch.pl": "c7136762bc46dfc6ed31ac21f0d58259f54f111a2fb616b766d3d9151739ebea",
+      "spelling.txt": "3c1526d0cc6365d6b637b35e4705e24add3c4a1d4e73bc261cab7f6ee4079264",
+      "const_structs.checkpatch": "ea064f6916a74763468037494aeb270aae34b7c97617e84d424ca5b8733539b2"
+    },
+    "args": [
+      "--ignore=LONG_LINE,FILE_PATH_CHANGES"
+    ]
+  },
+  "clang_tidy": {
+    "build": "build-gate",
+    "configure": [
+      "cmake",
+      "--preset",
+      "debug",
+      "-B",
+      "build-gate",
+      "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
+    ],
+    "checks": "-*,bugprone-*,cert-*,clang-analyzer-*",
+    "header_filter": "(compiler|tools)/",
+    "extra_args": [
+      "-D_FORTIFY_SOURCE=0"
+    ]
+  },
+  "stages": {
+    "pre-commit": [
+      "scan"
+    ],
+    "pre-push": [
+      "scan",
+      "checkpatch",
+      "cppcheck",
+      "clang-tidy",
+      "lizard",
+      "jscpd",
+      "ruff",
+      "shellcheck"
+    ],
+    "ci": [
+      "scan",
+      "gitleaks",
+      "checkpatch",
+      "cppcheck",
+      "clang-tidy",
+      "lizard",
+      "jscpd",
+      "ruff",
+      "shellcheck"
+    ],
+    "deep": [
+      "scan",
+      "gitleaks",
+      "checkpatch",
+      "cppcheck",
+      "clang-tidy",
+      "lizard",
+      "jscpd",
+      "ruff",
+      "shellcheck"
+    ]
+  },
+  "versions": {
+    "cppcheck": "2.22.0",
+    "clang-tidy": "23.1",
+    "lizard": "1.26.0",
+    "jscpd": "5.4.3",
+    "ruff": "0.17.5",
+    "shellcheck": "0.11.0",
+    "gitleaks": "8.30.1"
+  }
+}
