@@ -24,6 +24,11 @@ jobs:
         with:
           path: ~/.cache/cppcheck-*
           key: cppcheck-${{ hashFiles('quality/gate.json') }}
+      - name: Cached checkpatch files (pinned by SHA-256)
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/haven-gate
+          key: checkpatch-${{ hashFiles('quality/gate.json') }}
       - name: The gate's engine (haven, pinned commit) and its pinned tools
         run: bash "$(scripts/gate engine-dir)/tools/gate/ci-setup.sh"
       - name: Tool versions
