@@ -1,0 +1,4 @@
+#!/bin/sh
+# Quality gate, push stage: the analyzers on the files changed against the
+# main branch of the remote being pushed to ($1). Installed by: scripts/gate install
+exec "$(git rev-parse --show-toplevel)/scripts/gate" pre-push --remote "$1"

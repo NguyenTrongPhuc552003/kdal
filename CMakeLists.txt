@@ -130,10 +130,10 @@ add_custom_target(e2e
 	COMMENT "Running KDAL E2E test suites"
 	VERBATIM)
 
-# Lint (checkpatch + static analysis)
+# Lint: the quality gate on the whole tree (checkpatch, cppcheck, clang-tidy,
+# lizard, jscpd, shellcheck, ruff; see CONTRIBUTING.md)
 add_custom_target(lint
-	COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/ci/checkpatch.sh
-	COMMAND sh ${CMAKE_SOURCE_DIR}/scripts/ci/static_analysis.sh
+	COMMAND ${CMAKE_SOURCE_DIR}/scripts/gate ci
 	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
 	COMMENT "Running lint checks"
 	VERBATIM)

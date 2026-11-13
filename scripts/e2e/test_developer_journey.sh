@@ -162,8 +162,7 @@ done
 e2e_section "Step 7: CI scripts are valid shell"
 # ══════════════════════════════════════════════════════════════════════
 
-for script in scripts/ci/test.sh scripts/ci/checkpatch.sh \
-	scripts/ci/static_analysis.sh scripts/ci/coverage.sh \
+for script in scripts/ci/test.sh scripts/gate scripts/ci/coverage.sh \
 	scripts/env/dependencies.sh; do
 	_path="$E2E_ROOT/$script"
 	if [ -f "$_path" ]; then

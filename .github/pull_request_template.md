@@ -32,6 +32,6 @@ on. -->
 - [ ] One logical change per commit; refactors separate from behavior changes
 - [ ] Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) and explain why
 - [ ] `./scripts/ci/test.sh` passes locally
-- [ ] `./scripts/ci/checkpatch.sh` is clean on changed kernel files
+- [ ] `scripts/gate pre-push` passes (the pre-push hook runs it; see CONTRIBUTING.md)
 - [ ] New kernel code has KUnit tests in `tests/kunit/`
 - [ ] `CHANGELOG.md` (Unreleased) and `docs/` updated if needed

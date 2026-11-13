@@ -470,15 +470,6 @@
    "count": 1
   },
   {
-   "key": "226a2fb50c09ee4f302e2468",
-   "tool": "shellcheck",
-   "rule": "SC2086",
-   "file": "scripts/ci/checkpatch.sh",
-   "severity": "MINOR",
-   "message": "Double quote to prevent globbing and word splitting.",
-   "count": 4
-  },
-  {
    "key": "23253c84929c3344aaa0dfa6",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -800,15 +791,6 @@
    "file": "include/kdal/core/version.h",
    "severity": "MINOR",
    "message": "Missing or malformed SPDX-License-Identifier tag in line 1",
-   "count": 1
-  },
-  {
-   "key": "3832759e6a9a37c870fc2991",
-   "tool": "shellcheck",
-   "rule": "SC2086",
-   "file": "scripts/ci/static_analysis.sh",
-   "severity": "MINOR",
-   "message": "Double quote to prevent globbing and word splitting.",
    "count": 1
   },
   {

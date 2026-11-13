@@ -23,12 +23,34 @@ Linux kernel coding discipline.
 # Run CI suite
 ./scripts/ci/test.sh
 
-# Run static analysis
-./scripts/ci/static_analysis.sh
-
-# Run style check
-./scripts/ci/checkpatch.sh
+# Install the git hooks (once per clone), then run the quality gate
+scripts/gate install
+scripts/gate pre-push
 ```
+
+## Quality Gate
+
+KDAL uses the quality gate shared by the HAVEN ecosystem
+([design](https://github.com/NguyenTrongPhuc552003/haven/blob/main/docs/quality/gate.md)).
+`scripts/gate` fetches the gate's engine from haven at the commit pinned in
+`quality/gate.json` (once, into `~/.cache/haven-gate/`) and runs it with
+KDAL's profile:
+
+| Stage | When | Checks |
+| - | - | - |
+| `pre-commit` | `git commit` (hook) | secrets, personal names and home paths in the staged files |
+| `pre-push` | `git push` (hook) | checkpatch.pl (Linux v6.18) on the kernel module, cppcheck, clang-tidy on `compiler/` and `tools/kdality/`, lizard, jscpd, shellcheck, ruff on the files changed against `main` |
+| `ci` | every pull request, required | the same on the whole tree, plus gitleaks |
+
+Findings are rated BLOCKER, CRITICAL, MAJOR, MINOR or INFO. A BLOCKER always
+stops the change; a CRITICAL or MAJOR finding stops it when it is not in
+`quality/baseline.json`. The baseline holds the findings that existed when
+the gate started: fix them when you can, and after fixing run
+`scripts/gate baseline` and commit the smaller baseline. Never add new
+findings to the baseline to get a change through. `scripts/gate doctor`
+lists the tools found; `tools/gate/ci-setup.sh` in the engine's directory
+(`scripts/gate engine-dir`) installs the pinned versions. A newer engine is
+taken by changing `engine.commit` in a pull request of its own.
 
 ## Code Style
 
@@ -63,7 +85,7 @@ Rules:
 1. Fork and create a feature branch
 2. Implement changes with tests
 3. Run `./scripts/ci/test.sh` locally
-4. Run `./scripts/ci/checkpatch.sh` on changed files
+4. Push with the hooks installed (`scripts/gate install`), so the gate checks your changes
 5. Submit PR with description of changes and testing done
 
 ## Architecture Rules
