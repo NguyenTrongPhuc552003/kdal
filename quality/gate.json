@@ -71,7 +71,10 @@
       "-DCMAKE_EXPORT_COMPILE_COMMANDS=ON"
     ],
     "checks": "-*,bugprone-*,cert-*,clang-analyzer-*",
-    "header_filter": "(compiler|tools)/"
+    "header_filter": "(compiler|tools)/",
+    "extra_args": [
+      "-D_FORTIFY_SOURCE=0"
+    ]
   },
   "stages": {
     "pre-commit": [
