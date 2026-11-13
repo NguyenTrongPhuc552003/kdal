@@ -1,6 +1,8 @@
 # Weekly, and on demand: the quality gate's deep tier with the pinned kernel
 # tree: Coccinelle (too slow for every pull request), sparse and the
-# sanitizer build. It reports and blocks nothing; nothing here is required.
+# sanitizer build (with LeakSanitizer). Not a required check; it fails when
+# it finds something the baseline does not hold (BLOCKER, CRITICAL or
+# MAJOR), so the run shows red and GitHub notifies the owner.
 name: weekly deep checks
 
 on:
@@ -14,7 +16,7 @@ permissions:
 
 jobs:
   deep:
-    name: deep tier (Coccinelle, sanitizers; reports only)
+    name: deep tier (Coccinelle, sanitizers; fails on new findings)
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -23,9 +25,9 @@ jobs:
         uses: ./.github/actions/kernel-tree
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-      - name: The gate's engine and pinned tools
-        uses: ./.github/actions/gate-tools
+      - name: The gate's tools (haven's action at the engine pin)
+        uses: NguyenTrongPhuc552003/haven/.github/actions/gate-tools@d63e2d183f084984290b09881fe097f80d0e499f
       - name: Deep tier (blocks nothing)
         env:
           KDAL_KDIR: ${{ steps.kernel.outputs.kdir }}
-        run: scripts/gate deep
+        run: scripts/gate deep --fail-on-new
