@@ -10,6 +10,27 @@ permissions:
   contents: read
 
 jobs:
+  quality-gate:
+    name: quality gate
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install build tools
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y -qq --no-install-recommends cmake ninja-build pipx
+      - name: Cached cppcheck build
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/cppcheck-*
+          key: cppcheck-${{ hashFiles('quality/gate.json') }}
+      - name: The gate's engine (haven, pinned commit) and its pinned tools
+        run: bash "$(scripts/gate engine-dir)/tools/gate/ci-setup.sh"
+      - name: Tool versions
+        run: scripts/gate doctor
+      - name: Quality gate (whole tree)
+        run: scripts/gate ci
+
   build-and-smoke:
     name: build tools and the frozen compiler, smoke tests (${{ matrix.os }})
     strategy:
