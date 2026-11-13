@@ -1,0 +1,31 @@
+# Weekly, and on demand: the quality gate's deep tier with the pinned kernel
+# tree: Coccinelle (too slow for every pull request), sparse and the
+# sanitizer build. It reports and blocks nothing; nothing here is required.
+name: weekly deep checks
+
+on:
+  schedule:
+    - cron: "17 2 * * 1" # Mondays 02:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+jobs:
+  deep:
+    name: deep tier (Coccinelle, sanitizers; reports only)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: The pinned kernel tree (for sparse and Coccinelle)
+        id: kernel
+        uses: ./.github/actions/kernel-tree
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: The gate's engine and pinned tools
+        uses: ./.github/actions/gate-tools
+      - name: Deep tier (blocks nothing)
+        env:
+          KDAL_KDIR: ${{ steps.kernel.outputs.kdir }}
+        run: scripts/gate deep
