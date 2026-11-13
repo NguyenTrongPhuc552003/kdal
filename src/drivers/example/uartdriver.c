@@ -18,11 +18,10 @@
 
 #include <kdal/api/common.h>
 #include <kdal/core/kdal.h>
+#include <kdal/core/internal.h>
 #include <kdal/ioctl.h>
 
 /* Forward declaration from qemubackend.c */
-int kdal_qemu_alloc_ring(struct kdal_device *device);
-void kdal_qemu_free_ring(struct kdal_device *device);
 
 /* ── UART-specific configuration (stored in driver priv) ──────── */
 

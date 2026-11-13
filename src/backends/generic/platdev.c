@@ -19,6 +19,7 @@
 #include <kdal/api/common.h>
 #include <kdal/backend.h>
 #include <kdal/core/kdal.h>
+#include <kdal/core/internal.h>
 
 /*
  * Per-device private data for the platform backend.

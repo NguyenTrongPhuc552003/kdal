@@ -9,6 +9,7 @@
 
 #include <linux/io.h>
 #include <linux/types.h>
+#include <kdal/core/internal.h>
 
 u32 kdal_mmio_read32(void __iomem *base, u32 offset)
 {

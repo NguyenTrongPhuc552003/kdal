@@ -9,9 +9,7 @@
 
 #include <kdal/api/accel.h>
 #include <kdal/core/kdal.h>
-
-/* Exported by gpudriver.c */
-extern const struct kdal_accel_ops *kdal_gpu_accel_ops;
+#include <kdal/core/internal.h>
 
 static void test_queue_create(struct kunit *test)
 {

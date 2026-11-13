@@ -25,6 +25,7 @@
 #endif
 
 #include <kdal/core/kdal.h>
+#include <kdal/core/internal.h>
 
 /*
  * Per-device private data mirrors the struct in platdev.c so

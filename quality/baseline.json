@@ -20,15 +20,6 @@
    "count": 1
   },
   {
-   "key": "03d7669b806e151c9f2c0241",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "0590f42a9b50206b91cb6827",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -101,15 +92,6 @@
    "count": 1
   },
   {
-   "key": "098d4dd119e74d7962210b04",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "09f2801246a2b6a20cd1ce61",
    "tool": "lizard",
    "rule": "function-length",
@@ -178,7 +160,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/i2cdriver.c",
    "severity": "MAJOR",
-   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:276",
    "count": 1
   },
   {
@@ -308,24 +290,6 @@
    "count": 1
   },
   {
-   "key": "17b9139dbe60dc22977a55d0",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/drivers/example/i2cdriver.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
-   "key": "18d9c9bb8937f6eef829b7d3",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "19b778b1cab71f695cffef7f",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -395,15 +359,6 @@
    "file": "tools/kdality/lint.c",
    "severity": "MAJOR",
    "message": "2 adjacent parameters of 'emit_warning' of similar type ('const char *') are easily swapped by mistake",
-   "count": 1
-  },
-  {
-   "key": "1db0757f4b00c27f46f9f587",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -548,15 +503,6 @@
    "file": "compiler/parser.c",
    "severity": "MAJOR",
    "message": "3 adjacent parameters of 'kdal_ast_new' of convertible types are easily swapped by mistake",
-   "count": 1
-  },
-  {
-   "key": "2a3335d124b28d8aac488d59",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -754,7 +700,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/spidriver.c",
    "severity": "MAJOR",
-   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:276",
    "count": 1
   },
   {
@@ -800,15 +746,6 @@
    "file": "tools/kdality/testgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "38865a685127b346af790f7d",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/drivers/example/uartdriver.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -983,15 +920,6 @@
    "count": 1
   },
   {
-   "key": "42862ea438f7c6144e56656f",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "42d940af7032d7a5f7f85851",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -1151,15 +1079,6 @@
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "4d3a9ed7eff1ecfbd4eaba9e",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -1753,7 +1672,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/i2cdriver.c",
    "severity": "MAJOR",
-   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:212",
    "count": 1
   },
   {
@@ -1780,7 +1699,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/spidriver.c",
    "severity": "MAJOR",
-   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:212",
    "count": 1
   },
   {
@@ -1852,7 +1771,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/spidriver.c",
    "severity": "MAJOR",
-   "message": "17 lines duplicated from src/drivers/example/i2cdriver.c:40",
+   "message": "17 lines duplicated from src/drivers/example/i2cdriver.c:37",
    "count": 1
   },
   {
@@ -1952,24 +1871,6 @@
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "857fc16e6b19cabba29b401e",
-   "tool": "jscpd",
-   "rule": "duplicate",
-   "file": "src/drivers/example/spidriver.c",
-   "severity": "MAJOR",
-   "message": "17 lines duplicated from src/drivers/example/i2cdriver.c:11",
-   "count": 1
-  },
-  {
-   "key": "864a1192d85bc784f7d2268e",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -2135,15 +2036,6 @@
    "count": 1
   },
   {
-   "key": "961402807147d5aa73a8024b",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/drivers/example/spidriver.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "96e9121451a46a34fefcd109",
    "tool": "clang-tidy",
    "rule": "clang-analyzer-unix.Errno",
@@ -2185,7 +2077,7 @@
    "rule": "duplicate",
    "file": "src/backends/generic/platdev.c",
    "severity": "MAJOR",
-   "message": "16 lines duplicated from src/backends/generic/platdev.c:49",
+   "message": "16 lines duplicated from src/backends/generic/platdev.c:50",
    "count": 1
   },
   {
@@ -2212,16 +2104,7 @@
    "rule": "duplicate",
    "file": "src/backends/qemu/qemubackend.c",
    "severity": "MAJOR",
-   "message": "16 lines duplicated from src/backends/qemu/qemubackend.c:112",
-   "count": 1
-  },
-  {
-   "key": "9be9c9eae09074c3d6760536",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
+   "message": "16 lines duplicated from src/backends/qemu/qemubackend.c:113",
    "count": 1
   },
   {
@@ -2231,15 +2114,6 @@
    "file": "compiler/parser.c",
    "severity": "MAJOR",
    "message": "p_tok_to_binop: cyclomatic complexity 19 > 15",
-   "count": 1
-  },
-  {
-   "key": "9dc18547681b56867d56f691",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -2396,24 +2270,6 @@
    "count": 1
   },
   {
-   "key": "ab511e365d9e4af64d919f4f",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
-   "key": "ac035ad284a37392b3ba850a",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/drivers/example/gpudriver.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
-   "count": 1
-  },
-  {
    "key": "ad382184d03819cda8c180a1",
    "tool": "checkpatch",
    "rule": "BRACES",
@@ -2429,15 +2285,6 @@
    "file": "tools/kdality/testgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "af14179c37a94d453aabcc3a",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -2662,7 +2509,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/uartdriver.c",
    "severity": "MAJOR",
-   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:279",
+   "message": "26 lines duplicated from src/drivers/example/gpudriver.c:276",
    "count": 1
   },
   {
@@ -2834,15 +2681,6 @@
    "file": "compiler/codegen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "c8c3a1d521bfef176ac02129",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -3085,7 +2923,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/uartdriver.c",
    "severity": "MAJOR",
-   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:100",
+   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:97",
    "count": 1
   },
   {
@@ -3166,7 +3004,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/spidriver.c",
    "severity": "MAJOR",
-   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:100",
+   "message": "20 lines duplicated from src/drivers/example/i2cdriver.c:97",
    "count": 1
   },
   {
@@ -3239,15 +3077,6 @@
    "file": "compiler/codegen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "e45c8ca31e091c98638bd105",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   },
   {
@@ -3427,7 +3256,7 @@
    "rule": "duplicate",
    "file": "src/drivers/example/uartdriver.c",
    "severity": "MAJOR",
-   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:215",
+   "message": "16 lines duplicated from src/drivers/example/gpudriver.c:212",
    "count": 1
   },
   {
@@ -3752,15 +3581,6 @@
    "file": "tools/kdality/init.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "fff0939786cf7ec7d5ce6492",
-   "tool": "checkpatch",
-   "rule": "AVOID_EXTERNS",
-   "file": "src/core/kdal.c",
-   "severity": "MINOR",
-   "message": "externs should be avoided in .c files",
    "count": 1
   }
  ]
