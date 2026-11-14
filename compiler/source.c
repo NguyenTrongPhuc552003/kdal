@@ -34,22 +34,19 @@ char *kdal_read_file(const char *path, size_t *out_len)
 	if (size < 0 || (unsigned long)size >= SIZE_MAX ||
 	    fseek(fp, 0, SEEK_SET) != 0)
 		goto fail;
-	buf = malloc((size_t)size + 1);
+	/* zero-filled, so the text ends in NUL whatever fread returns */
+	buf = calloc((size_t)size + 1, 1);
 	if (!buf)
 		goto fail;
 	n = fread(buf, 1, (size_t)size, fp);
-	if (n >
-	    (size_t)size) /* fread returns at most size; stated, not assumed */
-		n = (size_t)size;
-	buf[n] = '\0';
-	fclose(fp);
+	(void)fclose(fp);
 	if (out_len)
 		*out_len = n;
 	return buf;
 fail:
 	err = errno;
 	free(buf);
-	fclose(fp);
+	(void)fclose(fp);
 	errno = err ? err : EIO;
 	return NULL;
 }
