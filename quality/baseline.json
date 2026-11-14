@@ -29,28 +29,10 @@
    "count": 1
   },
   {
-   "key": "063089042c06d520effb5e4c",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "0708e74330308a090e1e6002",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "tools/kdality/init.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "079f0e647febc457c57fd9d1",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -119,15 +101,6 @@
    "count": 1
   },
   {
-   "key": "0d383b88ba7320e29c9cd926",
-   "tool": "clang-tidy",
-   "rule": "bugprone-easily-swappable-parameters",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "2 adjacent parameters of 'generate_dtso' of convertible types are easily swapped by mistake",
-   "count": 1
-  },
-  {
    "key": "0d6545f6d03678a019a205a9",
    "tool": "jscpd",
    "rule": "duplicate",
@@ -150,15 +123,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/codegen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "0f5f2081a6b09228a0670c65",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -191,15 +155,6 @@
    "count": 1
   },
   {
-   "key": "133afae505b0b64a452b14a7",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "140cbcbc1427ca0fa807616c",
    "tool": "clang-tidy",
    "rule": "bugprone-easily-swappable-parameters",
@@ -223,7 +178,7 @@
    "rule": "complexity",
    "file": "tools/kdality/simulate.c",
    "severity": "MAJOR",
-   "message": "simulate_file: cyclomatic complexity 23 > 15",
+   "message": "simulate_file: cyclomatic complexity 19 > 15",
    "count": 1
   },
   {
@@ -242,15 +197,6 @@
    "file": "tools/kdality/testgen.c",
    "severity": "MAJOR",
    "message": "is_safe_outdir: cyclomatic complexity 20 > 15",
-   "count": 1
-  },
-  {
-   "key": "1764ff1e0a455b30ecb3ff92",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
@@ -276,15 +222,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/codegen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "1c02d8283d8040dce8f4105e",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -389,15 +326,6 @@
    "count": 1
   },
   {
-   "key": "23253c84929c3344aaa0dfa6",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "253288953720294259e8599a",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -461,15 +389,6 @@
    "count": 1
   },
   {
-   "key": "2a7e037c7ec71e0f9b99bbef",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "2be30017ec54c9faecdf9e8c",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -524,24 +443,6 @@
    "count": 1
   },
   {
-   "key": "2e04c0534fe3361e02402fb1",
-   "tool": "lizard",
-   "rule": "complexity",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "parse_kdh: cyclomatic complexity 41 > 15",
-   "count": 1
-  },
-  {
-   "key": "2f3c526807638619a770f60c",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "2f4eb26e8da577e2e125cac5",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -567,24 +468,6 @@
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
-  },
-  {
-   "key": "318d3d0eaa94e6fd668c6361",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "324150e35cb147e164302227",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 2
   },
   {
    "key": "32ae0b895ad3fe38db9b86a8",
@@ -677,15 +560,6 @@
    "count": 1
   },
   {
-   "key": "36dc43532973fec6a125ce3c",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "36fe32b4e44e0278057b73ec",
    "tool": "checkpatch",
    "rule": "SPDX_LICENSE_TAG",
@@ -710,15 +584,6 @@
    "file": "scripts/e2e/run_all.sh",
    "severity": "MINOR",
    "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
-   "count": 1
-  },
-  {
-   "key": "3a08a09624c60632b0319736",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
@@ -857,15 +722,6 @@
    "count": 1
   },
   {
-   "key": "425bae1446e3603aa1279a49",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "42d940af7032d7a5f7f85851",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -929,24 +785,6 @@
    "count": 1
   },
   {
-   "key": "46db5a6d98ed74f0078494c9",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "48c07b97db5ae8af6f005bc7",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "4972a544e8a55283bf37d806",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -1005,15 +843,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "tools/kdality/testgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "4d39e4b9aad77c681f5a640c",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -1190,15 +1019,6 @@
    "count": 2
   },
   {
-   "key": "59ba04be9fe13e0ae044ef0b",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "5bd154fbf292aaa72dfee031",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -1304,15 +1124,6 @@
    "file": "scripts/e2e/test_website.sh",
    "severity": "MINOR",
    "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
-   "count": 1
-  },
-  {
-   "key": "630c85dd9441ce845bab65c3",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
@@ -1703,15 +1514,6 @@
    "count": 1
   },
   {
-   "key": "7e61ab2ac57335b3e2f99b34",
-   "tool": "lizard",
-   "rule": "complexity",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "kdality_dtgen: cyclomatic complexity 21 > 15",
-   "count": 1
-  },
-  {
    "key": "7e8884a641c71915a9e1e3c8",
    "tool": "shellcheck",
    "rule": "SC2059",
@@ -1781,15 +1583,6 @@
    "file": "scripts/ci/test.sh",
    "severity": "MINOR",
    "message": "Double quote to prevent globbing and word splitting.",
-   "count": 1
-  },
-  {
-   "key": "826e0cdfdfcd1c919545dc4b",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
@@ -2045,15 +1838,6 @@
    "count": 1
   },
   {
-   "key": "a08a79bbc8341f7c0faa4fa1",
-   "tool": "lizard",
-   "rule": "function-length",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "parse_kdh: 148 lines > 100",
-   "count": 1
-  },
-  {
    "key": "a1121749a0a843882df231ce",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -2099,30 +1883,12 @@
    "count": 1
   },
   {
-   "key": "a4b012d43fd5543582949f6d",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "a5597b69dd06aad845553c15",
    "tool": "shellcheck",
    "rule": "SC2059",
    "file": "scripts/e2e/run_all.sh",
    "severity": "MINOR",
    "message": "Don't use variables in the printf format string. Use printf '..%s..' \"$foo\".",
-   "count": 1
-  },
-  {
-   "key": "a578d1f9fd52204a9e944bc9",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
@@ -2252,24 +2018,6 @@
    "count": 1
   },
   {
-   "key": "b457937923294d907f1eedcb",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "b4aedfb83900bd7d5aff2a9a",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "b5cf12c36d7117a74316eaa8",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -2315,24 +2063,6 @@
    "count": 1
   },
   {
-   "key": "b7305124afe2bc25e04a33e0",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "b77ddf3bf05dcf6475cfbc28",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "b77ffdcac17c6b0a438cba15",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -2355,15 +2085,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/main.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "ba71d13a8e30e3af5505f858",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -2490,15 +2211,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/lexer.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "c588c8be659c0eef39dbf028",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -2639,15 +2351,6 @@
    "count": 1
   },
   {
-   "key": "cf7ab4c126bc1c602e1a7b8a",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 3
-  },
-  {
    "key": "d0de2604b7466c2a1d87daf1",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -2715,15 +2418,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/codegen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "d6ce55294b464c62e57e5df1",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -2936,15 +2630,6 @@
    "count": 1
   },
   {
-   "key": "e6e996d0000ed00091fa4dad",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/simulate.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "e6ee6faaf518db6c5a571057",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -3134,28 +2819,10 @@
    "count": 1
   },
   {
-   "key": "ef5d8c74bbffb660edeb7ed1",
-   "tool": "jscpd",
-   "rule": "duplicate",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "20 lines duplicated from compiler/codegen.c:326",
-   "count": 1
-  },
-  {
    "key": "efc817de70f4d46fc90f0345",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "compiler/codegen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "f03ae875992c62cf285e279b",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -3320,15 +2987,6 @@
    "file": "compiler/parser.c",
    "severity": "MAJOR",
    "message": "p_binop_prec: cyclomatic complexity 19 > 15",
-   "count": 1
-  },
-  {
-   "key": "fc4102fa9bcd8ff8dfc103ed",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
   },
   {
