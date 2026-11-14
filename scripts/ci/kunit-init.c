@@ -5,12 +5,13 @@
  * Freestanding arm64 Linux program: no libc, raw system calls. It loads
  * /kdal.ko (built with KDAL_KUNIT=y, so the suites run while the module
  * loads and print KTAP on the kernel log), reports the result, prints
- * KDAL's resource demand (debugfs "demand") between markers, and powers
- * the machine off so QEMU exits.
+ * KDAL's resource demand (debugfs "demand") between markers, waits for the
+ * console to send it all, and powers the machine off so QEMU exits.
  */
 
 #define AT_FDCWD		-100
 #define O_RDONLY		0
+#define NR_IOCTL		29
 #define NR_READ			63
 #define NR_WRITE		64
 #define NR_CLOSE		57
@@ -18,6 +19,7 @@
 #define NR_OPENAT		56
 #define NR_REBOOT		142
 #define NR_FINIT_MODULE		273
+#define TCSBRK			0x5409
 #define REBOOT_MAGIC1		0xfee1dead
 #define REBOOT_MAGIC2		672274793
 #define REBOOT_POWER_OFF	0x4321fedc
@@ -111,6 +113,14 @@ void _start(void)
 		if (ret == 0)
 			print_demand();
 	}
+	/*
+	 * write() returns once the bytes are queued in the console tty, and
+	 * the kernel's power-off message is written synchronously, so it can
+	 * overtake them: wait until the tty and the UART are empty (tcdrain(),
+	 * which is TCSBRK with a non-zero argument: no break is sent). HAVEN's
+	 * docs/methodology/stage2/20261114-console-drain.
+	 */
+	sys3(NR_IOCTL, 1, TCSBRK, 1);
 	sys4(NR_REBOOT, REBOOT_MAGIC1, REBOOT_MAGIC2, REBOOT_POWER_OFF, 0);
 	for (;;)
 		;
