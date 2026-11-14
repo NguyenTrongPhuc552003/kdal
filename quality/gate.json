@@ -2,7 +2,7 @@
   "schema": "haven-gate-config/1",
   "engine": {
     "repo": "https://github.com/NguyenTrongPhuc552003/haven.git",
-    "commit": "d63e2d183f084984290b09881fe097f80d0e499f"
+    "commit": "299566ed6d7a63593ebf71bfe17f9d664e01df9d"
   },
   "c_paths": [
     "src",
@@ -102,7 +102,8 @@
       "jscpd",
       "ruff",
       "shellcheck",
-      "sparse"
+      "sparse",
+      "copies"
     ],
     "deep": [
       "scan",
@@ -139,6 +140,9 @@
       "constParameterPointer",
       "constParameterCallback",
       "variableScope"
+    ],
+    "include": [
+      "quality/cppcheck-kernel.h"
     ]
   },
   "sh_files": [
@@ -168,5 +172,10 @@
       "LLVM=1",
       "KDAL_KUNIT=y"
     ]
+  },
+  "copies": {
+    "scripts/gate": "repo-gate.sh",
+    ".githooks/pre-commit": "pre-commit",
+    ".githooks/pre-push": "pre-push"
   }
 }
