@@ -165,25 +165,12 @@ if [ -x "$KDALITY" ]; then
 		"$KDALITY" simulate -h 2>/dev/null ||
 		e2e_skip "kdality simulate -h"
 
-	# dt-gen subcommand
-	# shellcheck disable=SC2066
-	for kdh in "$E2E_ROOT/lang/stdlib/uart.kdh"; do
-		if [ -f "$kdh" ]; then
-			DT_OUT="$SANDBOX/dtgen_out"
-			mkdir -p "$DT_OUT"
-			if "$KDALITY" dt-gen -o "$DT_OUT" "$kdh" >/dev/null 2>&1; then
-				e2e_pass "kdality dt-gen uart.kdh"
-				# Check for .dts or .dtsi output
-				if find "$DT_OUT" -name '*.dts' -o -name '*.dtsi' 2>/dev/null | head -1 | grep -q .; then
-					e2e_pass "dt-gen produces .dts/.dtsi output"
-				else
-					e2e_skip "dt-gen ran but no .dts/.dtsi found"
-				fi
-			else
-				e2e_skip "kdality dt-gen (alpha limitation)"
-			fi
-		fi
-	done
+	# dt-gen subcommand: both .kdh syntaxes, the same check as CI's
+	if sh "$E2E_ROOT/scripts/ci/dtgen-check.sh" "$KDALITY"; then
+		e2e_pass "kdality dt-gen (both .kdh syntaxes)"
+	else
+		e2e_fail "kdality dt-gen (both .kdh syntaxes)"
+	fi
 
 	# test-gen subcommand
 	for kdc in "$KDC_EXAMPLES"/*.kdc; do

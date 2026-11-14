@@ -6,32 +6,23 @@
  *   kdality dt-gen <file.kdh> [-o <outdir>] [--base-addr <addr>] [--irq <num>]
  *
  * This replaces manual DT overlay writing - newcomers can describe their
- * device in .kdh and auto-generate the DT binding.
+ * device in .kdh and auto-generate the DT binding. The .kdh is read by the
+ * compiler's parser, so the full syntax (device class NAME, registers) and
+ * the simplified one (device NAME, register_map) both work
+ * (HAVEN's docs/methodology/stage2/20261114-kdal-dtgen).
  */
 
 #include <errno.h>
 #include <fcntl.h>
 #include <limits.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
-/* ── Simple .kdh scanner ─────────────────────────────────────────
- *
- * We parse just enough of the .kdh format to extract:
- *   - device name
- *   - compatible string
- *   - register map (names + offsets)
- *   - signals (for interrupt bindings)
- *
- * This is a lightweight approach - the full compiler AST could be
- * used instead if libkdalc grows a .kdh-only parse mode.
- */
-
-#define MAX_REGS 32
-#define MAX_SIGNALS 16
-#define NAME_LEN 64
+#include "../../compiler/include/codegen.h"
 
 /*
  * A whole string as an unsigned number in base (0: C prefixes), within
@@ -60,22 +51,8 @@ static int parse_number(const char *s, int base, unsigned long *out,
 	return 0;
 }
 
-struct kdh_reg {
-	char name[NAME_LEN];
-	unsigned long offset;
-};
-
-struct kdh_info {
-	char device_name[NAME_LEN];
-	char compatible[128];
-	char class_name[NAME_LEN];
-	struct kdh_reg regs[MAX_REGS];
-	int nregs;
-	char signals[MAX_SIGNALS][NAME_LEN];
-	int nsignals;
-};
-
-static int is_safe_filename_component(const char *s)
+/* A device name usable as a file name: letters, digits, '_' and '-'. */
+static int is_safe_name(const char *s)
 {
 	if (!s || !*s)
 		return 0;
@@ -87,20 +64,24 @@ static int is_safe_filename_component(const char *s)
 	return 1;
 }
 
+/*
+ * Create outdir/filename (one path component, so nothing outside outdir)
+ * and open it for writing; full_path is set first, so a caller can name
+ * the file whatever fails.
+ */
 static FILE *open_output_in_dir(const char *outdir, const char *filename,
 				char *full_path, size_t full_path_size)
 {
 	int dirfd, fd;
 	FILE *fp;
 
-	if (!is_safe_filename_component(filename)) {
-		errno = EINVAL;
-		return NULL;
-	}
-
 	if (snprintf(full_path, full_path_size, "%s/%s", outdir, filename) >=
 	    (int)full_path_size) {
 		errno = ENAMETOOLONG;
+		return NULL;
+	}
+	if (!*filename || filename[0] == '.' || strchr(filename, '/')) {
+		errno = EINVAL;
 		return NULL;
 	}
 
@@ -110,263 +91,167 @@ static FILE *open_output_in_dir(const char *outdir, const char *filename,
 
 	fd = openat(dirfd, filename, O_WRONLY | O_CREAT | O_TRUNC,
 		    S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH);
-	close(dirfd);
+	(void)close(dirfd);
 	if (fd < 0)
 		return NULL;
 
 	fp = fdopen(fd, "w");
 	if (!fp) {
-		close(fd);
+		(void)close(fd);
 		return NULL;
 	}
 
 	return fp;
 }
 
-static int parse_kdh(const char *path, struct kdh_info *info)
+/* ── From the AST ────────────────────────────────────────────────── */
+
+/* The registers block's declarations that have an offset ("@" or the
+ * simplified form's number), one after the other. */
+static const kdal_reg_decl_node_t *next_reg(const kdal_ast_t *r)
 {
-	FILE *fp;
-	char line[512];
-	int in_regmap = 0;
-	int in_signals = 0;
+	for (; r; r = r->next) {
+		const kdal_reg_decl_node_t *reg =
+			(const kdal_reg_decl_node_t *)r;
 
-	memset(info, 0, sizeof(*info));
-
-	fp = fopen(path, "r");
-	if (!fp) {
-		fprintf(stderr, "dt-gen: cannot open '%s': %s\n", path,
-			strerror(errno));
-		return -1;
+		if (r->type == KDAL_NODE_REGISTER_DECL &&
+		    reg->offset != UINT64_MAX)
+			return reg;
 	}
+	return NULL;
+}
 
-	while (fgets(line, sizeof(line), fp)) {
-		char *p = line;
+static const kdal_reg_decl_node_t *first_reg(const kdal_device_node_t *dev)
+{
+	return dev->registers ? next_reg(dev->registers->child) : NULL;
+}
 
-		/* skip whitespace */
-		while (*p == ' ' || *p == '\t')
-			p++;
+/* The overlay's reg size: the highest register offset plus 4, at least
+ * 0x100. One function, so the file and the summary agree. */
+static unsigned long long reg_size(const kdal_device_node_t *dev)
+{
+	unsigned long long size = 0x100;
 
-		/* skip comments and empty lines */
-		if (*p == '/' || *p == '\n' || *p == '\0')
-			continue;
-
-		/* detect sections */
-		if (strstr(p, "register_map")) {
-			in_regmap = 1;
-			in_signals = 0;
-			continue;
-		}
-		if (strstr(p, "signals")) {
-			in_signals = 1;
-			in_regmap = 0;
-			continue;
-		}
-		if (strstr(p, "capabilities") || strstr(p, "power_states")) {
-			in_regmap = 0;
-			in_signals = 0;
-			continue;
-		}
-
-		/* closing brace resets */
-		if (*p == '}') {
-			in_regmap = 0;
-			in_signals = 0;
-			continue;
-		}
-
-		/* device name */
-		if (strncmp(p, "device ", 7) == 0) {
-			char *name = p + 7;
-			char *end = name;
-			while (*end && *end != ' ' && *end != '{' &&
-			       *end != '\n')
-				end++;
-			size_t len = (size_t)(end - name);
-			if (len >= NAME_LEN)
-				len = NAME_LEN - 1;
-			memcpy(info->device_name, name, len);
-			info->device_name[len] = '\0';
-			continue;
-		}
-
-		/* class */
-		if (strncmp(p, "class ", 6) == 0) {
-			char *cls = p + 6;
-			char *end = cls;
-			while (*end && *end != ';' && *end != '\n')
-				end++;
-			size_t len = (size_t)(end - cls);
-			if (len >= NAME_LEN)
-				len = NAME_LEN - 1;
-			memcpy(info->class_name, cls, len);
-			info->class_name[len] = '\0';
-			continue;
-		}
-
-		/* compatible string */
-		if (strncmp(p, "compatible ", 11) == 0) {
-			char *q = strchr(p, '"');
-			if (q) {
-				q++;
-				const char *end = strchr(q, '"');
-				if (end) {
-					size_t len = (size_t)(end - q);
-					if (len >= sizeof(info->compatible))
-						len = sizeof(info->compatible) -
-						      1;
-					memcpy(info->compatible, q, len);
-					info->compatible[len] = '\0';
-				}
-			}
-			continue;
-		}
-
-		/* Parse register entries in the compact header format. */
-		if (in_regmap && info->nregs < MAX_REGS) {
-			char rname[NAME_LEN];
-			unsigned long off;
-			const char *q = p;
-			size_t nlen;
-
-			/* "NAME 0xOFFSET" */
-			while (*q == ' ' || *q == '\t')
-				q++;
-			nlen = strcspn(q, " \t");
-			if (nlen > 0 && nlen < NAME_LEN &&
-			    strncmp(q + nlen + strspn(q + nlen, " \t"), "0x",
-				    2) == 0 &&
-			    parse_number(q + nlen, 16, &off, ULONG_MAX) == 0) {
-				memcpy(rname, q, nlen);
-				rname[nlen] = '\0';
-				strncpy(info->regs[info->nregs].name, rname,
-					NAME_LEN - 1);
-				info->regs[info->nregs].offset = off;
-				info->nregs++;
-			}
-			continue;
-		}
-
-		/* Parse signal names from the compact header format. */
-		if (in_signals && info->nsignals < MAX_SIGNALS) {
-			char sname[NAME_LEN];
-			if (sscanf(p, "%63[^; \t\n]", sname) == 1) {
-				strncpy(info->signals[info->nsignals], sname,
-					NAME_LEN - 1);
-				info->nsignals++;
-			}
-			continue;
-		}
+	for (const kdal_reg_decl_node_t *reg = first_reg(dev); reg;
+	     reg = next_reg(reg->base.next)) {
+		if (reg->offset + 4 > size)
+			size = reg->offset + 4;
 	}
+	return size;
+}
 
-	fclose(fp);
+/* The compatible string: the .kdh's, without the lexer's quotes, or
+ * "kdal,<name>". */
+static void compatible_of(const kdal_device_node_t *dev, char *out, size_t size)
+{
+	const char *c = dev->compatible;
+	size_t len = c ? strlen(c) : 0;
 
-	if (!info->device_name[0]) {
-		fprintf(stderr, "dt-gen: no 'device' found in '%s'\n", path);
-		return -1;
-	}
-	if (!info->compatible[0]) {
-		snprintf(info->compatible, sizeof(info->compatible), "kdal,%s",
-			 info->device_name);
-	}
-
-	return 0;
+	if (len >= 2 && c[0] == '"' && c[len - 1] == '"')
+		(void)snprintf(out, size, "%.*s", (int)(len - 2), c + 1);
+	else
+		(void)snprintf(out, size, "kdal,%s", dev->name);
 }
 
 /* ── DT overlay generation ───────────────────────────────────────── */
 
-static int generate_dtso(const struct kdh_info *info, const char *outdir,
-			 unsigned long base_addr, int irq_num)
+struct dtgen_opts {
+	const char *input; /* the .kdh */
+	const char *outdir;
+	unsigned long base_addr;
+	int irq; /* -1: none */
+};
+
+static int generate_dtso(const kdal_device_node_t *dev,
+			 const struct dtgen_opts *o, char *path,
+			 size_t path_size)
 {
-	char filename[NAME_LEN + 6];
-	char path[PATH_MAX];
+	const unsigned long base_addr = o->base_addr;
+	const int irq_num = o->irq;
+	char filename[NAME_MAX + 1];
+	char compatible[256];
 	FILE *fp;
-	unsigned long reg_size;
+	int failed;
 
-	/* Compute reg size from highest register offset + 4 */
-	reg_size = 0x100; /* default 256 bytes */
-	if (info->nregs > 0) {
-		unsigned long max_off = 0;
-		for (int i = 0; i < info->nregs; i++) {
-			if (info->regs[i].offset > max_off)
-				max_off = info->regs[i].offset;
-		}
-		/* Round up to next power of 2 boundary, min 0x100 */
-		reg_size = max_off + 4;
-		if (reg_size < 0x100)
-			reg_size = 0x100;
-	}
-
-	if (!is_safe_filename_component(info->device_name)) {
-		fprintf(stderr, "dt-gen: invalid device name '%s'\n",
-			info->device_name);
+	if (!is_safe_name(dev->name)) {
+		(void)fprintf(stderr, "dt-gen: invalid device name '%s'\n",
+			      dev->name ? dev->name : "");
 		return -1;
 	}
-
-	if (snprintf(filename, sizeof(filename), "%s.dtso",
-		     info->device_name) >= (int)sizeof(filename)) {
-		fprintf(stderr, "dt-gen: output filename too long\n");
+	if (snprintf(filename, sizeof(filename), "%s.dtso", dev->name) >=
+	    (int)sizeof(filename)) {
+		(void)fprintf(stderr, "dt-gen: output filename too long\n");
 		return -1;
 	}
-
-	fp = open_output_in_dir(outdir, filename, path, sizeof(path));
+	fp = open_output_in_dir(o->outdir, filename, path, path_size);
 	if (!fp) {
-		fprintf(stderr, "dt-gen: cannot create '%s': %s\n", path,
-			strerror(errno));
+		(void)fprintf(stderr, "dt-gen: cannot create '%s': %s\n", path,
+			      strerror(errno));
 		return -1;
 	}
+	compatible_of(dev, compatible, sizeof(compatible));
 
 	/* DT overlay header */
-	fprintf(fp, "/*\n");
-	fprintf(fp, " * %s.dtso - Device Tree overlay for %s\n",
-		info->device_name, info->device_name);
-	fprintf(fp, " * Auto-generated by: kdality dt-gen\n");
-	fprintf(fp, " * Source: %s.kdh\n", info->device_name);
-	fprintf(fp, " */\n\n");
-	fprintf(fp, "/dts-v1/;\n");
-	fprintf(fp, "/plugin/;\n\n");
+	(void)fprintf(fp, "/*\n");
+	(void)fprintf(fp, " * %s.dtso - Device Tree overlay for %s\n",
+		      dev->name, dev->name);
+	(void)fprintf(fp, " * Auto-generated by: kdality dt-gen\n");
+	(void)fprintf(fp, " * Source: %s.kdh\n", dev->name);
+	(void)fprintf(fp, " */\n\n");
+	(void)fprintf(fp, "/dts-v1/;\n");
+	(void)fprintf(fp, "/plugin/;\n\n");
 
-	fprintf(fp, "/ {\n");
-	fprintf(fp, "    compatible = \"simple-bus\";\n");
-	fprintf(fp, "    #address-cells = <2>;\n");
-	fprintf(fp, "    #size-cells = <2>;\n\n");
+	(void)fprintf(fp, "/ {\n");
+	(void)fprintf(fp, "    compatible = \"simple-bus\";\n");
+	(void)fprintf(fp, "    #address-cells = <2>;\n");
+	(void)fprintf(fp, "    #size-cells = <2>;\n\n");
 
 	/* Fragment */
-	fprintf(fp, "    fragment@0 {\n");
-	fprintf(fp, "        target-path = \"/\";\n");
-	fprintf(fp, "        __overlay__ {\n");
-	fprintf(fp, "            %s@%lx {\n", info->device_name, base_addr);
-	fprintf(fp, "                compatible = \"%s\";\n", info->compatible);
-	fprintf(fp, "                reg = <0x0 0x%lx 0x0 0x%lx>;\n", base_addr,
-		reg_size);
+	(void)fprintf(fp, "    fragment@0 {\n");
+	(void)fprintf(fp, "        target-path = \"/\";\n");
+	(void)fprintf(fp, "        __overlay__ {\n");
+	(void)fprintf(fp, "            %s@%lx {\n", dev->name, base_addr);
+	(void)fprintf(fp, "                compatible = \"%s\";\n", compatible);
+	(void)fprintf(fp, "                reg = <0x0 0x%lx 0x0 0x%llx>;\n",
+		      base_addr, reg_size(dev));
 
 	/* Status */
-	fprintf(fp, "                status = \"okay\";\n");
+	(void)fprintf(fp, "                status = \"okay\";\n");
 
 	/* Interrupts if signals contain irq */
 	if (irq_num >= 0) {
-		fprintf(fp,
-			"                interrupts = <0x0 %d 0x4>; "
-			"/* SPI, level high */\n",
-			irq_num);
+		(void)fprintf(fp,
+			      "                interrupts = <0x0 %d 0x4>; "
+			      "/* SPI, level high */\n",
+			      irq_num);
 	}
 
 	/* Register comments */
-	if (info->nregs > 0) {
-		fprintf(fp, "\n                /* Register map from %s.kdh:\n",
-			info->device_name);
-		for (int i = 0; i < info->nregs; i++) {
-			fprintf(fp, "                 *   %s @ 0x%lx\n",
-				info->regs[i].name, info->regs[i].offset);
-		}
-		fprintf(fp, "                 */\n");
+	if (first_reg(dev)) {
+		(void)fprintf(
+			fp, "\n                /* Register map from %s.kdh:\n",
+			dev->name);
+		for (const kdal_reg_decl_node_t *reg = first_reg(dev); reg;
+		     reg = next_reg(reg->base.next))
+			(void)fprintf(fp, "                 *   %s @ 0x%llx\n",
+				      reg->name,
+				      (unsigned long long)reg->offset);
+		(void)fprintf(fp, "                 */\n");
 	}
 
-	fprintf(fp, "            };\n");
-	fprintf(fp, "        };\n");
-	fprintf(fp, "    };\n");
-	fprintf(fp, "};\n");
+	(void)fprintf(fp, "            };\n");
+	(void)fprintf(fp, "        };\n");
+	(void)fprintf(fp, "    };\n");
+	(void)fprintf(fp, "};\n");
 
-	fclose(fp);
+	/* a failed write sets the stream's error flag; fclose reports the
+	 * last flush */
+	failed = ferror(fp);
+	if (fclose(fp) != 0 || failed) {
+		(void)fprintf(stderr, "dt-gen: cannot write '%s': %s\n", path,
+			      strerror(errno));
+		return -1;
+	}
 	return 0;
 }
 
@@ -392,99 +277,120 @@ static void dtgen_help(void)
 
 /* ── main entry ──────────────────────────────────────────────────── */
 
-int kdality_dtgen(int argc, char *const argv[])
+/* The options into *o: 0 to go on, 1 after the help, -1 on an error.
+ * argv[0] is the subcommand's name ("dt-gen"), not an input. */
+static int parse_args(int argc, char *const argv[], struct dtgen_opts *o)
 {
-	const char *input = NULL;
-	const char *outdir = ".";
-	char resolved_input[PATH_MAX];
-	char resolved_outdir[PATH_MAX];
-	unsigned long base_addr = 0x10000000;
-	int irq_num = -1;
-	struct kdh_info info;
-	int argi = 0;
+	int argi = 1;
 
 	while (argi < argc) {
 		const char *arg = argv[argi++];
 
 		if (strcmp(arg, "-h") == 0 || strcmp(arg, "--help") == 0) {
 			dtgen_help();
-			return 0;
+			return 1;
 		} else if (strcmp(arg, "-o") == 0) {
 			if (argi >= argc) {
 				fprintf(stderr,
 					"dt-gen: missing value for '-o'\n");
-				return 1;
+				return -1;
 			}
-			outdir = argv[argi++];
+			o->outdir = argv[argi++];
 		} else if (strcmp(arg, "--base-addr") == 0) {
 			if (argi >= argc) {
 				fprintf(stderr,
 					"dt-gen: missing value for '--base-addr'\n");
-				return 1;
+				return -1;
 			}
-			if (parse_number(argv[argi++], 0, &base_addr,
+			if (parse_number(argv[argi++], 0, &o->base_addr,
 					 ULONG_MAX)) {
 				(void)fprintf(
 					stderr,
 					"dt-gen: invalid value for '--base-addr'\n");
-				return 1;
+				return -1;
 			}
 		} else if (strcmp(arg, "--irq") == 0) {
 			if (argi >= argc) {
 				fprintf(stderr,
 					"dt-gen: missing value for '--irq'\n");
-				return 1;
+				return -1;
 			}
 			unsigned long irq;
 			if (parse_number(argv[argi++], 10, &irq, INT_MAX)) {
 				(void)fprintf(
 					stderr,
 					"dt-gen: invalid value for '--irq'\n");
-				return 1;
+				return -1;
 			}
-			irq_num = (int)irq;
+			o->irq = (int)irq;
 		} else if (arg[0] != '-') {
-			input = arg;
+			o->input = arg;
 		}
 	}
 
-	if (!input) {
+	return 0;
+}
+
+static void print_summary(const kdal_device_node_t *dev,
+			  const struct dtgen_opts *o, const char *path)
+{
+	char compatible[256];
+
+	compatible_of(dev, compatible, sizeof(compatible));
+	printf("Generated %s\n", path);
+	printf("  compatible: %s\n", compatible);
+	printf("  base addr:  0x%lx\n", o->base_addr);
+	printf("  reg size:   0x%llx\n", reg_size(dev));
+	if (o->irq >= 0)
+		printf("  irq:        %d\n", o->irq);
+	printf("\nCompile with: dtc -I dts -O dtb -o %s.dtbo %s\n", dev->name,
+	       path);
+}
+
+int kdality_dtgen(int argc, char *const argv[])
+{
+	struct dtgen_opts o = { NULL, ".", 0x10000000, -1 };
+	char resolved_input[PATH_MAX];
+	char resolved_outdir[PATH_MAX];
+	char path[PATH_MAX];
+	kdal_arena_t *arena = NULL;
+	const kdal_file_node_t *file;
+	const kdal_device_node_t *dev;
+	int ret = parse_args(argc, argv, &o);
+
+	if (ret)
+		return ret < 0 ? 1 : 0;
+	if (!o.input) {
 		fprintf(stderr, "dt-gen: no input .kdh file\n\n");
 		dtgen_help();
 		return 1;
 	}
 
-	if (!realpath(input, resolved_input)) {
-		fprintf(stderr, "dt-gen: cannot resolve '%s': %s\n", input,
-			strerror(errno));
+	if (!realpath(o.input, resolved_input)) {
+		(void)fprintf(stderr, "dt-gen: cannot resolve '%s': %s\n",
+			      o.input, strerror(errno));
 		return 1;
 	}
 
-	if (!realpath(outdir, resolved_outdir)) {
+	if (!realpath(o.outdir, resolved_outdir)) {
 		fprintf(stderr,
 			"dt-gen: cannot resolve output directory '%s': %s\n",
-			outdir, strerror(errno));
+			o.outdir, strerror(errno));
 		return 1;
 	}
+	o.outdir = resolved_outdir;
 
-	if (parse_kdh(resolved_input, &info) != 0)
+	file = kdal_parse_file("dt-gen", resolved_input, &arena);
+	if (!file)
 		return 1;
-
-	if (generate_dtso(&info, resolved_outdir, base_addr, irq_num) != 0)
-		return 1;
-
-	printf("Generated %s/%s.dtso\n", resolved_outdir, info.device_name);
-	printf("  compatible: %s\n", info.compatible);
-	printf("  base addr:  0x%lx\n", base_addr);
-	printf("  reg size:   0x%lx\n",
-	       info.nregs > 0 ? (info.regs[info.nregs - 1].offset + 4 < 0x100 ?
-					 0x100UL :
-					 info.regs[info.nregs - 1].offset + 4) :
-				0x100UL);
-	if (irq_num >= 0)
-		printf("  irq:        %d\n", irq_num);
-	printf("\nCompile with: dtc -I dts -O dtb -o %s.dtbo %s/%s.dtso\n",
-	       info.device_name, resolved_outdir, info.device_name);
-
-	return 0;
+	dev = (const kdal_device_node_t *)file->device;
+	if (!dev)
+		(void)fprintf(stderr,
+			      "dt-gen: no 'device' declaration in '%s'\n",
+			      resolved_input);
+	ret = dev && generate_dtso(dev, &o, path, sizeof(path)) == 0 ? 0 : 1;
+	if (!ret)
+		print_summary(dev, &o, path);
+	kdal_arena_free(arena);
+	return ret;
 }

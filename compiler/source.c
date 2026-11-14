@@ -2,9 +2,10 @@
 /*
  * KDAL compiler: reading a source file into memory.
  *
- * One reader for kdalc and the kdality tools (lint, simulate), which had
- * three copies of it. errno is kept from the failing call, so callers can
- * report it with strerror(errno).
+ * One reader for kdalc and the kdality tools (lint, simulate, dt-gen),
+ * which had three copies of it. errno is kept from the failing call, so
+ * callers can report it with strerror(errno). kdal_parse_file() is the
+ * read, lex and parse the tools each repeated.
  */
 
 #include <errno.h>
@@ -71,4 +72,33 @@ char *kdal_read_file_arena(kdal_arena_t *arena, const char *path,
 	if (out_len)
 		*out_len = len;
 	return kept;
+}
+
+kdal_file_node_t *kdal_parse_file(const char *who, const char *path,
+				  kdal_arena_t **out_arena)
+{
+	size_t len;
+	kdal_arena_t *arena = kdal_arena_new(65536);
+	/* in the arena: the tokens point into the text */
+	char *src = arena ? kdal_read_file_arena(arena, path, &len) : NULL;
+	kdal_token_t *tokens = NULL;
+	kdal_file_node_t *file = NULL;
+	int ntokens;
+
+	if (!src) {
+		(void)fprintf(stderr, "%s: cannot open '%s': %s\n", who, path,
+			      strerror(arena ? errno : ENOMEM));
+		kdal_arena_free(arena);
+		return NULL;
+	}
+	/* the lexer and the parser report their own errors */
+	ntokens = kdal_lex(arena, src, len, &tokens, path);
+	if (ntokens >= 0)
+		file = kdal_parse(arena, tokens, ntokens, path);
+	if (!file) {
+		kdal_arena_free(arena);
+		return NULL;
+	}
+	*out_arena = arena;
+	return file;
 }
