@@ -1,0 +1,25 @@
+// led.kdh - the simplified .kdh syntax, copied from docs/language_guide.md
+// (input of scripts/ci/dtgen-check.sh)
+
+device led {
+    class gpio;
+    compatible "example,led-gpio";
+
+    register_map {
+        CTRL  0x00 rw;   // control register
+        STATE 0x04 ro;   // current state (on/off)
+    }
+
+    signals {
+        toggle;           // software signal to toggle LED
+    }
+
+    capabilities {
+        dimmable false;
+    }
+
+    power_states {
+        off;
+        on;
+    }
+}
