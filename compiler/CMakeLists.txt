@@ -20,9 +20,24 @@ set(KDALC_LIB_SOURCES
     parser.c
     sema.c
     codegen.c
+    source.c
 )
 
 add_library(kdalc_lib STATIC ${KDALC_LIB_SOURCES})
+
+# ── Fuzzing (KDAL_FUZZ, clang only) ──────────────────────────────────
+# The library is instrumented for libFuzzer and built with AddressSanitizer
+# and UBSan; fuzz_lex_parse feeds it any input (the quality gate runs it in
+# KDAL's weekly CI workflow).
+option(KDAL_FUZZ "Build the libFuzzer target for the lexer and parser (clang)" OFF)
+if(KDAL_FUZZ)
+    set(_KDAL_FUZZ_SAN -fsanitize=address,undefined -fno-sanitize-recover=undefined -fno-omit-frame-pointer)
+    target_compile_options(kdalc_lib PRIVATE -fsanitize=fuzzer-no-link ${_KDAL_FUZZ_SAN})
+    add_executable(fuzz_lex_parse fuzz/fuzz_lex_parse.c)
+    target_link_libraries(fuzz_lex_parse PRIVATE kdalc_lib)
+    target_compile_options(fuzz_lex_parse PRIVATE -fsanitize=fuzzer ${_KDAL_FUZZ_SAN})
+    target_link_options(fuzz_lex_parse PRIVATE -fsanitize=fuzzer ${_KDAL_FUZZ_SAN})
+endif()
 
 target_include_directories(kdalc_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

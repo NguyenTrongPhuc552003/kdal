@@ -577,23 +577,13 @@ int kdal_compile_file(const char *src_path, const kdal_codegen_opts_t *opts)
 	}
 
 	/* Read source */
-	FILE *fp = fopen(resolved_src, "r");
-	if (!fp) {
+	size_t nread;
+	char *src = kdal_read_file(resolved_src, &nread);
+	if (!src) {
 		fprintf(stderr, "kdalc: cannot open '%s': %s\n", resolved_src,
 			strerror(errno));
 		return -1;
 	}
-	fseek(fp, 0, SEEK_END);
-	long fsize = ftell(fp);
-	rewind(fp);
-	char *src = malloc((size_t)fsize + 1);
-	if (!src) {
-		fclose(fp);
-		return -1;
-	}
-	size_t nread = fread(src, 1, (size_t)fsize, fp);
-	src[nread] = '\0';
-	fclose(fp);
 
 	kdal_arena_t *arena = kdal_arena_new(65536);
 	if (!arena) {

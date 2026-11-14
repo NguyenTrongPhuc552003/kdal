@@ -38,15 +38,6 @@
    "count": 1
   },
   {
-   "key": "0642e59ed044d3ea1d870c9d",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/lint.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "0708e74330308a090e1e6002",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -101,15 +92,6 @@
    "count": 1
   },
   {
-   "key": "0a335ea4cc3101ece4499efe",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/lint.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 3
-  },
-  {
    "key": "0c0e9e6bdb6cbb68f0b2bc7a",
    "tool": "lizard",
    "rule": "complexity",
@@ -134,15 +116,6 @@
    "file": "compiler/codegen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "0c346985f37378293d020834",
-   "tool": "clang-tidy",
-   "rule": "bugprone-unsafe-functions",
-   "file": "compiler/codegen.c",
-   "severity": "CRITICAL",
-   "message": "function 'rewind' has no error detection; 'fseek' should be used instead",
    "count": 1
   },
   {
@@ -250,7 +223,7 @@
    "rule": "complexity",
    "file": "tools/kdality/simulate.c",
    "severity": "MAJOR",
-   "message": "simulate_file: cyclomatic complexity 21 > 15",
+   "message": "simulate_file: cyclomatic complexity 23 > 15",
    "count": 1
   },
   {
@@ -285,15 +258,6 @@
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
    "file": "tools/kdality/testgen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "19b778b1cab71f695cffef7f",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/simulate.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 1
@@ -461,15 +425,6 @@
    "count": 1
   },
   {
-   "key": "26a0b6306bdfe99a570d5bf2",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "compiler/codegen.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "27d2fe30e8766950d7ce1120",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -529,7 +484,7 @@
    "rule": "function-length",
    "file": "compiler/lexer.c",
    "severity": "MAJOR",
-   "message": "kdal_lex: 177 lines > 100",
+   "message": "kdal_lex: 193 lines > 100",
    "count": 1
   },
   {
@@ -574,7 +529,7 @@
    "rule": "complexity",
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
-   "message": "parse_kdh: cyclomatic complexity 36 > 15",
+   "message": "parse_kdh: cyclomatic complexity 41 > 15",
    "count": 1
   },
   {
@@ -794,15 +749,6 @@
    "count": 1
   },
   {
-   "key": "3b57713174b1b4856afe5913",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/simulate.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "3bc060ae6173901017feaed9",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -872,7 +818,7 @@
    "file": "compiler/codegen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 5
+   "count": 3
   },
   {
    "key": "4022dfeebe829a7bb57f6ce5",
@@ -926,15 +872,6 @@
    "file": "tools/kdality/init.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "42da7303eeddb03b1a1f2787",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-security.ArrayBound",
-   "file": "tools/kdality/lint.c",
-   "severity": "CRITICAL",
-   "message": "Potential out of bound access to the heap area with tainted index",
    "count": 1
   },
   {
@@ -1235,15 +1172,6 @@
    "count": 1
   },
   {
-   "key": "5852ceae887a1d5acedf0077",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-security.ArrayBound",
-   "file": "compiler/codegen.c",
-   "severity": "CRITICAL",
-   "message": "Potential out of bound access to the heap area with tainted index",
-   "count": 1
-  },
-  {
    "key": "58a39c8454fa9dc5658ba425",
    "tool": "lizard",
    "rule": "complexity",
@@ -1440,15 +1368,6 @@
    "severity": "MINOR",
    "message": "Possible repeated word: 'npudemo'",
    "count": 1
-  },
-  {
-   "key": "6738847a3d289af922212f86",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-core.NullDereference",
-   "file": "compiler/lexer.c",
-   "severity": "CRITICAL",
-   "message": "Dereference of null pointer",
-   "count": 3
   },
   {
    "key": "67978848a94b8f859eddb726",
@@ -1789,7 +1708,7 @@
    "rule": "complexity",
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
-   "message": "kdality_dtgen: cyclomatic complexity 19 > 15",
+   "message": "kdality_dtgen: cyclomatic complexity 21 > 15",
    "count": 1
   },
   {
@@ -1982,15 +1901,6 @@
    "count": 1
   },
   {
-   "key": "92cccb53c338e9c9af65c6f3",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-security.ArrayBound",
-   "file": "tools/kdality/simulate.c",
-   "severity": "CRITICAL",
-   "message": "Potential out of bound access to the heap area with tainted index",
-   "count": 1
-  },
-  {
    "key": "9326abbf48a360b09ce64513",
    "tool": "lizard",
    "rule": "complexity",
@@ -2033,15 +1943,6 @@
    "file": "examples/accel_demo/npudemo.c",
    "severity": "MAJOR",
    "message": "26 lines duplicated from examples/accel_demo/gpudemo.c:16",
-   "count": 1
-  },
-  {
-   "key": "96e9121451a46a34fefcd109",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-unix.Errno",
-   "file": "compiler/codegen.c",
-   "severity": "CRITICAL",
-   "message": "Value of 'errno' was not checked and may be overwritten by function 'malloc'",
    "count": 1
   },
   {
@@ -2149,7 +2050,7 @@
    "rule": "function-length",
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
-   "message": "parse_kdh: 136 lines > 100",
+   "message": "parse_kdh: 148 lines > 100",
    "count": 1
   },
   {
@@ -2222,15 +2123,6 @@
    "file": "tools/kdality/dtgen.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "a69b54fa8df7b609bcf5477c",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-optin.portability.UnixAPI",
-   "file": "compiler/codegen.c",
-   "severity": "CRITICAL",
-   "message": "Call to 'malloc' has an allocation size of 0 bytes",
    "count": 1
   },
   {
@@ -2331,24 +2223,6 @@
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 2
-  },
-  {
-   "key": "b20cc0e64feb40009ca29837",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/simulate.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "b3db2854a2471f2280c21999",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/simulate.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 3
   },
   {
    "key": "b3fbb4291628e8844d746152",
@@ -2594,15 +2468,6 @@
    "count": 1
   },
   {
-   "key": "c08c3ddba20e9c5048f26110",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/lint.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
    "key": "c09718db2e25a373a747b879",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -2627,15 +2492,6 @@
    "file": "compiler/lexer.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "c47aff2b6b6a336793000a2d",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-core.NullDereference",
-   "file": "compiler/lexer.c",
-   "severity": "CRITICAL",
-   "message": "Dereference of null pointer",
    "count": 1
   },
   {
@@ -2790,15 +2646,6 @@
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
    "count": 3
-  },
-  {
-   "key": "cff8c8a073c4fb822a60d8d6",
-   "tool": "clang-tidy",
-   "rule": "cert-err33-c",
-   "file": "tools/kdality/lint.c",
-   "severity": "MAJOR",
-   "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
   },
   {
    "key": "d0de2604b7466c2a1d87daf1",
@@ -3050,15 +2897,6 @@
    "file": "tools/kdality/compile.c",
    "severity": "MAJOR",
    "message": "the value returned by this function should not be disregarded; neglecting it may lead to errors",
-   "count": 1
-  },
-  {
-   "key": "e29fd90f02fd00f079a8dfef",
-   "tool": "jscpd",
-   "rule": "duplicate",
-   "file": "tools/kdality/simulate.c",
-   "severity": "MAJOR",
-   "message": "31 lines duplicated from tools/kdality/lint.c:71",
    "count": 1
   },
   {
@@ -3359,15 +3197,6 @@
    "count": 1
   },
   {
-   "key": "f4c577ac9e44ca77498bee7c",
-   "tool": "clang-tidy",
-   "rule": "bugprone-unchecked-string-to-number-conversion",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "CRITICAL",
-   "message": "'sscanf' used to convert a string to an unsigned integer value, but function will not report conversion errors; consider using 'strtoul' instead",
-   "count": 1
-  },
-  {
    "key": "f51ee1883dac1f489221e7ce",
    "tool": "lizard",
    "rule": "complexity",
@@ -3391,7 +3220,7 @@
    "rule": "complexity",
    "file": "compiler/lexer.c",
    "severity": "MAJOR",
-   "message": "kdal_lex: cyclomatic complexity 37 > 15",
+   "message": "kdal_lex: cyclomatic complexity 41 > 15",
    "count": 1
   },
   {
@@ -3467,15 +3296,6 @@
    "count": 1
   },
   {
-   "key": "fb8329b3dd26881efd11d47b",
-   "tool": "clang-tidy",
-   "rule": "bugprone-unchecked-string-to-number-conversion",
-   "file": "tools/kdality/dtgen.c",
-   "severity": "CRITICAL",
-   "message": "'atoi' used to convert a string to an integer value, but function will not report conversion errors; consider using 'strtol' instead",
-   "count": 1
-  },
-  {
    "key": "fbaf1bae65acd8f679d32ab2",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",
@@ -3500,15 +3320,6 @@
    "file": "compiler/parser.c",
    "severity": "MAJOR",
    "message": "p_binop_prec: cyclomatic complexity 19 > 15",
-   "count": 1
-  },
-  {
-   "key": "fc3315b2bd05db75d47e3208",
-   "tool": "clang-tidy",
-   "rule": "clang-analyzer-unix.Malloc",
-   "file": "compiler/lexer.c",
-   "severity": "CRITICAL",
-   "message": "Potential leak of memory pointed to by 'lx.tokens'",
    "count": 1
   },
   {

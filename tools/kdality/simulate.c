@@ -88,33 +88,6 @@ static void sim_log(struct sim_state *s, const char *msg)
 		printf("  LOG: %s\n", msg);
 }
 
-/* ── File reader ─────────────────────────────────────────────────── */
-
-static char *read_source(const char *path, size_t *out_len)
-{
-	FILE *fp = fopen(path, "rb");
-	if (!fp)
-		return NULL;
-	fseek(fp, 0, SEEK_END);
-	long sz = ftell(fp);
-	fseek(fp, 0, SEEK_SET);
-	if (sz < 0) {
-		fclose(fp);
-		return NULL;
-	}
-	char *buf = malloc((size_t)sz + 1);
-	if (!buf) {
-		fclose(fp);
-		return NULL;
-	}
-	size_t n = fread(buf, 1, (size_t)sz, fp);
-	fclose(fp);
-	buf[n] = '\0';
-	if (out_len)
-		*out_len = n;
-	return buf;
-}
-
 /* ── Expression evaluator ────────────────────────────────────────── */
 
 static const char *expr_reg_name(const kdal_ast_t *expr)
@@ -324,19 +297,16 @@ static const char *handler_label(const kdal_handler_node_t *h)
 static int simulate_file(const char *path, const char *target_event, int trace)
 {
 	size_t src_len;
-	char *src = read_source(path, &src_len);
-	if (!src) {
-		fprintf(stderr, "simulate: cannot open '%s': %s\n", path,
-			strerror(errno));
+	kdal_arena_t *arena = kdal_arena_new(65536);
+	/* in the arena: the tokens point into the text */
+	char *arena_src = arena ? kdal_read_file_arena(arena, path, &src_len) :
+				  NULL;
+	if (!arena_src) {
+		(void)fprintf(stderr, "simulate: cannot open '%s': %s\n", path,
+			      strerror(arena ? errno : ENOMEM));
+		kdal_arena_free(arena);
 		return -1;
 	}
-
-	kdal_arena_t *arena = kdal_arena_new(65536);
-
-	/* Copy source into arena so token src pointers stay valid */
-	char *arena_src = kdal_arena_alloc(arena, src_len + 1);
-	memcpy(arena_src, src, src_len + 1);
-	free(src);
 
 	kdal_token_t *tokens = NULL;
 	int ntokens = kdal_lex(arena, arena_src, src_len, &tokens, path);
