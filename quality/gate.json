@@ -2,7 +2,7 @@
   "schema": "haven-gate-config/1",
   "engine": {
     "repo": "https://github.com/NguyenTrongPhuc552003/haven.git",
-    "commit": "299566ed6d7a63593ebf71bfe17f9d664e01df9d"
+    "commit": "fcbf155940c9fce37373cbb1fdc070f450e93bb4"
   },
   "c_paths": [
     "src",
@@ -117,7 +117,8 @@
       "shellcheck",
       "sanitizers",
       "sparse",
-      "coccinelle"
+      "coccinelle",
+      "libfuzzer"
     ]
   },
   "versions": {
@@ -177,5 +178,23 @@
     "scripts/gate": "repo-gate.sh",
     ".githooks/pre-commit": "pre-commit",
     ".githooks/pre-push": "pre-push"
+  },
+  "libfuzzer": {
+    "cc": "clang",
+    "preset": "debug",
+    "build": "build-fuzz",
+    "cmake_args": [
+      "-DKDAL_FUZZ=ON"
+    ],
+    "seconds": 120,
+    "targets": [
+      {
+        "name": "fuzz_lex_parse",
+        "binary": "compiler/fuzz_lex_parse",
+        "seeds": [
+          "examples/kdc_hello"
+        ]
+      }
+    ]
   }
 }

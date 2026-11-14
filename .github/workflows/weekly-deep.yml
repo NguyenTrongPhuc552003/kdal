@@ -1,6 +1,7 @@
 # Weekly, and on demand: the quality gate's deep tier with the pinned kernel
-# tree: Coccinelle (too slow for every pull request), sparse and the
-# sanitizer build (with LeakSanitizer). Not a required check; it fails when
+# tree: Coccinelle (too slow for every pull request), sparse, the
+# sanitizer build (with LeakSanitizer) and 120 s of libFuzzer on kdalc's
+# lexer and parser. Not a required check; it fails when
 # it finds something the baseline does not hold (BLOCKER, CRITICAL or
 # MAJOR), so the run shows red and GitHub notifies the owner.
 name: weekly deep checks
@@ -26,7 +27,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: The gate's tools (haven's action at the engine pin)
-        uses: NguyenTrongPhuc552003/haven/.github/actions/gate-tools@299566ed6d7a63593ebf71bfe17f9d664e01df9d
+        uses: NguyenTrongPhuc552003/haven/.github/actions/gate-tools@fcbf155940c9fce37373cbb1fdc070f450e93bb4
+        with:
+          # libFuzzer's runtime (clang only recommends it)
+          packages: libclang-rt-18-dev
       - name: Deep tier (blocks nothing)
         env:
           KDAL_KDIR: ${{ steps.kernel.outputs.kdir }}
