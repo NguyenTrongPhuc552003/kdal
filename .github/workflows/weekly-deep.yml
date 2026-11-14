@@ -27,7 +27,7 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: The gate's tools (haven's action at the engine pin)
-        uses: NguyenTrongPhuc552003/haven/.github/actions/gate-tools@fcbf155940c9fce37373cbb1fdc070f450e93bb4
+        uses: NguyenTrongPhuc552003/haven/.github/actions/gate-tools@4d26a363d5e9779fc7bd2424982e6d99d6bf9a12
         with:
           # libFuzzer's runtime (clang only recommends it)
           packages: libclang-rt-18-dev
