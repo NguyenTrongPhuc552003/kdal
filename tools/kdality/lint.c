@@ -19,7 +19,6 @@
  */
 
 #include <ctype.h>
-#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -71,47 +70,12 @@ static void emit_warning(struct lint_ctx *ctx, int line, const char *code,
 	ctx->nwarns++;
 }
 
-/* ── Parse helper ────────────────────────────────────────────────── */
-
-static kdal_file_node_t *lint_parse_file(const char *path,
-					 kdal_arena_t **out_arena)
-{
-	size_t src_len;
-	kdal_arena_t *arena = kdal_arena_new(65536);
-	/* in the arena: the tokens point into the text */
-	char *arena_src = arena ? kdal_read_file_arena(arena, path, &src_len) :
-				  NULL;
-	if (!arena_src) {
-		(void)fprintf(stderr, "lint: cannot open '%s': %s\n", path,
-			      strerror(arena ? errno : ENOMEM));
-		kdal_arena_free(arena);
-		return NULL;
-	}
-
-	kdal_token_t *tokens = NULL;
-	int ntokens = kdal_lex(arena, arena_src, src_len, &tokens, path);
-
-	if (ntokens < 0) {
-		kdal_arena_free(arena);
-		return NULL;
-	}
-
-	kdal_file_node_t *file = kdal_parse(arena, tokens, ntokens, path);
-	if (!file) {
-		kdal_arena_free(arena);
-		return NULL;
-	}
-
-	*out_arena = arena;
-	return file;
-}
-
 /* ── KDH lint pass (AST-based) ───────────────────────────────────── */
 
 static int lint_kdh(struct lint_ctx *ctx, const char *path)
 {
 	kdal_arena_t *arena = NULL;
-	kdal_file_node_t *file = lint_parse_file(path, &arena);
+	kdal_file_node_t *file = kdal_parse_file("lint", path, &arena);
 	if (!file) {
 		emit_warning(ctx, 1, "E001", "failed to parse '%s'", path);
 		return -1;
@@ -246,7 +210,7 @@ static void lint_walk_stmts(struct lint_ctx *ctx, const kdal_ast_t *stmt)
 static int lint_kdc(struct lint_ctx *ctx, const char *path)
 {
 	kdal_arena_t *arena = NULL;
-	kdal_file_node_t *file = lint_parse_file(path, &arena);
+	kdal_file_node_t *file = kdal_parse_file("lint", path, &arena);
 	if (!file) {
 		emit_warning(ctx, 1, "E001", "failed to parse '%s'", path);
 		return -1;

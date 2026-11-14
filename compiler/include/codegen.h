@@ -59,6 +59,16 @@ char *kdal_read_file_arena(kdal_arena_t *arena, const char *path,
 			   size_t *out_len);
 
 /*
+ * kdal_parse_file - read, lex and parse the file at @path; on success
+ *                   *out_arena holds the AST (the caller frees it). On a
+ *                   file that cannot be read, prints "WHO: cannot open";
+ *                   lexer and parser errors are reported by those stages.
+ * @returns       the root file node, or NULL
+ */
+kdal_file_node_t *kdal_parse_file(const char *who, const char *path,
+				  kdal_arena_t **out_arena);
+
+/*
  * kdal_lex     - tokenise src_len bytes of src into *out_tokens.
  *               The array is allocated in @arena and freed with it.
  * @returns     number of tokens, or negative on error

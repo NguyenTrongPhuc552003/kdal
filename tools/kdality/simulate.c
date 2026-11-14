@@ -296,29 +296,12 @@ static const char *handler_label(const kdal_handler_node_t *h)
 
 static int simulate_file(const char *path, const char *target_event, int trace)
 {
-	size_t src_len;
-	kdal_arena_t *arena = kdal_arena_new(65536);
-	/* in the arena: the tokens point into the text */
-	char *arena_src = arena ? kdal_read_file_arena(arena, path, &src_len) :
-				  NULL;
-	if (!arena_src) {
-		(void)fprintf(stderr, "simulate: cannot open '%s': %s\n", path,
-			      strerror(arena ? errno : ENOMEM));
-		kdal_arena_free(arena);
-		return -1;
-	}
+	kdal_arena_t *arena = NULL;
+	kdal_file_node_t *file = kdal_parse_file("simulate", path, &arena);
 
-	kdal_token_t *tokens = NULL;
-	int ntokens = kdal_lex(arena, arena_src, src_len, &tokens, path);
-
-	if (ntokens < 0) {
-		fprintf(stderr, "simulate: lexer error in '%s'\n", path);
-		kdal_arena_free(arena);
+	if (!file)
 		return 1;
-	}
-
-	kdal_file_node_t *file = kdal_parse(arena, tokens, ntokens, path);
-	if (!file || !file->driver) {
+	if (!file->driver) {
 		fprintf(stderr, "simulate: no driver found in '%s'\n", path);
 		kdal_arena_free(arena);
 		return 1;
