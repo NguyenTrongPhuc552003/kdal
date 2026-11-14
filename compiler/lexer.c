@@ -132,8 +132,10 @@ static inline void lx_advance(lexer_t *lx)
 	}
 }
 
-static void lx_emit(lexer_t *lx, kdal_tok_t type, const char *start,
-		    size_t tok_len, int line, int col)
+/* Appends a token; returns it, or NULL when the array could not grow (the
+ * error is reported and had_error set, and the caller must not use it). */
+static kdal_token_t *lx_emit(lexer_t *lx, kdal_tok_t type, const char *start,
+			     size_t tok_len, int line, int col)
 {
 	if (lx->ntokens >= lx->cap) {
 		int newcap = lx->cap ? lx->cap * 2 : 64;
@@ -142,7 +144,7 @@ static void lx_emit(lexer_t *lx, kdal_tok_t type, const char *start,
 		if (!newarr) {
 			fprintf(stderr, "%s: out of memory\n", lx->filename);
 			lx->had_error = 1;
-			return;
+			return NULL;
 		}
 		lx->tokens = newarr;
 		lx->cap = newcap;
@@ -154,6 +156,7 @@ static void lx_emit(lexer_t *lx, kdal_tok_t type, const char *start,
 	t->line = line;
 	t->col = col;
 	t->v.ival = 0;
+	return t;
 }
 
 static void lx_skip_block_comment(lexer_t *lx)
@@ -196,11 +199,9 @@ static void lx_lex_ident(lexer_t *lx)
 		lx_advance(lx);
 	size_t len = lx->pos - start;
 	kdal_tok_t tt = lx_classify_ident(lx->src + start, len);
-	lx_emit(lx, tt, lx->src + start, len, sline, scol);
-	if (tt == TOK_BOOL_TRUE || tt == TOK_BOOL_FALSE) {
-		kdal_token_t *t = &lx->tokens[lx->ntokens - 1];
+	kdal_token_t *t = lx_emit(lx, tt, lx->src + start, len, sline, scol);
+	if (t && (tt == TOK_BOOL_TRUE || tt == TOK_BOOL_FALSE))
 		t->v.bval = (tt == TOK_BOOL_TRUE) ? 1 : 0;
-	}
 }
 
 static void lx_lex_number(lexer_t *lx)
@@ -217,9 +218,11 @@ static void lx_lex_number(lexer_t *lx)
 		while (isxdigit((unsigned char)lx_cur(lx)))
 			lx_advance(lx);
 		size_t len = lx->pos - start;
-		lx_emit(lx, TOK_HEX, lx->src + start, len, sline, scol);
-		lx->tokens[lx->ntokens - 1].v.ival =
-			(long long)strtoll(lx->src + start + 2, NULL, 16);
+		kdal_token_t *t =
+			lx_emit(lx, TOK_HEX, lx->src + start, len, sline, scol);
+		if (t)
+			t->v.ival = (long long)strtoll(lx->src + start + 2,
+						       NULL, 16);
 	} else if (c0 == '0' && (c1 == 'b' || c1 == 'B')) {
 		/* Binary */
 		size_t start = lx->pos;
@@ -228,18 +231,22 @@ static void lx_lex_number(lexer_t *lx)
 		while (lx_cur(lx) == '0' || lx_cur(lx) == '1')
 			lx_advance(lx);
 		size_t len = lx->pos - start;
-		lx_emit(lx, TOK_BINLIT, lx->src + start, len, sline, scol);
-		lx->tokens[lx->ntokens - 1].v.ival =
-			(long long)strtoll(lx->src + start + 2, NULL, 2);
+		kdal_token_t *t = lx_emit(lx, TOK_BINLIT, lx->src + start, len,
+					  sline, scol);
+		if (t)
+			t->v.ival = (long long)strtoll(lx->src + start + 2,
+						       NULL, 2);
 	} else {
 		/* Decimal */
 		size_t start = lx->pos;
 		while (isdigit((unsigned char)lx_cur(lx)))
 			lx_advance(lx);
 		size_t len = lx->pos - start;
-		lx_emit(lx, TOK_INT, lx->src + start, len, sline, scol);
-		lx->tokens[lx->ntokens - 1].v.ival =
-			(long long)strtoll(lx->src + start, NULL, 10);
+		kdal_token_t *t =
+			lx_emit(lx, TOK_INT, lx->src + start, len, sline, scol);
+		if (t)
+			t->v.ival =
+				(long long)strtoll(lx->src + start, NULL, 10);
 	}
 }
 
@@ -272,7 +279,6 @@ static void lx_lex_string(lexer_t *lx)
 int kdal_lex(kdal_arena_t *arena, const char *src, size_t src_len,
 	     kdal_token_t **out_tokens, const char *filename)
 {
-	(void)arena; /* reserved for future arena-based token allocation */
 	lexer_t lx = {
 		.src = src,
 		.len = src_len,
@@ -442,8 +448,25 @@ next:;
 	/* EOF sentinel */
 	lx_emit(&lx, TOK_EOF, lx.src + lx.pos, 0, lx.line, lx.col);
 
+	/*
+	 * The finished array moves into the arena, so the tokens live exactly
+	 * as long as the AST that points into them, and the caller frees
+	 * nothing but the arena.
+	 */
+	kdal_token_t *kept = NULL;
+	if (lx.ntokens > 0 && arena)
+		kept = kdal_arena_alloc(arena, (size_t)lx.ntokens *
+						       sizeof(kdal_token_t));
+	if (kept)
+		memcpy(kept, lx.tokens,
+		       (size_t)lx.ntokens * sizeof(kdal_token_t));
+	else if (lx.ntokens > 0) {
+		(void)fprintf(stderr, "%s: out of memory\n", lx.filename);
+		lx.had_error = 1;
+	}
+	free(lx.tokens);
 	if (out_tokens)
-		*out_tokens = lx.tokens;
+		*out_tokens = kept;
 	return lx.had_error ? -lx.ntokens : lx.ntokens;
 }
 

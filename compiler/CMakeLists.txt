@@ -20,9 +20,11 @@ set(KDALC_LIB_SOURCES
     parser.c
     sema.c
     codegen.c
+    source.c
 )
 
 add_library(kdalc_lib STATIC ${KDALC_LIB_SOURCES})
+
 
 target_include_directories(kdalc_lib PUBLIC
     ${CMAKE_CURRENT_SOURCE_DIR}/include

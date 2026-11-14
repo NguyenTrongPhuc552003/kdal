@@ -44,8 +44,23 @@ int kdal_generate(const kdal_file_node_t *file_node, const char *src_path,
 /* ── Lower-level stage entry points (exposed for testing) ─────────── */
 
 /*
+ * kdal_read_file - read a whole file into a new NUL-terminated buffer
+ *                  (the caller frees it); *out_len gets its length.
+ * @returns       the buffer, or NULL with errno set
+ */
+char *kdal_read_file(const char *path, size_t *out_len);
+
+/*
+ * kdal_read_file_arena - kdal_read_file, with the text kept in @arena (the
+ *                        tokens point into it, so it must live as long)
+ * @returns       the text, or NULL with errno set (ENOMEM: no arena space)
+ */
+char *kdal_read_file_arena(kdal_arena_t *arena, const char *path,
+			   size_t *out_len);
+
+/*
  * kdal_lex     - tokenise src_len bytes of src into *out_tokens.
- *               Caller owns the returned array (arena-allocated).
+ *               The array is allocated in @arena and freed with it.
  * @returns     number of tokens, or negative on error
  */
 int kdal_lex(kdal_arena_t *arena, const char *src, size_t src_len,

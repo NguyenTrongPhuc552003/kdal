@@ -33,6 +33,33 @@
 #define MAX_SIGNALS 16
 #define NAME_LEN 64
 
+/*
+ * A whole string as an unsigned number in base (0: C prefixes), within
+ * max; 0 on success. strtoul's errors are checked, which sscanf and atoi
+ * cannot report.
+ */
+static int parse_number(const char *s, int base, unsigned long *out,
+			unsigned long max)
+{
+	char *end;
+	unsigned long v;
+
+	while (*s == ' ' || *s == '\t')
+		s++;
+	if (*s == '-' || *s == '\0')
+		return -1;
+	errno = 0;
+	v = strtoul(s, &end, base);
+	if (errno || end == s || v > max)
+		return -1;
+	while (*end == ' ' || *end == '\t' || *end == '\n' || *end == '\r')
+		end++;
+	if (*end != '\0')
+		return -1;
+	*out = v;
+	return 0;
+}
+
 struct kdh_reg {
 	char name[NAME_LEN];
 	unsigned long offset;
@@ -198,7 +225,19 @@ static int parse_kdh(const char *path, struct kdh_info *info)
 		if (in_regmap && info->nregs < MAX_REGS) {
 			char rname[NAME_LEN];
 			unsigned long off;
-			if (sscanf(p, "%63s 0x%lx", rname, &off) == 2) {
+			const char *q = p;
+			size_t nlen;
+
+			/* "NAME 0xOFFSET" */
+			while (*q == ' ' || *q == '\t')
+				q++;
+			nlen = strcspn(q, " \t");
+			if (nlen > 0 && nlen < NAME_LEN &&
+			    strncmp(q + nlen + strspn(q + nlen, " \t"), "0x",
+				    2) == 0 &&
+			    parse_number(q + nlen, 16, &off, ULONG_MAX) == 0) {
+				memcpy(rname, q, nlen);
+				rname[nlen] = '\0';
 				strncpy(info->regs[info->nregs].name, rname,
 					NAME_LEN - 1);
 				info->regs[info->nregs].offset = off;
@@ -383,14 +422,27 @@ int kdality_dtgen(int argc, char *const argv[])
 					"dt-gen: missing value for '--base-addr'\n");
 				return 1;
 			}
-			base_addr = strtoul(argv[argi++], NULL, 0);
+			if (parse_number(argv[argi++], 0, &base_addr,
+					 ULONG_MAX)) {
+				(void)fprintf(
+					stderr,
+					"dt-gen: invalid value for '--base-addr'\n");
+				return 1;
+			}
 		} else if (strcmp(arg, "--irq") == 0) {
 			if (argi >= argc) {
 				fprintf(stderr,
 					"dt-gen: missing value for '--irq'\n");
 				return 1;
 			}
-			irq_num = atoi(argv[argi++]);
+			unsigned long irq;
+			if (parse_number(argv[argi++], 10, &irq, INT_MAX)) {
+				(void)fprintf(
+					stderr,
+					"dt-gen: invalid value for '--irq'\n");
+				return 1;
+			}
+			irq_num = (int)irq;
 		} else if (arg[0] != '-') {
 			input = arg;
 		}
