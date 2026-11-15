@@ -16,7 +16,6 @@
 #   kdalc       - KDAL compiler binary
 #   kdalc_lib   - KDAL compiler static library (libkdalc.a)
 #   kdality     - KDAL CLI toolchain
-#   website     - documentation site (Astro Starlight)
 #   vscode      - VS Code extension (.vsix)
 #   module      - kernel module via kbuild
 #   all         - build every buildable target above
@@ -100,10 +99,6 @@ if [ "${TARGET}" = "clean" ]; then
 		echo "==> Cleaning entire build directory..."
 		rm -rf "${BUILD_DIR}"
 		echo "    Done."
-	elif [ "${CLEAN_TARGET}" = "website" ]; then
-		echo "==> Cleaning website build artifacts..."
-		rm -rf "${REPO_ROOT}/website/dist" "${REPO_ROOT}/website/.astro"
-		echo "    Done."
 	elif [ "${CLEAN_TARGET}" = "vscode" ]; then
 		echo "==> Cleaning VS Code extension artifacts..."
 		rm -rf "${REPO_ROOT}/editor/vscode/kdal-lang/out" \
@@ -127,12 +122,6 @@ fi
 collect_outputs() {
 	_target="${1:-}"
 	case "${_target}" in
-	website)
-		if [ -d "${REPO_ROOT}/website/dist" ]; then
-			mkdir -p "${BUILD_DIR}/website"
-			cp -R "${REPO_ROOT}/website/dist/." "${BUILD_DIR}/website/"
-		fi
-		;;
 	vscode)
 		_vsix="$(find "${REPO_ROOT}/editor/vscode/kdal-lang" \
 			-maxdepth 1 -name '*.vsix' 2>/dev/null | head -1)"
@@ -161,7 +150,6 @@ elif [ "${TARGET}" = "help" ]; then
 	echo "  kdalc        KDAL compiler binary"
 	echo "  kdalc_lib    KDAL compiler static library"
 	echo "  kdality      KDAL CLI toolchain"
-	echo "  website      Documentation site (Astro Starlight)"
 	echo "  vscode       VS Code extension (.vsix)"
 	echo "  module       Kernel module via kbuild"
 	echo "  all          Build every target above"
@@ -176,7 +164,6 @@ elif [ "${TARGET}" = "help" ]; then
 elif [ "${TARGET}" = "all" ]; then
 	echo "==> Building all KDAL targets..."
 	cmake --build --preset "${DEV_PRESET}" --target kdal-all
-	collect_outputs website
 	collect_outputs vscode
 elif [ "${TARGET}" = "install" ]; then
 	echo "==> Installing KDAL SDK..."

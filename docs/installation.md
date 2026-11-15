@@ -66,7 +66,7 @@ KDAL_HOME=/opt/kdal curl -fsSL .../install.sh | sh
 # 3. Build guest kernel with KUnit and module support
 ./scripts/env/kernel.sh
 
-# 4. Build everything (compiler + CLI + website + VS Code extension)
+# 4. Build everything (compiler + CLI + VS Code extension)
 ./scripts/dev/build.sh --variant release all
 
 # 5. Run tests
@@ -105,10 +105,9 @@ The project uses **CMake 3.20+**, wrapped by convenience scripts:
 
 | Command                                            | Description                                          |
 | -------------------------------------------------- | ---------------------------------------------------- |
-| `./scripts/dev/build.sh --variant release all`     | Build compiler + CLI + website + vscode              |
+| `./scripts/dev/build.sh --variant release all`     | Build compiler + CLI + vscode                        |
 | `./scripts/dev/build.sh --variant debug kdalc`     | Build `kdalc` compiler and `libkdalc.a` with symbols |
 | `./scripts/dev/build.sh --variant release kdality` | Build `kdality` CLI (links compiler)                 |
-| `./scripts/dev/build.sh --variant release website` | Build documentation site                             |
 | `./scripts/dev/build.sh --variant release vscode`  | Build VS Code extension (.vsix)                      |
 | `./scripts/dev/build.sh --variant debug module`    | Build kernel module (requires `KDAL_KERNEL_DIR`)     |
 | `./scripts/dev/build.sh --variant asan clean`      | Remove AddressSanitizer build artifacts              |

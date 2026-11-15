@@ -1118,15 +1118,6 @@
    "count": 1
   },
   {
-   "key": "62d7bf00d8bb13f192b89c4e",
-   "tool": "shellcheck",
-   "rule": "SC1091",
-   "file": "scripts/e2e/test_website.sh",
-   "severity": "MINOR",
-   "message": "Not following: ./lib.sh: openBinaryFile: does not exist (No such file or directory)",
-   "count": 1
-  },
-  {
    "key": "6391f95eab3e39db55199134",
    "tool": "clang-tidy",
    "rule": "cert-err33-c",

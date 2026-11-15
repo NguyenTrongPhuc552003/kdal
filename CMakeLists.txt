@@ -104,16 +104,9 @@ add_custom_target(module
 	COMMENT "Building KDAL kernel module via kbuild"
 	VERBATIM)
 
-# Website (Astro Starlight documentation site)
+# The documentation site is part of haven-docs (docs-haven.vercel.app/kdal/).
 find_program(NPM npm)
 if(NPM)
-  add_custom_target(website
-	COMMAND ${NPM} install --no-audit --no-fund
-	COMMAND ${NPM} run build
-	WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/website
-	COMMENT "Building KDAL documentation website"
-	VERBATIM)
-
   # VS Code extension
   add_custom_target(vscode
 	COMMAND ${NPM} install --no-audit --no-fund
@@ -147,11 +140,11 @@ add_custom_target(ci
 
 # ── Aggregate 'all' target (every buildable target) ──────────────────
 # CMake's built-in 'all' only builds compiled targets (kdalc, kdality).
-# This meta-target also builds website and vscode extension.
+# This meta-target also builds the VS Code extension.
 # Test/check targets (e2e, lint, ci) are excluded - run them separately.
 set(_KDAL_ALL_DEPS kdalc kdalc_lib kdality)
 if(NPM)
-  list(APPEND _KDAL_ALL_DEPS website vscode)
+  list(APPEND _KDAL_ALL_DEPS vscode)
 endif()
 add_custom_target(kdal-all DEPENDS ${_KDAL_ALL_DEPS}
 	COMMENT "Building all KDAL targets")

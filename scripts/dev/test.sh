@@ -13,7 +13,6 @@
 # Testable targets:
 #   kdalc       - compiler binary + sample compilation
 #   kdality     - CLI subcommands
-#   website     - documentation site build
 #   vscode      - VS Code extension packaging
 #   ci          - CI smoke tests
 #   e2e         - end-to-end test suites
@@ -249,44 +248,6 @@ test_kdality() {
 		pass "kdality simulate responds"
 	else
 		fail "kdality simulate"
-	fi
-}
-
-# ── Test: website ────────────────────────────────────────────────────
-test_website() {
-	section "website" 4
-
-	# 1. builds successfully
-	if build_target website >/dev/null 2>&1; then
-		pass "website builds"
-	else
-		fail "website build"
-		return
-	fi
-
-	DIST="${REPO_ROOT}/website/dist"
-
-	# 2. dist/ directory exists
-	if [ -d "${DIST}" ]; then
-		pass "dist/ directory created"
-	else
-		fail "dist/ directory missing"
-		return
-	fi
-
-	# 3. index.html exists
-	if [ -f "${DIST}/index.html" ]; then
-		pass "index.html generated"
-	else
-		fail "index.html missing"
-	fi
-
-	# 4. at least 25 pages built
-	_pages=$(find "${DIST}" -name 'index.html' | wc -l | tr -d ' ')
-	if [ "${_pages}" -ge 25 ]; then
-		pass "${_pages} pages built (>= 25)"
-	else
-		fail "only ${_pages} pages built (expected >= 25)"
 	fi
 }
 
@@ -592,7 +553,6 @@ test_examples() {
 case "${TARGET}" in
 kdalc) run_test kdalc test_kdalc ;;
 kdality) run_test kdality test_kdality ;;
-website) run_test website test_website ;;
 vscode) run_test vscode test_vscode ;;
 ci) run_test ci test_ci ;;
 e2e) run_test e2e test_e2e ;;
@@ -605,7 +565,6 @@ examples) run_test examples test_examples ;;
 all)
 	run_test kdalc test_kdalc
 	run_test kdality test_kdality
-	run_test website test_website
 	run_test vscode test_vscode
 	run_test ci test_ci
 	run_test e2e test_e2e
@@ -623,7 +582,6 @@ help)
 	echo "Testable targets:"
 	echo "  kdalc       Compiler binary + sample compilation"
 	echo "  kdality     CLI subcommands"
-	echo "  website     Documentation site build"
 	echo "  vscode      VS Code extension packaging"
 	echo "  ci          CI smoke tests"
 	echo "  e2e         End-to-end test suites"

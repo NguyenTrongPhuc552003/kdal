@@ -4,7 +4,7 @@
 #   make                 - build the kdal.ko kernel module
 #   make clean           - remove kbuild artifacts
 #
-# For all userspace builds (kdalc, kdality, website, tests, etc.),
+# For all userspace builds (kdalc, kdality, tests, etc.),
 # use CMake instead:
 #   cmake --preset release
 #   cmake --build --preset release --target <name>
