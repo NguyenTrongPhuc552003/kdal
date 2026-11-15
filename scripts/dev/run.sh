@@ -13,7 +13,6 @@
 #   kdality   <args>   - run the KDAL CLI toolchain
 #
 # Service targets (no extra args):
-#   website            - start Astro dev server (localhost:4321)
 #   vscode             - open VS Code with the extension loaded
 #   module             - load the kernel module (requires sudo + Linux)
 #
@@ -83,7 +82,6 @@ if [ -z "${TARGET}" ]; then
 	echo "Targets:"
 	echo "  kdalc   <args>   Run the KDAL compiler"
 	echo "  kdality <args>   Run the KDAL CLI toolchain"
-	echo "  website          Start Astro dev server"
 	echo "  vscode           Open VS Code with KDAL extension"
 	echo "  module           Load the kernel module (sudo, Linux)"
 	echo "  ci               Run CI smoke tests"
@@ -113,13 +111,6 @@ kdality)
 	;;
 
 # ── Service targets ──────────────────────────────────────────────
-website)
-	ensure_built website
-	echo "==> Starting Astro dev server..."
-	cd "${REPO_ROOT}/website"
-	exec npx astro preview "$@"
-	;;
-
 vscode)
 	ensure_built vscode
 	VSIX=$(find "${REPO_ROOT}/editor/vscode/kdal-lang" -maxdepth 1 -name '*.vsix' | head -1)

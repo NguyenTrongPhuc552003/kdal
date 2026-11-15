@@ -6,7 +6,7 @@
 #
 # Minimum versions:
 #   CMake  >= 3.20   (required by CMakePresets.json)
-#   Node.js >= 18    (required by vsce, Astro website build)
+#   Node.js >= 18    (required by vsce)
 #   GCC    >= 11     (C17 support)
 
 set -eu

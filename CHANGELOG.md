@@ -38,6 +38,13 @@ Changes since v0.1.0. The language, compiler, editor plugins and tools
   token enum numbering simplified.
 - Em-dashes replaced with ASCII hyphens; local CodeQL artifacts ignored.
 
+### Removed
+
+- `website/` (the Astro Starlight site): its pages are part of the ecosystem's
+  site in the haven-docs repository (docs-haven.vercel.app/kdal/), which also
+  copies this README and changelog at every build. The `website` targets of
+  CMake and `scripts/dev/`, and the e2e `website` suite, are gone with it.
+
 ### Fixed
 
 - The module builds against Linux v6.18 with clang (`file_operations` and

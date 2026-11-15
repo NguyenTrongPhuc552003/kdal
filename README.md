@@ -40,7 +40,7 @@ that lets developers write portable device drivers and accelerator backends
 # Build kernel with KDAL support
 ./scripts/env/kernel.sh
 
-# Build everything (compiler + CLI + website + VS Code extension)
+# Build everything (compiler + CLI + VS Code extension)
 ./scripts/dev/build.sh --variant release all
 
 # Launch QEMU guest
@@ -117,7 +117,6 @@ scripts/e2e/        End-to-end test suites
 scripts/ci/         CI/CD helper scripts
 scripts/installer/  SDK installer (kdalup)
 docs/               Architecture, API, language guide, porting, thesis
-website/            Documentation site (Astro Starlight)
 examples/           Driver examples (.kdc, plain C, accel demos)
 build/              Variant-specific build trees and generated outputs
 ```
@@ -148,7 +147,6 @@ Use `--variant` for normal local development. Use `--preset` only for automation
 ```sh
 ./scripts/dev/build.sh --variant release kdalc   # Compiler (kdalc + libkdalc.a)
 ./scripts/dev/build.sh --variant release kdality # CLI toolchain
-./scripts/dev/build.sh --variant release website # Documentation site → build/release/website/
 ./scripts/dev/build.sh --variant release vscode  # VS Code extension → build/release/editor/vscode/
 ./scripts/dev/build.sh --variant debug module    # Kernel module iteration build
 ./scripts/dev/build.sh --variant release all     # Everything above
@@ -174,7 +172,6 @@ export ARCH=arm64
 # Test specific targets
 ./scripts/dev/test.sh --variant release kdalc       # Compiler binary + sample compilation
 ./scripts/dev/test.sh --variant release kdality     # CLI subcommands
-./scripts/dev/test.sh --variant release website     # Documentation site build
 ./scripts/dev/test.sh --variant release vscode      # VS Code extension packaging
 ./scripts/dev/test.sh --variant release cppcheck    # C static analysis (mirrors CI)
 ./scripts/dev/test.sh --variant release shellcheck  # Shell script linting (mirrors CI)
@@ -191,7 +188,6 @@ Test reports are saved under the selected variant tree, for example `build/debug
 build/
 ├── release/           Optimized local build and install validation
 │   ├── compiler/      kdalc, libkdalc.a
-│   ├── website/       Documentation site dist
 │   ├── editor/vscode/ .vsix package
 │   └── test/          Test reports
 ├── debug/             Debuggable local build with symbols
@@ -201,6 +197,11 @@ build/
 ```
 
 ## Documentation
+
+The KDAL documentation site is part of the ecosystem's site,
+[docs-haven.vercel.app/kdal](https://docs-haven.vercel.app/kdal/) (its pages are in the
+[haven-docs](https://github.com/NguyenTrongPhuc552003/haven-docs) repository). The
+repository's own documents:
 
 | Document                                 | Description                             |
 | ---------------------------------------- | --------------------------------------- |

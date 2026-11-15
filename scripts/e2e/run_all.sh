@@ -3,12 +3,12 @@
 #
 # Usage:
 #   ./scripts/e2e/run_all.sh              Run all suites
-#   ./scripts/e2e/run_all.sh --quick      Skip slow tests (website build)
+#   ./scripts/e2e/run_all.sh --quick      Same suites (no slow suite left)
 #   ./scripts/e2e/run_all.sh <suite>      Run a single suite
 #
 # Available suites:
 #   developer-journey  user-journey  compiler
-#   editor-support     packaging     website    release
+#   editor-support     packaging     release
 #
 # Exit code: 0 if all suites pass, 1 if any suite fails.
 
@@ -31,9 +31,9 @@ fi
 # ── Configuration ─────────────────────────────────────────────────────
 
 # Default suite order (fast → slow)
-ALL_SUITES="developer-journey compiler packaging editor-support user-journey release website"
+ALL_SUITES="developer-journey compiler packaging editor-support user-journey release"
 
-# Quick mode skips website (requires npm install + build)
+# Quick mode skipped the website suite; the site is part of haven-docs now
 QUICK_SUITES="developer-journey compiler packaging editor-support user-journey release"
 
 SUITES="$ALL_SUITES"
@@ -52,7 +52,7 @@ for arg in "$@"; do
 		echo "Suites: $ALL_SUITES"
 		echo ""
 		echo "Options:"
-		echo "  --quick, -q    Skip slow tests (website build)"
+		echo "  --quick, -q    Same suites (kept for old scripts)"
 		echo "  --help, -h     Show this help"
 		exit 0
 		;;
