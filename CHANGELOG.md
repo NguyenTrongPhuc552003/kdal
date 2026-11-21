@@ -9,28 +9,6 @@ Changes since v0.1.0. The language, compiler and editor plugins (`lang/`,
 `compiler/`, `editor/`) are frozen since 2026-11-01; the `kdality` runtime
 CLI (`tools/`) is maintained (README, "Layout").
 
-### Fixed (2026-11-21)
-
-- `kdality init` writes a project that compiles, simulates, lints and
-  generates tests as written; every subcommand parses its arguments from
-  the first one after its name and refuses unknown options; absolute and
-  parent paths work and output directories are created; `lint` sees
-  register reads inside `let`, `log` and conditions and bitfield paths,
-  and finds `kdal/stdlib/` imports (`docs/first-project-journey.md`,
-  #38, #39).
-- `kdality simulate --trace` shows `log("...")` and `wait(sig, ms)` as
-  written (finding F2, #41).
-- The KUnit job's demand report goes through the kernel log, so KUnit's
-  own lines no longer land inside it (finding F3, #42; 0 failures in 200
-  stress boots, workflow `kunit-stress.yml`).
-- The e2e suites report a failing command as a failure and run in CI.
-
-### Changed (2026-11-21)
-
-- The guides (architecture, API, installation, language, porting, FAQ,
-  performance, upstreaming, thesis) live on the HAVEN docs site; `docs/`
-  keeps the records (`docs/README.md`).
-
 ### Added
 
 - Devices report their resource demand (MMIO range, GIC INTIDs, SMMU and
@@ -60,6 +38,9 @@ CLI (`tools/`) is maintained (README, "Layout").
   option parsing tightened, simulate expression dispatch, testgen parsing and
   token enum numbering simplified.
 - Em-dashes replaced with ASCII hyphens; local CodeQL artifacts ignored.
+- The guides (architecture, API, installation, language, porting, FAQ,
+  performance, upstreaming, thesis) live on the HAVEN docs site; `docs/`
+  keeps the records (`docs/README.md`).
 
 ### Removed
 
@@ -84,6 +65,19 @@ CLI (`tools/`) is maintained (README, "Layout").
   and `dt-gen` and `init` file handling is hardened.
 - CI: `kernel-prepare.sh` accepts a relative work directory; QEMU runs
   without a network card.
+- `kdality init` writes a project that compiles, simulates, lints and
+  generates tests as written; every subcommand parses its arguments from
+  the first one after its name and refuses unknown options; absolute and
+  parent paths work and output directories are created; `lint` sees
+  register reads inside `let`, `log` and conditions and bitfield paths,
+  and finds `kdal/stdlib/` imports (`docs/first-project-journey.md`,
+  #38, #39).
+- `kdality simulate --trace` shows `log("...")` and `wait(sig, ms)` as
+  written (finding F2, #41).
+- The KUnit job's demand report goes through the kernel log, so KUnit's
+  own lines no longer land inside it (finding F3, #42; 0 failures in 200
+  stress boots, workflow `kunit-stress.yml`).
+- The e2e suites report a failing command as a failure and run in CI.
 
 ## [0.1.0] - 2025-06-09
 
