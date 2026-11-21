@@ -115,3 +115,19 @@ change as `kdality`'s paths), made without noticing the freeze; the
 owner decides whether it stays. `CHANGELOG.md` listed `tools/` as frozen
 too; #44 corrected it to the README's list (`tools/`, the `kdality`
 runtime CLI, is maintained).
+
+## Decisions (2026-11-21, delegated by the owner: "up to you")
+
+1. **F1 and F4 are parked with the freeze**, not fixed now. The thesis
+   uses KDAL's kernel module (`kdal.ko`, the Linux partition's driver and
+   its demand report), not the `.kdc`-to-module path; making that path
+   work is a runtime API, exported symbols and a code generator change,
+   a project of its own in frozen code. What a user needs now is to know
+   the limit: the README and the docs site's quickstart say it, and
+   `codegen-check.yml` stays on demand to show when it changes. Revisited
+   at the next review gate with the other parked KDAL items.
+2. **#39's change to `compiler/main.c` stays.** It makes `kdalc` accept
+   the same paths as `kdality` (any path but an empty one or one with
+   control characters), ten lines, CI green; undoing it would bring back
+   the difference between the two tools that #39 removed. Recorded here
+   as an exception to the freeze, made before the freeze was noticed.
