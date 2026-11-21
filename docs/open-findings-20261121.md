@@ -56,3 +56,39 @@ program waits for KUnit's last line before it prints the report
 | - | - | - |
 | O5 | the extraction on #38's failing console log (`evidence/kunit-demand-interleave-20261121.log`) | valid JSON, the same report as the passing run |
 | O6 | 200 KUnit boots in CI (a stress job like HAVEN's console drain) | 0 failing extractions |
+
+## F4. The modules `kdality compile` writes may not build at all [F, I]
+
+Found while reading F1 (2026-11-21, afternoon). The generated C for
+`examples/kdc_hello/uart_hello.kdc`:
+
+- includes `<linux/kdal.h>`; KDAL has no such header (it has
+  `include/kdal/core/kdal.h` and `include/kdal/api/*.h`) [F];
+- calls `kdal_reg_read`, `kdal_reg_write` and `kdal_wait_signal`; no KDAL
+  source defines them, and `src/` exports no symbol at all
+  (`EXPORT_SYMBOL` appears nowhere), so a separate module could not call
+  `kdal.ko` even if the names matched [F];
+- reads `ctx->regs.DATA`, `ctx->regs.CTRL.enable`; the generated
+  `struct UartHelloDriver_ctx` has no `regs` member [F].
+
+So the language's last step (`.kdc` to a loadable module) is not
+implemented end to end, and the docs that end in `make module` / `insmod`
+describe a step that has not been shown to work [I]. No CI job compiles a
+generated module today (`ci.yml` builds only the userspace demos) [F].
+
+**First, the evidence [P]:** `scripts/ci/codegen-check.sh` and the
+on-demand workflow `codegen-check.yml` run `kdality compile` on every
+example and then Kbuild against the pinned Linux 6.18 tree, KDAL's
+`include/` on the path.
+
+| Row | Check | Expected (predicted before the run) |
+| - | - | - |
+| O7 | `codegen-check.yml` on `main` | both examples: `kdality compile` succeeds; the module build **fails**, among the first errors `linux/kdal.h` not found |
+
+**Then [P], after O7's result and the owner's view:** F1 and F4 are one
+design: the compiler reads the header and emits a register table
+(offsets, widths, access), and the generated module uses a runtime that
+exists (either an API `kdal.ko` exports, or self-contained `readl`/
+`writel` on an `ioremap`ed base). Its record and expectations come before
+any code; until then the docs say plainly that the module step is not
+working yet.

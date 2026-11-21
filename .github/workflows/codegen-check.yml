@@ -1,0 +1,31 @@
+# Finding F4 of docs/open-findings-20261121.md (row O7): do the modules
+# kdality compiles from the examples build against the pinned kernel?
+# On demand until they do; then it joins ci.yml.
+name: codegen check
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  codegen:
+    name: generated modules against Linux v6.18 (arm64)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: read
+    steps:
+      - uses: actions/checkout@v7
+      - name: The pinned kernel tree
+        id: kernel
+        uses: ./.github/actions/kernel-tree
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build kdality
+        run: |
+          sudo apt-get install -y -qq --no-install-recommends cmake ninja-build gcc
+          cmake --preset release && cmake --build --preset release
+      - name: kdality compile, then Kbuild, for every example
+        run: scripts/ci/codegen-check.sh build/release/kdality "${{ steps.kernel.outputs.kdir }}" build/codegen
