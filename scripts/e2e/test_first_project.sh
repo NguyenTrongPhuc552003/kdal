@@ -61,6 +61,9 @@ assert_file_exists "output/Makefile.kbuild" "output/Makefile.kbuild"
 e2e_section "J2: simulate the new driver"
 assert_cmd_output "simulate names the driver" "Driver: mydrv_driver" "$KDALITY" simulate mydrv_driver.kdc
 run "simulate exits 0" "$KDALITY" simulate mydrv_driver.kdc
+# docs/open-findings-20261121.md, row O4: the trace shows what was written
+assert_cmd_output "simulate --trace: log with one pair of quotes" 'log("mydrv: probed' "$KDALITY" simulate --trace mydrv_driver.kdc
+assert_cmd_output "simulate --trace: wait with its arguments" 'wait(irq, 1000)' "$KDALITY" simulate --trace mydrv_driver.kdc
 
 e2e_section "J3: lint and test-gen in the new project"
 run "lint mydrv.kdh" "$KDALITY" lint mydrv.kdh
