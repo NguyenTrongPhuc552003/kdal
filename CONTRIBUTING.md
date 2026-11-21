@@ -119,7 +119,7 @@ Rules:
 
 ## Adding a New Backend
 
-See [docs/portingguide.md](docs/portingguide.md).
+See the [porting guide](https://docs-haven.vercel.app/kdal/kernel/porting/).
 
 ## Adding a `.kdh` Standard Library Device
 
@@ -128,7 +128,7 @@ See [docs/portingguide.md](docs/portingguide.md).
 3. Follow existing patterns - see `lang/stdlib/uart.kdh` as reference
 4. Create a matching example `.kdc` file in `examples/`
 5. Add a test case in `tests/userspace/` or extend `test.sh`
-6. Update `docs/language_guide.md` device reference table
+6. Update the standard library table on the HAVEN docs site ([stdlib](https://docs-haven.vercel.app/kdal/language/stdlib/), repository haven-docs)
 
 ## Modifying the Compiler
 

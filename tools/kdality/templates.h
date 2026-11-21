@@ -142,8 +142,8 @@ static const char tmpl_readme[] =
 	"\n"
 	"## Learn More\n"
 	"\n"
-	"- [Writing driver code](https://github.com/NguyenTrongPhuc552003/haven-docs/blob/main/src/content/docs/kdal/language/driver-code.md)\n"
-	"- [Device headers](https://github.com/NguyenTrongPhuc552003/haven-docs/blob/main/src/content/docs/kdal/language/device-headers.md)\n"
-	"- [Kernel API](https://github.com/NguyenTrongPhuc552003/haven-docs/blob/main/src/content/docs/kdal/kernel/api.md)\n";
+	"- [Writing driver code](https://docs-haven.vercel.app/kdal/language/driver-code/)\n"
+	"- [Device headers](https://docs-haven.vercel.app/kdal/language/device-headers/)\n"
+	"- [Kernel API](https://docs-haven.vercel.app/kdal/kernel/api/)\n";
 
 #endif /* KDALITY_TEMPLATES_H */

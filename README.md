@@ -74,7 +74,7 @@ insmod /mnt/shared/kdal.ko
  └───────────────────────────────────────────────┘
 ```
 
-See [docs/architecture.md](docs/architecture.md) for full details.
+See the [architecture page](https://docs-haven.vercel.app/kdal/kernel/architecture/) for full details.
 
 ## Scope in the HAVEN thesis
 
@@ -205,17 +205,17 @@ repository's own documents:
 
 | Document                                 | Description                             |
 | ---------------------------------------- | --------------------------------------- |
-| [Architecture](docs/architecture.md)     | 6-layer design, data flow, init cascade |
-| [API Reference](docs/api_reference.md)   | All functions, ioctl commands, types    |
-| [Language Guide](docs/language_guide.md) | Tutorial: .kdh/.kdc from scratch        |
+| [Architecture](https://docs-haven.vercel.app/kdal/kernel/architecture/) | 6-layer design, data flow, init cascade |
+| [API Reference](https://docs-haven.vercel.app/kdal/kernel/api/) | All functions, ioctl commands, types    |
+| [Language Overview](https://docs-haven.vercel.app/kdal/language/overview/) | Tutorial: .kdh/.kdc from scratch        |
 | [Language Spec](lang/spec.md)            | Formal language specification           |
 | [Language Design](lang/DESIGN.md)        | Design rationale and comparison table   |
-| [Installation](docs/installation.md)     | Setup guide for macOS and Linux         |
-| [Porting Guide](docs/portingguide.md)    | How to add a new backend                |
-| [Performance](docs/performance.md)       | Benchmarking methodology and metrics    |
-| [FAQ](docs/faq.md)                       | Common questions answered               |
-| [Upstreaming](docs/upstreaming.md)       | Path to Linux kernel mainline           |
-| [Thesis](docs/thesis.md)                 | Chapter mapping to repository artifacts |
+| [Installation](https://docs-haven.vercel.app/kdal/getting-started/installation/) | Setup guide for macOS and Linux         |
+| [Porting Guide](https://docs-haven.vercel.app/kdal/kernel/porting/) | How to add a new backend                |
+| [Performance](https://docs-haven.vercel.app/kdal/reference/performance/) | Benchmarking methodology and metrics    |
+| [FAQ](https://docs-haven.vercel.app/kdal/reference/faq/) | Common questions answered               |
+| [Upstreaming](https://docs-haven.vercel.app/kdal/reference/upstreaming/) | Path to Linux kernel mainline           |
+| [Thesis](https://docs-haven.vercel.app/kdal/reference/thesis/) | Chapter mapping to repository artifacts |
 
 ## Target Platforms
 

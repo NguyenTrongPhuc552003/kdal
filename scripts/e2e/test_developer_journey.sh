@@ -207,8 +207,8 @@ e2e_section "Step 10: Documentation"
 assert_dir_exists "$E2E_ROOT/docs" "docs/"
 
 # Key doc files
-# the guides moved to the HAVEN docs site; the ones that belong to the code stay
-for doc in architecture.md api_reference.md first-project-journey.md; do
+# the guides are on the HAVEN docs site (docs/README.md); the records stay
+for doc in README.md ci-sdk.md first-project-journey.md open-findings-20261121.md; do
 	if [ -f "$E2E_ROOT/docs/$doc" ]; then
 		e2e_pass "docs/$doc exists"
 		assert_file_not_empty "$E2E_ROOT/docs/$doc" "docs/$doc"
