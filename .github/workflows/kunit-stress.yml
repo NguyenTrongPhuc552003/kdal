@@ -1,0 +1,41 @@
+# Row O6 of docs/open-findings-20261121.md: one KUnit build, then many
+# boots, each checked for every suite and a valid demand report.
+name: kunit stress
+
+on:
+  workflow_dispatch:
+    inputs:
+      boots:
+        description: Boots after the first, per shard
+        required: true
+        default: "50"
+
+permissions:
+  contents: read
+
+jobs:
+  shard:
+    name: KUnit stress shard ${{ matrix.shard }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v7
+      - name: The pinned kernel tree
+        id: kernel
+        uses: ./.github/actions/kernel-tree
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build kdal.ko with KUnit, boot it once, then the stress boots
+        env:
+          KDAL_KUNIT_BOOTS: ${{ inputs.boots }}
+        run: scripts/ci/kunit-qemu.sh "${{ steps.kernel.outputs.kdir }}" "${{ steps.kernel.outputs.image }}" build/kunit
+      - name: The failing boots' consoles
+        if: failure()
+        run: for f in build/kunit/stress-fail-*.log; do [ -f "$f" ] && { echo "== $f"; tail -60 "$f"; }; done; true

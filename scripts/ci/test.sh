@@ -53,5 +53,12 @@ echo "[5/6] Running offline smoke tests..."
 echo "[6/6] Checking kdality dt-gen..."
 sh "${REPO_ROOT}/scripts/ci/dtgen-check.sh" "${BUILD_DIR}/kdality"
 
+# docs/open-findings-20261121.md, row O5: the demand report from the KUnit
+# console log in which KUnit's lines landed between the markers
+python3 "${REPO_ROOT}/scripts/ci/demand-extract.py" \
+	"${REPO_ROOT}/docs/evidence/kunit-demand-interleave-20261121.txt" "${BUILD_DIR}/demand-o5.json"
+grep -q '"kdal-gpio@9030000"' "${BUILD_DIR}/demand-o5.json"
+echo "ok: the demand report is extracted from the interleaved log (O5)"
+
 echo ""
 echo "=== All smoke tests passed ==="

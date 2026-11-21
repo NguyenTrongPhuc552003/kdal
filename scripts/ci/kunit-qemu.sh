@@ -56,7 +56,7 @@ dtc -q -I dts -O dtb -o "$OUT/kdal.dtb" "$OUT/virt.dts"
 echo "== boot in QEMU"
 timeout 300 qemu-system-aarch64 "${QEMU_MACHINE[@]}" -dtb "$OUT/kdal.dtb" \
 	-kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
-	-append "console=ttyAMA0 panic=-1 rdinit=/init" >"$OUT/console.raw" 2>&1 || true
+	-append "console=ttyAMA0 panic=-1 rdinit=/init printk.devkmsg=on" >"$OUT/console.raw" 2>&1 || true
 tr -d '\r' <"$OUT/console.raw" >"$OUT/console.log"
 
 echo "== results"
@@ -77,7 +77,8 @@ for s in $SUITES; do
 	*) fail=1 ;;
 	esac
 done
-sed -n '/^KDAL-DEMAND-BEGIN$/,/^KDAL-DEMAND-END$/p' "$OUT/console.log" | sed '1d;$d' >"$OUT/demand.json"
+# the report's own lines, tagged (scripts/ci/demand-extract.py)
+python3 "$ROOT/scripts/ci/demand-extract.py" "$OUT/console.log" "$OUT/demand.json" || true
 if python3 - "$OUT/demand.json" <<'PY'
 import json, sys
 d = json.load(open(sys.argv[1]))
@@ -102,3 +103,27 @@ if [ "$fail" -ne 0 ]; then
 	exit 1
 fi
 echo "KUnit: PASS"
+
+# Stress (docs/open-findings-20261121.md, row O6): KDAL_KUNIT_BOOTS more
+# boots of the same build; each must give every suite and a valid report.
+boots=${KDAL_KUNIT_BOOTS:-0}
+if [ "$boots" -gt 0 ]; then
+	bad=0
+	for i in $(seq 1 "$boots"); do
+		timeout 300 qemu-system-aarch64 "${QEMU_MACHINE[@]}" -dtb "$OUT/kdal.dtb" \
+			-kernel "$IMAGE" -initrd "$OUT/initramfs.cpio" \
+			-append "console=ttyAMA0 panic=-1 rdinit=/init printk.devkmsg=on" >"$OUT/stress.raw" 2>&1 || true
+		tr -d '\r' <"$OUT/stress.raw" >"$OUT/stress.log"
+		ok=1
+		python3 "$ROOT/scripts/ci/demand-extract.py" "$OUT/stress.log" "$OUT/stress.json" >/dev/null 2>&1 || ok=0
+		for s in $SUITES; do
+			grep -q "# $s: pass:[0-9]* fail:0 " "$OUT/stress.log" || ok=0
+		done
+		if [ "$ok" -eq 0 ]; then
+			bad=$((bad + 1))
+			cp "$OUT/stress.log" "$OUT/stress-fail-$i.log"
+		fi
+	done
+	echo "stress: $bad of $boots boots failed"
+	[ "$bad" -eq 0 ] || exit 1
+fi
