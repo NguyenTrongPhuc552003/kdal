@@ -95,6 +95,11 @@ Where to work:
 - **Frozen since 2026-11-01:** `lang/`, `compiler/` and `editor/` (the KDAL
   language, the `kdalc` compiler and the editor plugins). They are kept and
   still built by CI, but take no new work unless the thesis needs them.
+  Known limit, parked with the freeze: `kdality compile` writes C that does
+  not build as a module yet (it includes `<linux/kdal.h>` and calls a
+  register API KDAL does not provide; `docs/open-findings-20261121.md`,
+  F1 and F4). The language, `simulate`, `lint`, `test-gen` and `dt-gen`
+  work.
 
 ```
 include/kdal/       Public API headers (types, ioctl, driver, accel, backend)
