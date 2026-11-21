@@ -57,58 +57,64 @@ Key elements:
 
 ## Your First Driver (`.kdc`)
 
-A `.kdc` file implements driver behavior using event handlers:
+A `.kdc` file implements driver behavior using event handlers. It imports
+the device header under a name (`DEV` here) and reaches every register,
+bitfield and signal through it:
 
 ```kdal
-// uart_hello.kdc - simple UART driver for PL011
+// led_driver.kdc - a driver for the led device above
 
-use "uart.kdh";
+kdal_version: "0.1";
 
-driver uart_hello for uart {
+import "led.kdh" as DEV;
 
-    on probe {
-        reg_write(CR, 0x301);    // enable TX, RX, UART
-        log("UART initialized");
+driver led_driver for DEV.led {
+
+    probe {
+        write(DEV.CTRL, 0x01);      // enable
+        log("led: probed\n");
     }
 
-    on remove {
-        reg_write(CR, 0x00);     // disable UART
+    remove {
+        write(DEV.CTRL, 0x00);      // disable
+        log("led: removed\n");
     }
 
-    on read {
-        val = reg_read(DR);
-        return val;
+    on read(DEV.STATE) {
+        wait(DEV.toggle, 1000);     // until the state changes
     }
 
-    on write {
-        reg_write(DR, input);
+    on write(DEV.CTRL, val) {
+        write(DEV.CTRL, val);
     }
 
-    on signal rx_ready {
-        data = reg_read(DR);
-        log("RX data received");
+    on signal(DEV.toggle) {
+        log("led: state=0x%x\n", read(DEV.STATE));
     }
 
-    on power off {
-        reg_write(CR, 0x00);
+    on power(on -> off) {
+        write(DEV.CTRL, 0x00);
     }
 
-    on power on {
-        reg_write(CR, 0x301);
+    on power(off -> on) {
+        write(DEV.CTRL, 0x01);
     }
 }
 ```
 
 Key constructs:
-- **`use`** - imports a `.kdh` device header
-- **`driver ... for ...`** - names the driver and binds it to a device
-- **`on probe`** - runs when the kernel attaches the driver to hardware
-- **`on remove`** - runs when the driver is unloaded
-- **`on read` / `on write`** - handle userspace `read()` / `write()` calls
-- **`on signal <name>`** - handle named software signals
-- **`on power <state>`** - handle power transitions
-- **`reg_read(NAME)`** / **`reg_write(NAME, val)`** - typed register access
-- **`log(msg)`** - emits `pr_info()` in the generated C
+- **`import "x.kdh" as DEV;`** - imports a `.kdh` device header under a name
+- **`driver ... for DEV.device`** - names the driver and binds it to a device
+- **`probe { ... }`** - runs when the kernel attaches the driver to hardware
+- **`remove { ... }`** - runs when the driver is unloaded
+- **`on read(DEV.REG)` / `on write(DEV.REG, val)`** - handle userspace `read()` / `write()` on a register
+- **`on signal(DEV.name)`** - handle a hardware signal (interrupt)
+- **`on power(a -> b)`** - handle a power transition
+- **`read(DEV.REG)`** / **`write(DEV.REG, val)`** - typed register access (bitfields too: `DEV.CTRL.enable`)
+- **`log(fmt, ...)`** - emits `pr_info()` in the generated C
+
+`kdality init <name>` writes a project in exactly this form; `kdality
+simulate`, `lint` and `test-gen` all work on it as generated.
 
 ## Compiling
 
@@ -185,8 +191,8 @@ and typed accessor calls in the generated C:
 
 | KDAL access mode | Generated C macro               | Notes                                   |
 | ---------------- | ------------------------------- | --------------------------------------- |
-| `ro`             | `ioread32(base + offset)`       | Read-only; compiler rejects `reg_write` |
-| `wo`             | `iowrite32(val, base + offset)` | Write-only; compiler rejects `reg_read` |
+| `ro`             | `ioread32(base + offset)`       | Read-only; lint warns on `write` (W003) |
+| `wo`             | `iowrite32(val, base + offset)` | Write-only; lint warns on `read` (W004) |
 | `rw`             | Both                            | Full access                             |
 
 The semantic analysis pass enforces these access restrictions at compile
@@ -194,14 +200,14 @@ time, catching errors before any C code is generated.
 
 ## Event Handlers
 
-| Handler            | Kernel equivalent               | When it runs            |
-| ------------------ | ------------------------------- | ----------------------- |
-| `on probe`         | `.probe` callback               | Driver bound to device  |
-| `on remove`        | `.remove` callback              | Driver unbound          |
-| `on read`          | `fops->read`                    | Userspace `read()`      |
-| `on write`         | `fops->write`                   | Userspace `write()`     |
-| `on signal <name>` | Custom interrupt/signal handler | Named signal dispatched |
-| `on power <state>` | PM callbacks                    | Power state transition  |
+| Handler                   | Kernel equivalent               | When it runs             |
+| ------------------------- | ------------------------------- | ------------------------ |
+| `probe`                   | `.probe` callback               | Driver bound to device   |
+| `remove`                  | `.remove` callback              | Driver unbound           |
+| `on read(DEV.REG)`        | `fops->read`                    | Userspace `read()`       |
+| `on write(DEV.REG, val)`  | `fops->write`                   | Userspace `write()`      |
+| `on signal(DEV.name)`     | Interrupt handler               | The signal fires         |
+| `on power(a -> b)`        | PM callbacks                    | Power state transition   |
 
 ## Standard Library Devices
 
@@ -216,42 +222,45 @@ KDAL ships with pre-built `.kdh` files for common device classes:
 | `gpu.kdh`  | GPU accelerator | CMD, STATUS, CTRL, FENCE   |
 | `npu.kdh`  | NPU accelerator | CMD, STATUS, CTRL, RESULT  |
 
-Use them directly: `use "uart.kdh";` - the compiler searches `lang/stdlib/`
-automatically.
+Import them by their `kdal/stdlib/` path, as
+`examples/kdc_hello/i2c_sensor.kdc` does:
+`import "kdal/stdlib/i2c.kdh" as I2C;`. `kdality lint` finds them in the
+installed standard library (or in `lang/stdlib/` in a source tree;
+`KDAL_STDLIB_DIR` overrides).
 
 ## Common Patterns
 
-### Polling a status register
+The parser has `if`/`else`, `for i in a..b`, `let`, `return` and `wait`;
+it has no `while`: a poll is a `wait` on the signal that ends it.
+
+### Waiting for data
 
 ```kdal
-on read {
-    while (reg_read(STATUS) & 0x01 == 0) {
-        // busy-wait until data ready
-    }
-    return reg_read(DATA);
+on read(DEV.DATA) {
+    wait(DEV.rx_ready, 1000);   // up to 1000 ms
 }
 ```
 
 ### Conditional initialization
 
 ```kdal
-on probe {
-    id = reg_read(DEVICE_ID);
+probe {
+    let id = read(DEV.DEVICE_ID);
     if (id != 0xCAFE) {
-        log("Unknown device ID");
+        log("unknown device id 0x%x\n", id);
         return -1;
     }
-    reg_write(CTRL, 0x01);
+    write(DEV.CTRL, 0x01);
 }
 ```
 
 ### Multi-register write sequence
 
 ```kdal
-on write {
-    reg_write(CTRL, 0x00);       // disable
-    reg_write(DATA, input);      // load data
-    reg_write(CTRL, 0x01);       // enable + trigger
+on write(DEV.DATA, val) {
+    write(DEV.CTRL, 0x00);       // disable
+    write(DEV.DATA, val);        // load data
+    write(DEV.CTRL, 0x01);       // enable + trigger
 }
 ```
 
@@ -261,8 +270,8 @@ The compiler maps non-zero returns from handlers to kernel error codes.
 Return `0` for success, negative values for errors:
 
 ```kdal
-on probe {
-    if (reg_read(STATUS) == 0xFF) {
+probe {
+    if (read(DEV.STATUS) == 0xFF) {
         return -1;   // generates: return -EIO;
     }
     return 0;

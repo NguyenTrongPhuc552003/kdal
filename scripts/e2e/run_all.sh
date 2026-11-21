@@ -31,10 +31,10 @@ fi
 # ── Configuration ─────────────────────────────────────────────────────
 
 # Default suite order (fast → slow)
-ALL_SUITES="developer-journey compiler packaging editor-support user-journey release"
+ALL_SUITES="developer-journey compiler first-project packaging editor-support user-journey release"
 
 # Quick mode skipped the website suite; the site is part of haven-docs now
-QUICK_SUITES="developer-journey compiler packaging editor-support user-journey release"
+QUICK_SUITES="developer-journey compiler first-project packaging editor-support user-journey release"
 
 SUITES="$ALL_SUITES"
 QUICK=false

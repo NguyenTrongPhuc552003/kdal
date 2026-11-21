@@ -121,32 +121,31 @@ e2e_section "Step 3: GitHub Actions workflows"
 
 WF_DIR="$E2E_ROOT/.github/workflows"
 
-# All workflows should exist
-for wf in build.yml ci.yml test.yml codeql.yml release.yml docs.yml nightly.yml; do
+# CI is ci.yml (every push) and weekly-deep.yml (the deep tier)
+for wf in ci.yml weekly-deep.yml; do
 	assert_file_exists "$WF_DIR/$wf" "workflows/$wf"
 done
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 4: release.yml content validation"
+e2e_section "Step 4: ci.yml content validation"
 # ══════════════════════════════════════════════════════════════════════
 
-RELEASE_YML="$WF_DIR/release.yml"
+CI_YML="$WF_DIR/ci.yml"
 
-assert_file_contains "$RELEASE_YML" "release" "workflow name"
-assert_file_contains "$RELEASE_YML" "matrix" "uses build matrix"
-assert_file_contains "$RELEASE_YML" "SHA256\|sha256\|checksum" "generates checksums"
-assert_file_contains "$RELEASE_YML" "upload\|artifact" "uploads artifacts"
-assert_file_contains "$RELEASE_YML" "linux-x86_64\|x86_64" "targets x86_64"
-assert_file_contains "$RELEASE_YML" "aarch64\|arm64" "targets aarch64"
+assert_file_contains "$CI_YML" "scripts/gate ci" "runs the quality gate"
+assert_file_contains "$CI_YML" "matrix" "uses a build matrix"
+assert_file_contains "$CI_YML" "scripts/ci/test.sh" "runs the smoke tests"
+assert_file_contains "$CI_YML" "kunit-qemu.sh" "runs KUnit in QEMU"
+assert_file_contains "$CI_YML" "scripts/e2e/run_all.sh" "runs the e2e suites"
 
 # ══════════════════════════════════════════════════════════════════════
-e2e_section "Step 5: nightly.yml content validation"
+e2e_section "Step 5: weekly-deep.yml content validation"
 # ══════════════════════════════════════════════════════════════════════
 
-NIGHTLY_YML="$WF_DIR/nightly.yml"
+DEEP_YML="$WF_DIR/weekly-deep.yml"
 
-assert_file_contains "$NIGHTLY_YML" "workflow_dispatch" "has manual trigger"
-assert_file_contains "$NIGHTLY_YML" "test\|build\|lint" "runs tests"
+assert_file_contains "$DEEP_YML" "schedule" "runs on a schedule"
+assert_file_contains "$DEEP_YML" "workflow_dispatch" "has a manual trigger"
 
 # ══════════════════════════════════════════════════════════════════════
 e2e_section "Step 6: YAML syntax validation"
@@ -172,14 +171,15 @@ e2e_section "Step 7: Simulated tarball layout"
 # ══════════════════════════════════════════════════════════════════════
 
 # Build SDK and verify tarball structure (offline simulation)
-if [ -x "$E2E_ROOT/compiler/kdalc" ] && [ -x "$E2E_ROOT/tools/kdality/kdality" ]; then
+REL_BUILD="${KDAL_BUILD_DIR:-$E2E_ROOT/build/release}"
+if [ -x "$REL_BUILD/compiler/kdalc" ] && [ -x "$REL_BUILD/kdality" ]; then
 	TAR_STAGE="$SANDBOX/tarball"
 	mkdir -p "$TAR_STAGE/bin" "$TAR_STAGE/include" "$TAR_STAGE/lib" \
 		"$TAR_STAGE/share/kdal/stdlib" "$TAR_STAGE/share/kdal/vim"
 
 	# Simulate what the release job creates
-	cp "$E2E_ROOT/compiler/kdalc" "$TAR_STAGE/bin/"
-	cp "$E2E_ROOT/tools/kdality/kdality" "$TAR_STAGE/bin/"
+	cp "$REL_BUILD/compiler/kdalc" "$TAR_STAGE/bin/"
+	cp "$REL_BUILD/kdality" "$TAR_STAGE/bin/"
 	cp "$E2E_ROOT/lang/stdlib"/*.kdh "$TAR_STAGE/share/kdal/stdlib/"
 
 	# Package it
@@ -219,7 +219,7 @@ if [ -x "$E2E_ROOT/compiler/kdalc" ] && [ -x "$E2E_ROOT/tools/kdality/kdality" ]
 		assert_file_not_empty "$SANDBOX/SHA256SUMS" "SHA256SUMS"
 	fi
 else
-	e2e_skip "binaries not built - skip tarball test"
+	e2e_fail "kdalc and kdality not built in $REL_BUILD - no tarball test"
 fi
 
 # ══════════════════════════════════════════════════════════════════════

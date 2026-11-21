@@ -136,22 +136,22 @@ if [ -x "$BUILD_DIR/kdality" ]; then
 	e2e_section "Step 6: kdality init - create new project"
 	# ══════════════════════════════════════════════════════════════════
 
-	PROJECT_DIR="$SANDBOX/my-first-kdal-project"
-	mkdir -p "$PROJECT_DIR"
+	# init takes a project *name* and creates it in the current directory
+	PROJECT_DIR="$SANDBOX/my_first_kdal_project"
 
-	if "$KDALITY" init "$PROJECT_DIR" >/dev/null 2>&1; then
+	if (cd "$SANDBOX" && "$KDALITY" init my_first_kdal_project) >/dev/null 2>&1; then
 		e2e_pass "kdality init creates project"
 		# Check generated project structure
 		# shellcheck disable=SC2043
-		for expect_file in Makefile; do
+		for expect_file in Makefile README.md my_first_kdal_project.kdh my_first_kdal_project_driver.kdc; do
 			if [ -f "$PROJECT_DIR/$expect_file" ]; then
 				e2e_pass "init creates $expect_file"
 			else
-				e2e_skip "init did not create $expect_file (may be expected for alpha)"
+				e2e_fail "init did not create $expect_file"
 			fi
 		done
 	else
-		e2e_skip "kdality init not fully implemented (alpha)"
+		e2e_fail "kdality init my_first_kdal_project"
 	fi
 else
 	e2e_skip "kdality binary not built - skipping CLI tests"

@@ -116,20 +116,21 @@ e2e_section "VS Code Extension - TypeScript compilation"
 # ══════════════════════════════════════════════════════════════════════
 
 if [ -f "$VSCODE_DIR/package.json" ] && require_tool npm; then
-	# Check if node_modules exists; if not, try install
-	if [ ! -d "$VSCODE_DIR/node_modules" ]; then
-		e2e_info "Installing npm dependencies..."
-		(cd "$VSCODE_DIR" && npm install --ignore-scripts) >/dev/null 2>&1 || true
+	# the locked dependencies (package-lock.json); a failed install fails
+	if [ ! -x "$VSCODE_DIR/node_modules/.bin/tsc" ]; then
+		e2e_info "Installing npm dependencies (npm ci)..."
+		if ! (cd "$VSCODE_DIR" && npm ci --ignore-scripts) >"$SANDBOX/npm-ci.log" 2>&1; then
+			e2e_fail "npm ci: $(tail -3 "$SANDBOX/npm-ci.log" | tr '\n' ' ')"
+		fi
 	fi
 
-	if [ -d "$VSCODE_DIR/node_modules" ]; then
-		if (cd "$VSCODE_DIR" && npx tsc --noEmit) >/dev/null 2>&1; then
+	if [ -x "$VSCODE_DIR/node_modules/.bin/tsc" ]; then
+		# the project's own TypeScript, not one found elsewhere on PATH
+		if (cd "$VSCODE_DIR" && ./node_modules/.bin/tsc --noEmit) >"$SANDBOX/tsc.log" 2>&1; then
 			e2e_pass "TypeScript compiles without errors"
 		else
-			e2e_fail "TypeScript compilation errors"
+			e2e_fail "TypeScript compilation errors: $(head -3 "$SANDBOX/tsc.log" | tr '\n' ' ')"
 		fi
-	else
-		e2e_skip "npm install failed - skip TS compilation"
 	fi
 else
 	e2e_skip "npm not available - skip TS compilation"
@@ -139,13 +140,13 @@ fi
 e2e_section "VS Code Extension - VSIX packaging"
 # ══════════════════════════════════════════════════════════════════════
 
-if require_tool npx && [ -d "$VSCODE_DIR/node_modules" ]; then
-	if (cd "$VSCODE_DIR" && npx vsce package --no-dependencies -o "$SANDBOX/kdal-lang.vsix") \
+if require_tool npx && [ -x "$VSCODE_DIR/node_modules/.bin/vsce" ]; then
+	if (cd "$VSCODE_DIR" && ./node_modules/.bin/vsce package --no-dependencies -o "$SANDBOX/kdal-lang.vsix") \
 		>/dev/null 2>&1; then
 		e2e_pass "VSIX packages successfully"
 		assert_file_not_empty "$SANDBOX/kdal-lang.vsix" "kdal-lang.vsix"
 	else
-		e2e_skip "VSIX packaging failed (may need --allow-missing-repository)"
+		e2e_fail "VSIX packaging (npx vsce package)"
 	fi
 else
 	e2e_skip "vsce not available - skip VSIX test"
@@ -181,15 +182,10 @@ for ext in kdh kdc; do
 done
 
 # Filetype detection
+# one file, ftdetect/kdal.vim, sets both filetypes
+assert_file_exists "$VIM_DIR/ftdetect/kdal.vim" "ftdetect/kdal.vim"
 for ext in kdh kdc; do
-	ftd="$VIM_DIR/ftdetect/${ext}.vim"
-	if [ -f "$ftd" ]; then
-		e2e_pass "ftdetect/${ext}.vim exists"
-		assert_file_contains "$ftd" "$ext" "ftdetect/${ext}.vim references $ext"
-	else
-		# May use a single file for both
-		e2e_skip "ftdetect/${ext}.vim not found (may use combined file)"
-	fi
+	assert_file_contains "$VIM_DIR/ftdetect/kdal.vim" "\\.${ext}" "ftdetect/kdal.vim detects .${ext}"
 done
 
 # ftplugin

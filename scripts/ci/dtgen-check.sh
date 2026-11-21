@@ -54,13 +54,20 @@ check() {
 check "$ROOT/examples/kdc_hello/uart_hello.kdh" UartHello "kdal,UartHello" 6
 check "$ROOT/tests/dtgen/led.kdh" led "example,led-gpio" 2
 
-# a missing output directory: an error that names it
-if "$KDALITY" dt-gen "$ROOT/tests/dtgen/led.kdh" -o "$OUT/absent" >"$OUT/dir.out" 2>&1; then
-	bad "dt-gen accepted a missing output directory"
-elif ! grep -q "absent" "$OUT/dir.out"; then
-	bad "the missing-directory message does not name it: $(cat "$OUT/dir.out")"
+# a missing output directory is created (docs/first-project-journey.md);
+# one that cannot be created is an error that names it
+if "$KDALITY" dt-gen "$ROOT/tests/dtgen/led.kdh" -o "$OUT/absent" >"$OUT/dir.out" 2>&1 &&
+	[ -f "$OUT/absent/led.dtso" ]; then
+	echo "ok: a missing output directory is created"
 else
-	echo "ok: a missing output directory is refused"
+	bad "dt-gen did not create a missing output directory: $(cat "$OUT/dir.out")"
+fi
+if "$KDALITY" dt-gen "$ROOT/tests/dtgen/led.kdh" -o "$OUT/dir.out/sub" >"$OUT/dir2.out" 2>&1; then
+	bad "dt-gen accepted an output directory under a file"
+elif ! grep -q "dir.out/sub" "$OUT/dir2.out"; then
+	bad "the output-directory message does not name it: $(cat "$OUT/dir2.out")"
+else
+	echo "ok: an output directory that cannot be made is refused"
 fi
 
 # a file that does not parse: an error, no output file

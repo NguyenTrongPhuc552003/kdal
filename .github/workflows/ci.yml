@@ -54,6 +54,21 @@ jobs:
           cc -std=c99 -Wall -o /tmp/gpudemo examples/accel_demo/gpudemo.c
           cc -std=c99 -Wall -o /tmp/npudemo examples/accel_demo/npudemo.c
 
+  e2e:
+    # docs/first-project-journey.md, row J8: every suite, failing on a FAIL
+    name: end-to-end suites (Linux)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install build tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq --no-install-recommends cmake ninja-build gcc device-tree-compiler python3-yaml
+      - name: Build (release preset)
+        run: cmake --preset release && cmake --build --preset release
+      - name: End-to-end suites
+        run: sh scripts/e2e/run_all.sh
+
   kunit:
     name: kernel module build and KUnit in QEMU (Linux v6.18 arm64)
     runs-on: ubuntu-latest

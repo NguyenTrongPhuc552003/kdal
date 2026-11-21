@@ -18,6 +18,8 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 
+#include "paths.h"
+
 #define NAME_LEN 64
 #define MAX_HANDLERS 32
 
@@ -27,86 +29,6 @@ static int is_safe_filename_component(const char *s)
 		return 0;
 	if (strstr(s, "..") || strchr(s, '/') || strchr(s, '\\'))
 		return 0;
-	return 1;
-}
-
-static int is_safe_outdir(const char *s)
-{
-	const char *p, *seg;
-
-	if (!s || !*s)
-		return 0;
-
-	/* Only allow relative paths. */
-	if (s[0] == '/')
-		return 0;
-
-	/* Reject obvious dangerous characters/patterns. */
-	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
-	    strchr(s, '\r') || strchr(s, ':') || strstr(s, "//"))
-		return 0;
-
-	/* Validate each path segment. */
-	seg = s;
-	for (p = s;; p++) {
-		if (*p == '/' || *p == '\0') {
-			size_t len = (size_t)(p - seg);
-
-			/* Empty segment (e.g. "a//b" or trailing "/"). */
-			if (len == 0)
-				return 0;
-
-			/* Reject "." and ".." segments explicitly. */
-			if ((len == 1 && seg[0] == '.') ||
-			    (len == 2 && seg[0] == '.' && seg[1] == '.'))
-				return 0;
-
-			if (*p == '\0')
-				break;
-
-			seg = p + 1;
-		}
-	}
-
-	return 1;
-}
-
-static int is_safe_input_path(const char *s)
-{
-	const char *p, *seg;
-
-	if (!s || !*s)
-		return 0;
-
-	/* Require relative path for input to avoid arbitrary absolute file access. */
-	if (s[0] == '/')
-		return 0;
-
-	/* Reject dangerous patterns/characters. */
-	if (strstr(s, "..") || strchr(s, '\\') || strchr(s, '\n') ||
-	    strchr(s, '\r') || strchr(s, ':') || strstr(s, "//"))
-		return 0;
-
-	/* Validate path segments and reject "." / ".." / empty segments. */
-	seg = s;
-	for (p = s;; p++) {
-		if (*p == '/' || *p == '\0') {
-			size_t len = (size_t)(p - seg);
-
-			if (len == 0)
-				return 0;
-
-			if ((len == 1 && seg[0] == '.') ||
-			    (len == 2 && seg[0] == '.' && seg[1] == '.'))
-				return 0;
-
-			if (*p == '\0')
-				break;
-
-			seg = p + 1;
-		}
-	}
-
 	return 1;
 }
 
@@ -202,11 +124,14 @@ static int generate_kunit(const struct kdc_info *info, const char *outdir)
 	char filename[NAME_LEN + 16];
 	FILE *fp;
 
-	if (!is_safe_outdir(outdir)) {
+	if (!kdality_path_ok(outdir)) {
 		fprintf(stderr, "test-gen: invalid output directory '%s'\n",
 			outdir ? outdir : "(null)");
 		return -1;
 	}
+
+	if (kdality_ensure_dir("test-gen", outdir) != 0)
+		return -1;
 
 	if (!is_safe_filename_component(info->driver_name)) {
 		fprintf(stderr, "test-gen: invalid driver name '%s'\n",
@@ -359,7 +284,7 @@ int kdality_testgen(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	const char *outdir = ".";
-	int argi = 0;
+	int argi = 1; /* argv[0] is the subcommand's name */
 
 	while (argi < argc) {
 		const char *arg = argv[argi++];
@@ -374,7 +299,19 @@ int kdality_testgen(int argc, char *const argv[])
 				return 1;
 			}
 			outdir = argv[argi++];
-		} else if (arg[0] != '-') {
+		} else if (arg[0] == '-') {
+			(void)fprintf(stderr,
+				      "test-gen: unknown option '%s'\n\n", arg);
+			testgen_help();
+			return 1;
+		} else if (input) {
+			(void)fprintf(
+				stderr,
+				"test-gen: more than one input ('%s', '%s')\n\n",
+				input, arg);
+			testgen_help();
+			return 1;
+		} else {
 			input = arg;
 		}
 	}
@@ -385,38 +322,11 @@ int kdality_testgen(int argc, char *const argv[])
 		return 1;
 	}
 
-	if (!is_safe_input_path(input)) {
-		fprintf(stderr, "test-gen: invalid input path '%s'\n", input);
-		return 1;
-	}
-
-	char cwd[PATH_MAX];
 	char resolved_input[PATH_MAX];
-	char resolved_cwd[PATH_MAX];
-	size_t cwd_len;
 
-	if (!getcwd(cwd, sizeof(cwd))) {
-		perror("test-gen: getcwd");
-		return 1;
-	}
-
-	if (!realpath(cwd, resolved_cwd)) {
-		perror("test-gen: realpath(cwd)");
-		return 1;
-	}
-
-	if (!realpath(input, resolved_input)) {
-		perror("test-gen: realpath(input)");
-		return 1;
-	}
-
-	cwd_len = strlen(resolved_cwd);
-	if (strncmp(resolved_input, resolved_cwd, cwd_len) != 0 ||
-	    (resolved_input[cwd_len] != '\0' &&
-	     resolved_input[cwd_len] != '/')) {
-		fprintf(stderr,
-			"test-gen: input path escapes working directory: '%s'\n",
-			input);
+	if (!kdality_path_ok(input) || !realpath(input, resolved_input)) {
+		(void)fprintf(stderr, "test-gen: cannot resolve '%s': %s\n",
+			      input, strerror(errno));
 		return 1;
 	}
 

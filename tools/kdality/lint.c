@@ -19,13 +19,16 @@
  */
 
 #include <ctype.h>
+#include <errno.h>
 #include <limits.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "../../compiler/include/codegen.h"
+#include "paths.h"
 
 #define NAME_LEN 64
 #define MAX_REGS 32
@@ -64,7 +67,7 @@ static void emit_warning(struct lint_ctx *ctx, int line, const char *code,
 
 	va_list ap;
 	va_start(ap, fmt);
-	vsnprintf(w->message, sizeof(w->message), fmt, ap);
+	(void)vsnprintf(w->message, sizeof(w->message), fmt, ap);
 	va_end(ap);
 
 	ctx->nwarns++;
@@ -127,79 +130,91 @@ static int lint_kdh(struct lint_ctx *ctx, const char *path)
 
 /* ── Statement walker (detect reg access and magic numbers) ──────── */
 
-static void lint_walk_stmts(struct lint_ctx *ctx, const kdal_ast_t *stmt)
+/* The register a path names: DEV.CTRL, CTRL or a bitfield DEV.CTRL.enable.
+ * The last part that is a register name wins; -1 when none is. */
+static int reg_of_path(const struct lint_ctx *ctx, const kdal_expr_node_t *e)
 {
-	for (const kdal_ast_t *s = stmt; s; s = s->next) {
+	for (int p = (int)e->u.path.nparts - 1; p >= 0; p--) {
+		for (int i = 0; i < ctx->nregs; i++) {
+			if (strcmp(ctx->regs[i], e->u.path.parts[p]) == 0)
+				return i;
+		}
+	}
+	return -1;
+}
+
+static void mark_reg(struct lint_ctx *ctx, const kdal_ast_t *target, int line,
+		     bool writing)
+{
+	int i;
+
+	if (!target || target->type != KDAL_NODE_EXPR_REG_PATH)
+		return;
+	i = reg_of_path(ctx, (const kdal_expr_node_t *)target);
+	if (i < 0)
+		return;
+	ctx->reg_used[i] = 1;
+	if (writing && strcmp(ctx->reg_modes[i], "ro") == 0)
+		emit_warning(ctx, line, "W003",
+			     "write to read-only register '%s'", ctx->regs[i]);
+	if (!writing && strcmp(ctx->reg_modes[i], "wo") == 0)
+		emit_warning(ctx, line, "W004",
+			     "read from write-only register '%s'",
+			     ctx->regs[i]);
+}
+
+/* An expression's operands sit in its union, not in child lists. */
+static void lint_walk_expr(struct lint_ctx *ctx, const kdal_ast_t *n)
+{
+	const kdal_expr_node_t *e = (const kdal_expr_node_t *)n;
+
+	if (!n)
+		return;
+	switch (n->type) {
+	case KDAL_NODE_EXPR_READ:
+		mark_reg(ctx, e->u.read_path, n->line, false);
+		lint_walk_expr(ctx, e->u.read_path);
+		break;
+	case KDAL_NODE_EXPR_BINOP:
+		lint_walk_expr(ctx, e->u.binop.lhs);
+		lint_walk_expr(ctx, e->u.binop.rhs);
+		break;
+	case KDAL_NODE_EXPR_UNOP:
+		lint_walk_expr(ctx, e->u.unop.operand);
+		break;
+	default:
+		break;
+	}
+}
+
+/* Statements carry their operands in child lists, expressions in their
+ * union: every read marks its register (W004), wherever it sits (a let,
+ * a log argument, a condition); writes mark theirs (W003, W009). */
+static void lint_walk_stmts(struct lint_ctx *ctx, const kdal_ast_t *n)
+{
+	for (const kdal_ast_t *s = n; s; s = s->next) {
+		const kdal_ast_t *target = s->child;
+
+		if (s->type >= KDAL_NODE_EXPR_LITERAL_INT &&
+		    s->type < KDAL_NODE__MAX) {
+			lint_walk_expr(ctx, s);
+			continue;
+		}
 		if (s->type == KDAL_NODE_REG_WRITE_STMT) {
-			/* Check W003: write to read-only register */
-			if (s->child &&
-			    s->child->type == KDAL_NODE_EXPR_REG_PATH) {
-				const kdal_expr_node_t *e =
-					(const kdal_expr_node_t *)s->child;
-				const char *name =
-					e->u.path.parts[e->u.path.nparts - 1];
-				for (int i = 0; i < ctx->nregs; i++) {
-					if (strcmp(ctx->regs[i], name) == 0) {
-						ctx->reg_used[i] = 1;
-						if (strcmp(ctx->reg_modes[i],
-							   "ro") == 0)
-							emit_warning(
-								ctx, s->line,
-								"W003",
-								"write to read-only register '%s'",
-								name);
-					}
-				}
-			}
-			/* Check W009: magic number in value */
-			if (ctx->strict && s->child) {
-				const kdal_ast_t *val = s->child->next;
-				if (val &&
-				    val->type == KDAL_NODE_EXPR_LITERAL_INT) {
-					const kdal_expr_node_t *ve =
-						(const kdal_expr_node_t *)val;
-					if (ve->u.ival > 0xFF)
-						emit_warning(
-							ctx, s->line, "W009",
-							"large magic number 0x%llx "
-							"in reg_write - consider "
-							"a named constant",
-							(unsigned long long)
-								ve->u.ival);
-				}
+			mark_reg(ctx, target, s->line, true);
+			/* W009: magic number in a register write */
+			if (ctx->strict && target && target->next &&
+			    target->next->type == KDAL_NODE_EXPR_LITERAL_INT) {
+				const kdal_expr_node_t *ve =
+					(const kdal_expr_node_t *)target->next;
+				if (ve->u.ival > 0xFF)
+					emit_warning(
+						ctx, s->line, "W009",
+						"large magic number 0x%llx in reg_write - "
+						"consider a named constant",
+						(unsigned long long)ve->u.ival);
 			}
 		}
-		/* Check W004: read from write-only register */
-		if (s->child) {
-			for (const kdal_ast_t *c = s->child; c; c = c->next) {
-				if (c->type == KDAL_NODE_EXPR_READ &&
-				    c->child &&
-				    c->child->type == KDAL_NODE_EXPR_REG_PATH) {
-					const kdal_expr_node_t *re =
-						(const kdal_expr_node_t *)
-							c->child;
-					const char *name =
-						re->u.path.parts
-							[re->u.path.nparts - 1];
-					for (int i = 0; i < ctx->nregs; i++) {
-						if (strcmp(ctx->regs[i],
-							   name) == 0) {
-							ctx->reg_used[i] = 1;
-							if (strcmp(ctx->reg_modes
-									   [i],
-								   "wo") == 0)
-								emit_warning(
-									ctx,
-									c->line,
-									"W004",
-									"read from write-only register '%s'",
-									name);
-						}
-					}
-				}
-			}
-		}
-		/* Recurse into children */
 		if (s->child)
 			lint_walk_stmts(ctx, s->child);
 	}
@@ -207,16 +222,62 @@ static void lint_walk_stmts(struct lint_ctx *ctx, const kdal_ast_t *stmt)
 
 /* ── KDC lint pass (AST-based) ───────────────────────────────────── */
 
-static int lint_kdc(struct lint_ctx *ctx, const char *path)
+static int file_exists(const char *p)
 {
-	kdal_arena_t *arena = NULL;
-	kdal_file_node_t *file = kdal_parse_file("lint", path, &arena);
-	if (!file) {
-		emit_warning(ctx, 1, "E001", "failed to parse '%s'", path);
-		return -1;
-	}
+	FILE *f = fopen(p, "r");
 
-	/* Try to load imported .kdh for register info */
+	if (!f)
+		return 0;
+	(void)fclose(f);
+	return 1;
+}
+
+/* An import as the compiler sees it: next to the .kdc; for
+ * "kdal/stdlib/x.kdh", $KDAL_STDLIB_DIR, the installed standard library,
+ * then the source tree's lang/stdlib. 0 when found next to the .kdc, 1 in
+ * the standard library, -1 when not found. */
+static int resolve_import(const char *kdc, const char *imp, char *out,
+			  size_t outsz)
+{
+	static const char prefix[] = "kdal/stdlib/";
+	const char *slash = strrchr(kdc, '/');
+	const char *dirs[3];
+	int n = 0;
+
+	if (imp[0] == '/') {
+		(void)snprintf(out, outsz, "%s", imp);
+		return file_exists(out) ? 0 : -1;
+	}
+	if (slash)
+		(void)snprintf(out, outsz, "%.*s/%s", (int)(slash - kdc), kdc,
+			       imp);
+	else
+		(void)snprintf(out, outsz, "%s", imp);
+	if (file_exists(out))
+		return 0;
+	if (strncmp(imp, prefix, sizeof(prefix) - 1) != 0)
+		return -1;
+	if (getenv("KDAL_STDLIB_DIR"))
+		dirs[n++] = getenv("KDAL_STDLIB_DIR");
+#ifdef KDALITY_STDLIB_INSTALL
+	dirs[n++] = KDALITY_STDLIB_INSTALL;
+#endif
+#ifdef KDALITY_STDLIB_SOURCE
+	dirs[n++] = KDALITY_STDLIB_SOURCE;
+#endif
+	for (int i = 0; i < n; i++) {
+		(void)snprintf(out, outsz, "%s/%s", dirs[i],
+			       imp + sizeof(prefix) - 1);
+		if (file_exists(out))
+			return 1;
+	}
+	return -1;
+}
+
+/* Each imported .kdh, for register info (W003, W004, W007). */
+static void lint_imports(struct lint_ctx *ctx, const char *path,
+			 const kdal_file_node_t *file)
+{
 	for (const kdal_ast_t *im = file->imports; im; im = im->next) {
 		const kdal_import_node_t *imp = (const kdal_import_node_t *)im;
 		if (imp->path) {
@@ -231,9 +292,40 @@ static int lint_kdc(struct lint_ctx *ctx, const char *path)
 				strncpy(clean, p, sizeof(clean) - 1);
 				clean[sizeof(clean) - 1] = '\0';
 			}
-			lint_kdh(ctx, clean);
+			char found[PATH_MAX];
+
+			int where = resolve_import(path, clean, found,
+						   sizeof(found));
+			int first = ctx->nregs;
+
+			if (where >= 0)
+				lint_kdh(ctx, found);
+			/* a standard-library device is shared: a driver
+			 * uses some of its registers, so no W007 for it */
+			if (where == 1)
+				for (int i = first; i < ctx->nregs; i++)
+					ctx->reg_used[i] = 1;
+			if (where < 0)
+				emit_warning(
+					ctx, im->line, "E002",
+					"cannot find imported header '%s' (next to "
+					"the .kdc, or the standard library for "
+					"kdal/stdlib/; KDAL_STDLIB_DIR overrides)",
+					clean);
 		}
 	}
+}
+
+static int lint_kdc(struct lint_ctx *ctx, const char *path)
+{
+	kdal_arena_t *arena = NULL;
+	kdal_file_node_t *file = kdal_parse_file("lint", path, &arena);
+	if (!file) {
+		emit_warning(ctx, 1, "E001", "failed to parse '%s'", path);
+		return -1;
+	}
+
+	lint_imports(ctx, path, file);
 
 	if (!file->driver) {
 		emit_warning(ctx, 1, "E001", "no 'driver' declaration found");
@@ -246,8 +338,9 @@ static int lint_kdc(struct lint_ctx *ctx, const char *path)
 
 	/* W006: no import statement */
 	if (!file->imports)
-		emit_warning(ctx, 1, "W006",
-			     "no 'use' statement - no device header imported");
+		emit_warning(
+			ctx, 1, "W006",
+			"no 'import' statement - no device header imported");
 
 	/* W001: missing probe */
 	if (!drv->probe)
@@ -341,62 +434,34 @@ static void lint_help(void)
 			"  W009  Magic number in reg_write (--strict)\n");
 }
 
-static int is_safe_lint_path(const char *path)
-{
-	size_t len;
-	const char *p;
-
-	if (!path || path[0] == '\0')
-		return 0;
-
-	len = strlen(path);
-	if (len >= PATH_MAX)
-		return 0;
-
-	/* Reject absolute paths (POSIX and Windows drive-letter style). */
-	if (path[0] == '/')
-		return 0;
-	if (isalpha((unsigned char)path[0]) && path[1] == ':')
-		return 0;
-
-	/* Reject Windows separators to prevent alternate traversal encoding. */
-	if (strchr(path, '\\') != NULL)
-		return 0;
-
-	/* Reject any ".." path segment. */
-	if (strcmp(path, "..") == 0)
-		return 0;
-	if (strncmp(path, "../", 3) == 0)
-		return 0;
-	if (len >= 3 && strcmp(path + len - 3, "/..") == 0)
-		return 0;
-	if (strstr(path, "/../") != NULL)
-		return 0;
-
-	for (p = path; *p; p++) {
-		if (*p == '\n' || *p == '\r')
-			return 0;
-	}
-
-	return 1;
-}
-
 int kdality_lint(int argc, char *const argv[])
 {
 	const char *input = NULL;
 	int strict = 0;
-	char base_resolved[PATH_MAX];
 	char resolved_input[PATH_MAX];
 	const char *safe_input;
 
-	for (int i = 0; i < argc; i++) {
+	/* argv[0] is the subcommand's name */
+	for (int i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-h") == 0 ||
 		    strcmp(argv[i], "--help") == 0) {
 			lint_help();
 			return 0;
 		} else if (strcmp(argv[i], "--strict") == 0) {
 			strict = 1;
-		} else if (argv[i][0] != '-') {
+		} else if (argv[i][0] == '-') {
+			(void)fprintf(stderr, "lint: unknown option '%s'\n\n",
+				      argv[i]);
+			lint_help();
+			return 1;
+		} else if (input) {
+			(void)fprintf(
+				stderr,
+				"lint: more than one input ('%s', '%s')\n\n",
+				input, argv[i]);
+			lint_help();
+			return 1;
+		} else {
 			input = argv[i];
 		}
 	}
@@ -407,26 +472,10 @@ int kdality_lint(int argc, char *const argv[])
 		return 1;
 	}
 
-	if (!is_safe_lint_path(input)) {
-		fprintf(stderr,
-			"lint: invalid input path (must be a safe relative path)\n");
-		return 1;
-	}
-
-	if (realpath(".", base_resolved) == NULL) {
-		perror("lint: failed to resolve base directory");
-		return 1;
-	}
-
-	if (realpath(input, resolved_input) == NULL) {
-		perror("lint: failed to resolve input path");
-		return 1;
-	}
-
-	size_t base_len = strlen(base_resolved);
-	if (strncmp(resolved_input, base_resolved, base_len) != 0 ||
-	    (resolved_input[base_len] != '\0' && resolved_input[base_len] != '/')) {
-		fprintf(stderr, "lint: input path escapes current working directory\n");
+	if (!kdality_path_ok(input) ||
+	    realpath(input, resolved_input) == NULL) {
+		(void)fprintf(stderr, "lint: cannot resolve '%s': %s\n", input,
+			      strerror(errno));
 		return 1;
 	}
 
@@ -454,10 +503,10 @@ int kdality_lint(int argc, char *const argv[])
 	else
 		rc = lint_kdc(&ctx, safe_input);
 
+	print_warnings(&ctx);
+
 	if (rc != 0)
 		return 1;
-
-	print_warnings(&ctx);
 
 	if (ctx.nwarns == 0)
 		printf("%s: OK (0 warnings)\n", safe_input);

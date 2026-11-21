@@ -133,7 +133,7 @@ int kdality_init(int argc, char *const argv[])
 	const char *vendor = "example";
 	char buf[4096];
 	char filename[256];
-	int argi = 0;
+	int argi = 1; /* argv[0] is the subcommand's name */
 
 	/* Parse args */
 	while (argi < argc) {
@@ -156,7 +156,20 @@ int kdality_init(int argc, char *const argv[])
 				return 1;
 			}
 			vendor = argv[argi++];
-		} else if (arg[0] != '-') {
+		} else if (arg[0] == '-') {
+			(void)fprintf(stderr,
+				      "kdality init: unknown option '%s'\n\n",
+				      arg);
+			init_help();
+			return 1;
+		} else if (name) {
+			(void)fprintf(
+				stderr,
+				"kdality init: more than one name ('%s', '%s')\n\n",
+				name, arg);
+			init_help();
+			return 1;
+		} else {
 			name = arg;
 		}
 	}

@@ -23,6 +23,7 @@
 #include <unistd.h>
 
 #include "../../compiler/include/codegen.h"
+#include "paths.h"
 
 /*
  * A whole string as an unsigned number in base (0: C prefixes), within
@@ -372,8 +373,12 @@ int kdality_dtgen(int argc, char *const argv[])
 		return 1;
 	}
 
+	if (kdality_ensure_dir("dt-gen", o.outdir) != 0)
+		return 1;
+
 	if (!realpath(o.outdir, resolved_outdir)) {
-		fprintf(stderr,
+		(void)fprintf(
+			stderr,
 			"dt-gen: cannot resolve output directory '%s': %s\n",
 			o.outdir, strerror(errno));
 		return 1;
