@@ -54,5 +54,5 @@ program waits for KUnit's last line before it prints the report
 
 | Row | Check | Expected |
 | - | - | - |
-| O5 | the extraction on #38's failing console log (`evidence/kunit-demand-interleave-20261121.log`) | valid JSON, the same report as the passing run |
+| O5 | the extraction on #38's failing console log (`evidence/kunit-demand-interleave-20261121.txt`) | valid JSON, the same report as the passing run |
 | O6 | 200 KUnit boots in CI (a stress job like HAVEN's console drain) | 0 failing extractions |

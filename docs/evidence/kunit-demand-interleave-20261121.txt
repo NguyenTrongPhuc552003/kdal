@@ -1,0 +1,96 @@
+[    0.585524]     # Subtest: kdal-registry
+[    0.585724]     # module: kdal
+[    0.585844]     1..9
+[    0.587509]     ok 1 test_register_backend
+[    0.588411]     ok 2 test_find_backend
+[    0.589030]     ok 3 test_register_driver
+[    0.589578]     ok 4 test_find_driver_by_class
+[    0.590218]     ok 5 test_register_device
+[    0.590712]     ok 6 test_find_device
+[    0.591154]     ok 7 test_registry_snapshot
+[    0.591541]     ok 8 test_for_each_device
+[    0.591968]     ok 9 test_null_params
+[    0.592051] # kdal-registry: pass:9 fail:0 skip:0 total:9
+[    0.592079] # Totals: pass:9 fail:0 skip:0 total:9
+[    0.592126] ok 1 kdal-registry
+[    0.592164]     KTAP version 1
+[    0.592172]     # Subtest: kdal-event
+[    0.592188]     # module: kdal
+[    0.592198]     1..6
+[    0.592997]     ok 1 test_emit_event
+[    0.593281]     ok 2 test_emit_null_device
+[    0.593765]     ok 3 test_poll_event
+[    0.594245]     ok 4 test_poll_null
+[    0.594628]     ok 5 test_event_shutdown
+[    0.595180]     ok 6 test_event_overflow
+[    0.595195] # kdal-event: pass:6 fail:0 skip:0 total:6
+[    0.595209] # Totals: pass:6 fail:0 skip:0 total:6
+[    0.595214] ok 2 kdal-event
+[    0.595220]     KTAP version 1
+[    0.595251]     # Subtest: kdal-core
+[    0.595256]     # module: kdal
+[    0.595260]     1..10
+[    0.596173]     ok 1 test_snapshot_after_init
+[    0.596482]     ok 2 test_find_uart_device
+[    0.596883]     ok 3 test_find_i2c_device
+[    0.597260]     ok 4 test_find_spi_device
+[    0.597653]     ok 5 test_find_gpu_device
+[    0.598035]     ok 6 test_device_has_driver
+[    0.598544]     ok 7 test_device_has_backend
+[    0.598821] kdal: uart0 suspended
+[    0.598903] kdal: uart0 powered on
+[    0.599396]     ok 8 test_power_transition
+[    0.599777]     ok 9 test_power_null_device
+[    0.600238]     ok 10 test_find_nonexistent_device
+[    0.600255] # kdal-core: pass:10 fail:0 skip:0 total:10
+[    0.600274] # Totals: pass:10 fail:0 skip:0 total:10
+[    0.600284] ok 3 kdal-core
+[    0.600307]     KTAP version 1
+[    0.600325]     # Subtest: kdal-driver
+[    0.600334]     # module: kdal
+[    0.600357]     1..8
+[    0.601327]     ok 1 test_find_uart_driver
+[    0.601674]     ok 2 test_find_i2c_driver
+[    0.602056]     ok 3 test_find_spi_driver
+[    0.602924]     ok 4 test_find_gpu_driver
+[    0.603336]     ok 5 test_find_no_gpio_driver
+[    0.603751]     ok 6 test_driver_has_ops
+[    0.604130]     ok 7 test_attach_null_params
+[    0.604522]     ok 8 test_device_already_attached
+[    0.604538] # kdal-driver: pass:8 fail:0 skip:0 total:8
+[    0.604553] # Totals: pass:8 fail:0 skip:0 total:8
+[    0.604562] ok 4 kdal-driver
+[    0.604579]     KTAP version 1
+[    0.604587]     # Subtest: kdal-accel
+[    0.604603]     # module: kdal
+[    0.604609]     1..5
+[    0.605450] kdal: gpu0 queue 0 created (depth=64)
+[    0.605516] kdal: gpu0 queue 0 destroyed
+[    0.605919]     ok 1 test_queue_create
+[    0.606631]     ok 2 test_queue_null_params
+[    0.607152]     ok 3 test_buffer_map_unmap
+[    0.607384] kdal: gpu0 queue 0 created (depth=64)
+[    0.607559] kdal: gpu0 queue 0 destroyed
+[    0.607932]     ok 4 test_submit
+[    0.608273]     ok 5 test_submit_null
+[    0.608294] # kdal-accel: pass:5 fail:0 skip:0 total:5
+[    0.608307] # Totals: pass:5 fail:0 skip:0 total:5
+[    0.608315] ok 5 kdal-accel
+[    0.608322]     KTAP version 1
+[    0.608324]     # Subtest: kdal-demand
+[    0.608333]     # module: kdal
+[    0.608342]     1..2
+KDAL-CI: insmod ok
+KDAL-DEMAND-BEGIN
+[    0.609899]     ok 1 test_demand_regions
+[    0.610427]     ok 2 test_demand_small_buffer
+[    0.610451] # kdal-demand: pass:2 fail:0 skip:0 total:2
+[    0.610461] # Totals: pass:2 fail:0 skip:0 total:2
+[    0.610470] ok 6 kdal-demand
+{"format": "kdal-demand/1", "vocabulary": "FF-A partition manifest binding", "device-regions": [
+  {"description": "kdal-gpio@9030000", "base-address": "0x9030000", "pages-count": 1, "attributes": "0x3", "interrupts": [{"id": 39}]}
+]}
+KDAL-DEMAND-END
+[    0.619267] Flash device refused suspend due to active operation (state 20)
+[    0.619385] Flash device refused suspend due to active operation (state 20)
+[    0.620029] reboot: Power down
