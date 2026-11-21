@@ -92,3 +92,26 @@ exists (either an API `kdal.ko` exports, or self-contained `readl`/
 `writel` on an `ioremap`ed base). Its record and expectations come before
 any code; until then the docs say plainly that the module step is not
 working yet.
+
+## Results (2026-11-21) [F]
+
+| Row | Result | Evidence |
+| - | - | - |
+| O4 | holds | #41: `log("hello_led: initialized\n")` and `wait(toggle, 1000)` in the trace; the first-project suite checks both in CI |
+| O5 | holds | #42: `demand-extract.py` on `evidence/kunit-demand-interleave-20261121.txt` gives the same report as a passing run; the smoke tests run it |
+| O6 | holds | `kunit-stress.yml` at `7d0ebae`: 0 of 200 stress boots failed (four shards of 50), plus each shard's first boot. No stress run was made before the fix, so this shows the new path does not fail, not how often the old one did |
+| O7 | holds as predicted | `codegen-check.yml` at `db187e8` (the first run, at `679db7d`, stopped before the module build because of the check's own relative output directory, fixed in #45): both examples compile with `kdality compile`; both module builds stop at `fatal error: 'linux/kdal.h' file not found`. The other gaps (undefined `kdal_reg_*`, no `regs` member, no exported symbols) are behind that first error: read in the code, not yet shown by a build |
+| O1 to O3 | not started | see below |
+
+## F1 and F4 and the freeze [F, ?]
+
+The README and `stages/` (decision of 2026-11-01) freeze `lang/`,
+`compiler/` and `editor/`: "kept and still built by CI, but take no new
+work unless the thesis needs them". The F1 and F4 fix is compiler work,
+so it is not started; it needs the owner's decision (unfreeze the
+compiler for it, or park it and say so in the docs). One change already
+went into `compiler/`: #39 relaxed `kdalc`'s source path check (the same
+change as `kdality`'s paths), made without noticing the freeze; the
+owner decides whether it stays. `CHANGELOG.md` listed `tools/` as frozen
+too; #44 corrected it to the README's list (`tools/`, the `kdality`
+runtime CLI, is maintained).
