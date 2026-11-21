@@ -207,12 +207,13 @@ e2e_section "Step 10: Documentation"
 assert_dir_exists "$E2E_ROOT/docs" "docs/"
 
 # Key doc files
-for doc in architecture.md getting-started.md; do
+# the guides moved to the HAVEN docs site; the ones that belong to the code stay
+for doc in architecture.md api_reference.md first-project-journey.md; do
 	if [ -f "$E2E_ROOT/docs/$doc" ]; then
 		e2e_pass "docs/$doc exists"
 		assert_file_not_empty "$E2E_ROOT/docs/$doc" "docs/$doc"
 	else
-		e2e_skip "docs/$doc not found"
+		e2e_fail "docs/$doc not found"
 	fi
 done
 

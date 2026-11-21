@@ -416,7 +416,7 @@ int kdality_simulate(int argc, char *const argv[])
 	const char *target_event = NULL;
 	char resolved_input[PATH_MAX];
 	int trace = 0;
-	int argi = 0;
+	int argi = 1; /* argv[0] is the subcommand's name */
 
 	while (argi < argc) {
 		const char *arg = argv[argi++];
@@ -433,7 +433,19 @@ int kdality_simulate(int argc, char *const argv[])
 				return 1;
 			}
 			target_event = argv[argi++];
-		} else if (arg[0] != '-') {
+		} else if (arg[0] == '-') {
+			(void)fprintf(stderr,
+				      "simulate: unknown option '%s'\n\n", arg);
+			simulate_help();
+			return 1;
+		} else if (input) {
+			(void)fprintf(
+				stderr,
+				"simulate: more than one input ('%s', '%s')\n\n",
+				input, arg);
+			simulate_help();
+			return 1;
+		} else {
 			input = arg;
 		}
 	}

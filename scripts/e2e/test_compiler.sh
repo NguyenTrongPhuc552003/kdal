@@ -68,7 +68,7 @@ if [ -n "$KDALC" ] && [ -x "$KDALC" ]; then
 	assert_cmd_output "kdalc warns on wrong extension" "warning\|expected\|kdc\|kdh" \
 		"$KDALC" "$SANDBOX/test.txt"
 else
-	e2e_skip "kdalc not built - skip CLI tests"
+	e2e_fail "kdalc not built - no CLI tests"
 fi
 
 # ══════════════════════════════════════════════════════════════════════
@@ -118,7 +118,7 @@ if [ -n "$KDALC" ] && [ -x "$KDALC" ]; then
 		fi
 	done
 else
-	e2e_skip "kdalc not built - skip compilation tests"
+	e2e_fail "kdalc not built - no compilation tests"
 fi
 
 # ══════════════════════════════════════════════════════════════════════
@@ -143,7 +143,7 @@ if [ -x "$KDALITY" ]; then
 		if "$KDALITY" compile -o "$_out" "$kdc" >/dev/null 2>&1; then
 			e2e_pass "kdality compile $_name"
 		else
-			e2e_skip "kdality compile $_name (may be alpha limitation)"
+			e2e_fail "kdality compile $_name"
 		fi
 		break # Just test first example
 	done
@@ -155,15 +155,14 @@ if [ -x "$KDALITY" ]; then
 		if "$KDALITY" lint "$kdh" >/dev/null 2>&1; then
 			e2e_pass "kdality lint $_name"
 		else
-			e2e_skip "kdality lint $_name (alpha)"
+			e2e_fail "kdality lint $_name"
 		fi
 		break
 	done
 
 	# simulate subcommand (just check it doesn't crash on --help)
 	assert_cmd_output "kdality simulate -h" "Usage\|simulate\|help" \
-		"$KDALITY" simulate -h 2>/dev/null ||
-		e2e_skip "kdality simulate -h"
+		"$KDALITY" simulate -h
 
 	# dt-gen subcommand: both .kdh syntaxes, the same check as CI's
 	if sh "$E2E_ROOT/scripts/ci/dtgen-check.sh" "$KDALITY"; then
@@ -180,12 +179,12 @@ if [ -x "$KDALITY" ]; then
 		if "$KDALITY" test-gen -o "$TG_OUT" "$kdc" >/dev/null 2>&1; then
 			e2e_pass "kdality test-gen $(basename "$kdc")"
 		else
-			e2e_skip "kdality test-gen (alpha limitation)"
+			e2e_fail "kdality test-gen $(basename "$kdc")"
 		fi
 		break
 	done
 else
-	e2e_skip "kdality not built - skip subcommand tests"
+	e2e_fail "kdality not built - no subcommand tests"
 fi
 
 # ══════════════════════════════════════════════════════════════════════

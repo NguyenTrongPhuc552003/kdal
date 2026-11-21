@@ -18,30 +18,7 @@
 
 /* libkdalc public API */
 #include "../../compiler/include/codegen.h"
-
-static bool is_safe_output_dir(const char *dir)
-{
-	const char *p;
-
-	if (!dir || dir[0] == '\0')
-		return false;
-
-	/* Disallow absolute paths */
-	if (dir[0] == '/' || dir[0] == '\\')
-		return false;
-
-	/* Disallow any ".." path segment */
-	p = dir;
-	while (*p) {
-		if (p[0] == '.' && p[1] == '.' &&
-		    (p == dir || p[-1] == '/' || p[-1] == '\\') &&
-		    (p[2] == '\0' || p[2] == '/' || p[2] == '\\'))
-			return false;
-		p++;
-	}
-
-	return true;
-}
+#include "paths.h"
 
 static void compile_help(void)
 {
@@ -70,7 +47,7 @@ int kdality_compile(int argc, char *const argv[])
 
 	const char *input = NULL;
 	char resolved_input[PATH_MAX];
-	int argi = 0;
+	int argi = 1; /* argv[0] is the subcommand's name */
 
 	while (argi < argc) {
 		const char *arg = argv[argi++];
@@ -88,7 +65,7 @@ int kdality_compile(int argc, char *const argv[])
 				return 1;
 			}
 			out_dir = argv[argi++];
-			if (!is_safe_output_dir(out_dir)) {
+			if (!kdality_path_ok(out_dir)) {
 				fprintf(stderr,
 					"kdality compile: invalid output directory '%s'\n",
 					out_dir);
@@ -110,10 +87,19 @@ int kdality_compile(int argc, char *const argv[])
 			}
 			opts.cross_compile = argv[argi++];
 		} else if (arg[0] != '-') {
+			if (input) {
+				(void)fprintf(
+					stderr,
+					"kdality compile: more than one input ('%s', '%s')\n",
+					input, arg);
+				compile_help();
+				return 1;
+			}
 			input = arg;
 		} else {
 			fprintf(stderr,
 				"kdality compile: unknown option '%s'\n", arg);
+			compile_help();
 			return 1;
 		}
 	}
@@ -124,11 +110,14 @@ int kdality_compile(int argc, char *const argv[])
 		return 1;
 	}
 
-	if (!realpath(input, resolved_input)) {
+	if (!kdality_path_ok(input) || !realpath(input, resolved_input)) {
 		fprintf(stderr, "kdality compile: cannot resolve '%s'\n",
 			input);
 		return 1;
 	}
+
+	if (kdality_ensure_dir("kdality compile", opts.output_dir) != 0)
+		return 1;
 
 	int rc = kdal_compile_file(resolved_input, &opts);
 	if (rc != 0) {

@@ -27,6 +27,10 @@ add_executable(kdality
 	tools/kdality/testgen.c
 	tools/kdality/lint.c)
 target_compile_options(kdality PRIVATE -Wall -Wextra -pedantic -D_DEFAULT_SOURCE)
+# where lint finds `import "kdal/stdlib/x.kdh"`: installed, then the source tree
+target_compile_definitions(kdality PRIVATE
+	KDALITY_STDLIB_INSTALL="${CMAKE_INSTALL_FULL_DATADIR}/kdal/stdlib"
+	KDALITY_STDLIB_SOURCE="${CMAKE_SOURCE_DIR}/lang/stdlib")
 target_include_directories(kdality PRIVATE
 	${CMAKE_SOURCE_DIR}/include
 	${CMAKE_SOURCE_DIR}/compiler/include)
