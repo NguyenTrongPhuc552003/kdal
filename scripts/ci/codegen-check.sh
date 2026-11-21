@@ -16,6 +16,7 @@ KDIR=$(cd "$2" && pwd)
 ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 OUT=${3:-$ROOT/build/codegen}
 mkdir -p "$OUT"
+OUT=$(cd "$OUT" && pwd) # absolute: kdality runs in each example's directory
 fail=0
 for kdc in "$ROOT"/examples/kdc_hello/*.kdc; do
 	name=$(basename "$kdc" .kdc)
