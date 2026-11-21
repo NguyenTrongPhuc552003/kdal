@@ -80,12 +80,20 @@ static void sim_reg_write(struct sim_state *s, const char *name,
 	}
 }
 
+/* msg is the literal as written, quotes included (the lexer keeps them):
+ * one pair of quotes in the trace, none in the plain LOG line. */
 static void sim_log(struct sim_state *s, const char *msg)
 {
+	size_t n = strlen(msg);
+	int quoted = n >= 2 && msg[0] == '"' && msg[n - 1] == '"';
+
 	if (s->trace)
-		printf("  [%d] log(\"%s\")\n", s->step++, msg);
+		(void)printf("  [%d] log(%s%s%s)\n", s->step++,
+			     quoted ? "" : "\"", msg, quoted ? "" : "\"");
+	else if (quoted)
+		(void)printf("  LOG: %.*s\n", (int)(n - 2), msg + 1);
 	else
-		printf("  LOG: %s\n", msg);
+		(void)printf("  LOG: %s\n", msg);
 }
 
 /* ── Expression evaluator ────────────────────────────────────────── */
@@ -100,6 +108,25 @@ static const char *expr_reg_name(const kdal_ast_t *expr)
 	if (expr->type == KDAL_NODE_EXPR_IDENT)
 		return e->u.sval;
 	return "?";
+}
+
+static unsigned long sim_eval(struct sim_state *s, const kdal_ast_t *expr);
+
+/* wait(sig, ms), arm(timer, ms), cancel(timer) with their arguments */
+static void sim_trace_call(struct sim_state *s, const kdal_ast_t *st)
+{
+	const char *name = st->type == KDAL_NODE_WAIT_STMT ? "wait" :
+			   st->type == KDAL_NODE_ARM_STMT  ? "arm" :
+							     "cancel";
+	const kdal_ast_t *what = st->child;
+	const kdal_ast_t *ms = what ? what->next : NULL;
+
+	if (ms)
+		(void)printf("  [%d] %s(%s, %lu)\n", s->step++, name,
+			     expr_reg_name(what), sim_eval(s, ms));
+	else
+		(void)printf("  [%d] %s(%s)\n", s->step++, name,
+			     expr_reg_name(what));
 }
 
 static unsigned long sim_eval(struct sim_state *s, const kdal_ast_t *expr)
@@ -221,16 +248,10 @@ static void sim_exec(struct sim_state *s, const kdal_ast_t *stmt)
 				       expr_reg_name(st->child));
 			break;
 		case KDAL_NODE_WAIT_STMT:
-			if (s->trace)
-				printf("  [%d] wait()\n", s->step++);
-			break;
 		case KDAL_NODE_ARM_STMT:
-			if (s->trace)
-				printf("  [%d] arm()\n", s->step++);
-			break;
 		case KDAL_NODE_CANCEL_STMT:
 			if (s->trace)
-				printf("  [%d] cancel()\n", s->step++);
+				sim_trace_call(s, st);
 			break;
 		case KDAL_NODE_RETURN_STMT:
 			if (s->trace)
