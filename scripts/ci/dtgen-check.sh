@@ -3,7 +3,7 @@
 #
 # kdality dt-gen on both .kdh syntaxes: the full one
 # (examples/kdc_hello/uart_hello.kdh) and the simplified one
-# (tests/dtgen/led.kdh, from docs/language_guide.md). Each must give
+# (tests/dtgen/led.kdh, the language guide's LED header). Each must give
 # <Name>.dtso with its compatible string, every register listed and the
 # reg size it prints; dtc, when installed, must compile it. A missing
 # output directory and a file that does not parse must fail with a message.
