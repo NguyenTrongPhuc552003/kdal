@@ -29,7 +29,7 @@ for kdc in "$ROOT"/examples/kdc_hello/*.kdc; do
 	fi
 	cp "$dir/Makefile.kbuild" "$dir/Kbuild"
 	if make -C "$KDIR" M="$dir" ARCH=arm64 LLVM=1 ccflags-y="-I$ROOT/include" modules >"$OUT/$name.kbuild.log" 2>&1; then
-		echo "$name: module builds ($(ls "$dir"/*.ko | xargs -n1 basename))"
+		for ko in "$dir"/*.ko; do echo "$name: module builds (${ko##*/})"; done
 	else
 		echo "$name: module build FAIL"
 		grep -E "error:" "$OUT/$name.kbuild.log" | head -8
