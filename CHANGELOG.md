@@ -79,7 +79,7 @@ CLI (`tools/`) is maintained (README, "Layout").
   stress boots, workflow `kunit-stress.yml`).
 - The e2e suites report a failing command as a failure and run in CI.
 
-## [0.1.0] - 2025-06-09
+## [0.1.0] - 2025-06-09 (tagged and released 2026-04-19)
 
 ### Added
 
