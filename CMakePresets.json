@@ -61,7 +61,8 @@
             "inherits": "base",
             "binaryDir": "${sourceDir}/build/release/$env{KDAL_TARGET_TRIPLET}",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Release"
+                "CMAKE_BUILD_TYPE": "Release",
+                "KDALITY_SOURCE_STDLIB": "OFF"
             }
         }
     ],
