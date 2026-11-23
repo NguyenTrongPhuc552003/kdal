@@ -61,3 +61,16 @@ Publishing (which makes the tag) and the Marketplace stay the owner's.
 | K4 | test from the draft | hashes match on both hosts; the layout checks pass; `kdalc -h` gives the version |
 | K5 | mark | title `v0.2.0` |
 | K6 | the workflow file | no tag trigger, no publish step, no Marketplace token |
+
+## Runs (2026-11-24)
+
+- **K1 holds** (run 45236442873, `main` at `bb14918`): the gate refuses
+  with six failures (VERSION, `version.h`, the Debian changelog, the rpm
+  spec, `package.json`, CHANGELOG); nothing else runs, no draft.
+- **Run 2** (run 45241981465, `64e61ee`, after the 0.2.0 bump in #51):
+  the gate, the packages and three SDKs pass; the linux-aarch64 and
+  linux-riscv64 SDKs stop at CMake's compiler check (`cannot find
+  Scrt1.o`): with `--no-install-recommends` the cross compilers come
+  without their C library (`libc6-dev-arm64-cross`,
+  `libc6-dev-riscv64-cross`). No draft was made. **Fix**: the matrix
+  installs both packages. K2 to K6 are read from the next run.
