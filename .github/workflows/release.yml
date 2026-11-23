@@ -1,0 +1,252 @@
+# A KDAL release built by CI as a draft, on demand only
+# (docs/release-workflow.md). gate checks every version string and the
+# changelog; the build jobs make the SDK tarballs, the source tarball, the
+# deb, the rpm and the VS Code extension, every tarball with clean entries
+# (scripts/release/tar-clean.py); draft checks that nothing private is in
+# the assets or the notes and creates a DRAFT release; test runs the SDK
+# from the draft on Linux and macOS; mark writes the result into the title.
+# Publishing (which makes the tag) and the VS Code Marketplace are the
+# owner's steps, never this workflow's.
+name: release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version without the v (for example 0.2.0); every version string and CHANGELOG.md must say it
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  gate:
+    name: every version string says it, the tag is new, the tests pass
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Version strings and changelog
+        run: |
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "FAIL: '$VERSION' is not X.Y.Z"; exit 1; }
+          if git ls-remote --exit-code --tags origin "refs/tags/v$VERSION" >/dev/null; then
+            echo "FAIL: the Git tag v$VERSION exists"; exit 1
+          fi
+          fail=0
+          check() { grep -q -- "$2" "$1" || { echo "FAIL: $1 does not say $VERSION"; fail=1; }; }
+          [ "$(cat VERSION)" = "$VERSION" ] || { echo "FAIL: VERSION is $(cat VERSION)"; fail=1; }
+          check include/kdal/core/version.h "KDAL_VERSION_STRING \"$VERSION\""
+          check packaging/debian/changelog "^kdal ($VERSION-1)"
+          check packaging/rpm/kdal.spec "^Version: *$VERSION\$"
+          check editor/vscode/kdal-lang/package.json "\"version\": \"$VERSION\""
+          check CHANGELOG.md "^## \[$VERSION\] - "
+          exit $fail
+      - name: Build the tools and run the CI tests
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y -qq --no-install-recommends cmake ninja-build gcc
+          cmake --preset ci-release
+          cmake --build --preset ci-release --target kdalc kdality
+          sh scripts/ci/test.sh
+
+  sdk:
+    name: SDK ${{ matrix.os }}-${{ matrix.arch }}
+    needs: gate
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {os: linux, arch: x86_64, runner: ubuntu-24.04, cc: gcc}
+          - {os: linux, arch: aarch64, runner: ubuntu-24.04, cc: aarch64-linux-gnu-gcc, pkg: gcc-aarch64-linux-gnu}
+          - {os: linux, arch: riscv64, runner: ubuntu-24.04, cc: riscv64-linux-gnu-gcc, pkg: gcc-riscv64-linux-gnu}
+          - {os: darwin, arch: aarch64, runner: macos-15, cc: clang}
+          - {os: darwin, arch: x86_64, runner: macos-15-intel, cc: clang}
+    env:
+      VERSION: ${{ inputs.version }}
+      KDAL_TARGET_TRIPLET: ${{ matrix.os }}-${{ matrix.arch }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Cross compiler
+        if: matrix.pkg
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y -qq --no-install-recommends ${{ matrix.pkg }}
+      - name: Build and stage the SDK
+        env:
+          CC: ${{ matrix.cc }}
+        run: |
+          cmake --preset release-matrix
+          cmake --build --preset release-matrix --target kdalc kdality
+          sdk="kdal-v$VERSION-$KDAL_TARGET_TRIPLET"
+          cmake --install "build/release/$KDAL_TARGET_TRIPLET" --prefix "$sdk"
+          for f in bin/kdalc bin/kdality; do test -x "$sdk/$f" || { echo "FAIL: $f"; exit 1; }; done
+          for d in include/kdal include/kdalc share/kdal/stdlib share/kdal/vim lib/cmake/KDAL; do
+            test -d "$sdk/$d" || { echo "FAIL: $d"; exit 1; }
+          done
+          test -f "$sdk/lib/libkdalc.a" && test -f "$sdk/share/kdal/vim/filetype.lua"
+          mkdir -p out
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python3 scripts/release/tar-clean.py "out/$sdk.tar.gz" "$sdk"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sdk-${{ matrix.os }}-${{ matrix.arch }}
+          path: out/
+          retention-days: 1
+
+  packages:
+    name: source tarball, deb, rpm, VS Code extension
+    needs: gate
+    runs-on: ubuntu-24.04
+    env:
+      VERSION: ${{ inputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Source tarball
+        run: |
+          mkdir -p out
+          git archive --format=tar --prefix="kdal-v$VERSION/" -o src.tar HEAD
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python3 scripts/release/tar-clean.py "out/kdal-v$VERSION.tar.gz" src.tar
+      - name: deb
+        run: |
+          sudo apt-get -o Acquire::Retries=5 update -qq
+          sudo apt-get -o Acquire::Retries=5 install -y -qq --no-install-recommends build-essential debhelper cmake
+          cp -r packaging/debian .
+          [ "$(cat debian/source/format)" = "3.0 (quilt)" ] || { echo "FAIL: debian/source/format"; exit 1; }
+          dpkg-buildpackage -us -uc -b -d
+          cp ../*.deb out/
+      - name: rpm (in a Fedora container)
+        run: |
+          mkdir -p rpm/SOURCES rpm/SPECS
+          git archive --format=tar --prefix="kdal-$VERSION/" -o rpm-src.tar HEAD
+          SOURCE_DATE_EPOCH=$(git log -1 --format=%ct) python3 scripts/release/tar-clean.py "rpm/SOURCES/kdal-$VERSION.tar.gz" rpm-src.tar
+          cp packaging/rpm/kdal.spec rpm/SPECS/
+          docker run --rm -v "$PWD/rpm:/root/rpmbuild" fedora:latest \
+            sh -c 'dnf install -y -q rpm-build cmake gcc make && rpmbuild -bb /root/rpmbuild/SPECS/kdal.spec'
+          cp rpm/RPMS/*/*.rpm out/
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: VS Code extension (packaged, not published)
+        working-directory: editor/vscode/kdal-lang
+        run: |
+          npm ci
+          npm run compile
+          npx @vscode/vsce package --no-dependencies
+          mv ./*.vsix "$GITHUB_WORKSPACE/out/"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages
+          path: out/
+          retention-days: 1
+
+  draft:
+    name: name check and draft
+    needs: [sdk, packages]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    outputs:
+      id: ${{ steps.draft.outputs.id }}
+    env:
+      VERSION: ${{ inputs.version }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums and notes
+        run: |
+          ls -l dist
+          (cd dist && sha256sum ./* | sed "s#  \./#  #" > ../SHA256SUMS && mv ../SHA256SUMS . && cat SHA256SUMS)
+          awk -v v="$VERSION" '
+            $0 ~ "^## \\[" v "\\] - " {on=1; next}
+            on && /^## \[/ {exit}
+            on {print}' CHANGELOG.md > section.md
+          [ -s section.md ] || { echo "FAIL: empty changelog section"; exit 1; }
+          {
+            echo "KDAL v$VERSION, built by CI from $GITHUB_SHA (run $GITHUB_RUN_ID): SDK tarballs for"
+            echo "Linux (x86_64, aarch64, riscv64) and macOS (aarch64, x86_64), the source, a deb, an rpm"
+            echo "and the VS Code extension; SHA256SUMS below."
+            echo
+            cat section.md
+            echo
+            echo "SHA256SUMS:"
+            echo
+            sed 's/^/    /' dist/SHA256SUMS
+            echo
+            echo "Test results follow when this run's test jobs finish."
+          } > notes.md
+      - name: Nothing private in the assets or the notes
+        run: python3 scripts/release/check-public-assets.py dist notes.md
+      - name: Draft release
+        id: draft
+        run: |
+          gh release create "v$VERSION" dist/* --draft --target "$GITHUB_SHA" \
+            --title "v$VERSION [untested]" --notes-file notes.md
+          id=$(gh api "repos/$GITHUB_REPOSITORY/releases" \
+            -q ".[] | select(.draft and .tag_name == \"v$VERSION\") | .id" | head -1)
+          [ -n "$id" ] || { echo "FAIL: no draft for v$VERSION"; exit 1; }
+          echo "id=$id" >> "$GITHUB_OUTPUT"
+
+  test:
+    name: run the SDK from the draft (${{ matrix.triplet }})
+    needs: draft
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {runner: ubuntu-24.04, triplet: linux-x86_64}
+          - {runner: macos-15, triplet: darwin-aarch64}
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: write # a draft is readable only with write access
+    steps:
+      - name: Download, check the hash and the layout, run kdalc
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ID: ${{ needs.draft.outputs.id }}
+          VERSION: ${{ inputs.version }}
+          TRIPLET: ${{ matrix.triplet }}
+        run: |
+          sdk="kdal-v$VERSION-$TRIPLET"
+          for f in "$sdk.tar.gz" SHA256SUMS; do
+            aid=$(gh api "repos/$GITHUB_REPOSITORY/releases/$ID/assets" -q ".[] | select(.name == \"$f\") | .id")
+            gh api -H "Accept: application/octet-stream" "repos/$GITHUB_REPOSITORY/releases/assets/$aid" > "$f"
+          done
+          grep " $sdk.tar.gz\$" SHA256SUMS > mine.sum
+          if command -v sha256sum >/dev/null; then sha256sum -c mine.sum; else shasum -a 256 -c mine.sum; fi
+          tar xzf "$sdk.tar.gz"
+          for f in bin/kdalc bin/kdality; do test -x "$sdk/$f" || { echo "FAIL: $f"; exit 1; }; done
+          test -f "$sdk/lib/libkdalc.a"
+          n=$(find "$sdk/share/kdal/stdlib" -name '*.kdh' | wc -l); [ "$n" -ge 7 ] || { echo "FAIL: $n stdlib files"; exit 1; }
+          n=$(find "$sdk/lib/cmake/KDAL" -name '*.cmake' | wc -l); [ "$n" -ge 4 ] || { echo "FAIL: $n cmake files"; exit 1; }
+          n=$(find "$sdk/share/kdal/vim" -name '*.vim' -o -name '*.lua' | wc -l); [ "$n" -ge 8 ] || { echo "FAIL: $n vim files"; exit 1; }
+          "$sdk/bin/kdalc" -h > help.txt 2>&1 || true
+          cat help.txt
+          grep -q "KDAL compiler $VERSION" help.txt || { echo "FAIL: kdalc does not say $VERSION"; exit 1; }
+
+  mark:
+    name: write the result into the draft
+    needs: [draft, test]
+    if: always() && needs.draft.result == 'success'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - env:
+          GH_TOKEN: ${{ github.token }}
+          ID: ${{ needs.draft.outputs.id }}
+          VERSION: ${{ inputs.version }}
+          TEST: ${{ needs.test.result }}
+        run: |
+          if [ "$TEST" = success ]; then title="v$VERSION"; else title="v$VERSION [FAILED: do not publish]"; fi
+          body=$(gh api "repos/$GITHUB_REPOSITORY/releases/$ID" -q .body)
+          body=$(printf '%s\n\nRun %s: the SDK from the draft on Linux x86_64 and macOS aarch64: %s.\n' \
+            "${body%Test results follow*}" "$GITHUB_RUN_ID" "$TEST")
+          got=$(gh api -X PATCH "repos/$GITHUB_REPOSITORY/releases/$ID" -f tag_name="v$VERSION" \
+            -f name="$title" -f body="$body" -q '"\(.tag_name) \(.draft) \(.name)"')
+          echo "$got"
+          [ "${got%% *}" = "v$VERSION" ] || { echo "FAIL: the draft's tag is ${got%% *}"; exit 1; }
