@@ -5,9 +5,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-24
+
 Changes since v0.1.0. The language, compiler and editor plugins (`lang/`,
 `compiler/`, `editor/`) are frozen since 2026-11-01; the `kdality` runtime
-CLI (`tools/`) is maintained (README, "Layout").
+CLI (`tools/`) is maintained (README, "Layout"). The QEMU and Docker
+integration for VS Code that v0.1.0 deferred to this release is not in it:
+the editor plugins are frozen.
 
 ### Added
 

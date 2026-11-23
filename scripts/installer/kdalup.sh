@@ -37,7 +37,7 @@ set -eu
 
 # ── Constants ─────────────────────────────────────────────────────────
 
-KDALUP_VERSION="0.1.0"
+KDALUP_VERSION="0.2.0"
 KDAL_HOME="${KDAL_HOME:-$HOME/.kdal}"
 KDAL_GITHUB="${KDAL_GITHUB:-NguyenTrongPhuc552003/kdal}"
 KDAL_RELEASES="https://github.com/${KDAL_GITHUB}/releases"

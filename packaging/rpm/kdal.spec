@@ -1,5 +1,5 @@
 Name:           kdal
-Version: 0.1.0
+Version: 0.2.0
 Release:        1%{?dist}
 Summary:        Kernel Device Abstraction Layer - compiler and toolchain
 License:        GPL-3.0-or-later
@@ -49,6 +49,13 @@ Development headers for building against the KDAL compiler library
 %{_includedir}/kdalc/
 
 %changelog
+* Tue Nov 24 2026 Trong Phuc Nguyen <trongphuc.ng552003@gmail.com> - 0.2.0-1
+- Devices report their resource demand (debugfs kdal/demand, JSON)
+- KUnit suites can be built into kdal.ko (KDAL_KUNIT=y)
+- Builds and loads against Linux v6.18; registry and init fixes
+- kdality: init, lint and simulate fixes; paths validated
+- The language, compiler and editor plugins are frozen
+
 * Sat Apr 12 2026 Trong Phuc Nguyen <trongphuc.ng552003@gmail.com> - 0.1.0-1
 - Initial release
 - kdalc compiler with lexer, parser, semantic analysis, C codegen
