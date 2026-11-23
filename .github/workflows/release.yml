@@ -59,8 +59,8 @@ jobs:
       matrix:
         include:
           - {os: linux, arch: x86_64, runner: ubuntu-24.04, cc: gcc}
-          - {os: linux, arch: aarch64, runner: ubuntu-24.04, cc: aarch64-linux-gnu-gcc, pkg: gcc-aarch64-linux-gnu}
-          - {os: linux, arch: riscv64, runner: ubuntu-24.04, cc: riscv64-linux-gnu-gcc, pkg: gcc-riscv64-linux-gnu}
+          - {os: linux, arch: aarch64, runner: ubuntu-24.04, cc: aarch64-linux-gnu-gcc, pkg: gcc-aarch64-linux-gnu libc6-dev-arm64-cross}
+          - {os: linux, arch: riscv64, runner: ubuntu-24.04, cc: riscv64-linux-gnu-gcc, pkg: gcc-riscv64-linux-gnu libc6-dev-riscv64-cross}
           - {os: darwin, arch: aarch64, runner: macos-15, cc: clang}
           - {os: darwin, arch: x86_64, runner: macos-15-intel, cc: clang}
     env:
