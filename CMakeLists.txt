@@ -27,10 +27,16 @@ add_executable(kdality
 	tools/kdality/testgen.c
 	tools/kdality/lint.c)
 target_compile_options(kdality PRIVATE -Wall -Wextra -pedantic -D_DEFAULT_SOURCE)
-# where lint finds `import "kdal/stdlib/x.kdh"`: installed, then the source tree
+# where lint finds `import "kdal/stdlib/x.kdh"`: installed, then the source
+# tree. Release builds leave the source tree out: its path is the build
+# machine's, not the user's (docs/release-workflow.md, run 3).
+option(KDALITY_SOURCE_STDLIB "kdality also looks in this source tree's lang/stdlib" ON)
 target_compile_definitions(kdality PRIVATE
-	KDALITY_STDLIB_INSTALL="${CMAKE_INSTALL_FULL_DATADIR}/kdal/stdlib"
-	KDALITY_STDLIB_SOURCE="${CMAKE_SOURCE_DIR}/lang/stdlib")
+	KDALITY_STDLIB_INSTALL="${CMAKE_INSTALL_FULL_DATADIR}/kdal/stdlib")
+if(KDALITY_SOURCE_STDLIB)
+	target_compile_definitions(kdality PRIVATE
+		KDALITY_STDLIB_SOURCE="${CMAKE_SOURCE_DIR}/lang/stdlib")
+endif()
 target_include_directories(kdality PRIVATE
 	${CMAKE_SOURCE_DIR}/include
 	${CMAKE_SOURCE_DIR}/compiler/include)

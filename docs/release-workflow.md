@@ -74,3 +74,14 @@ Publishing (which makes the tag) and the Marketplace stay the owner's.
   without their C library (`libc6-dev-arm64-cross`,
   `libc6-dev-riscv64-cross`). No draft was made. **Fix**: the matrix
   installs both packages. K2 to K6 are read from the next run.
+- **Run 3** (run 45246903053, `73ad670`): the gate, all five SDKs and
+  the packages pass; the name check stops the draft with **2 failures**:
+  the two macOS `kdality` binaries hold `/Users/runner/...`, and the
+  three Linux ones the same path under `/home/runner` (a note, since the
+  check allows CI's Linux home). The path is lint's source-tree fallback
+  for the standard library (`KDALITY_STDLIB_SOURCE`, the build machine's
+  `lang/stdlib`), meaningless on a user's machine. No draft was made, so
+  K2 does not hold yet. **Fix**: option `KDALITY_SOURCE_STDLIB` (on by
+  default, as before), set off in the `release-matrix` preset; checked on
+  the Mac: a `release-matrix` `kdality` has no source path, a default
+  build still has it.
