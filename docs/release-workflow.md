@@ -76,12 +76,17 @@ Publishing (which makes the tag) and the Marketplace stay the owner's.
   installs both packages. K2 to K6 are read from the next run.
 - **Run 3** (run 45246903053, `73ad670`): the gate, all five SDKs and
   the packages pass; the name check stops the draft with **2 failures**:
-  the two macOS `kdality` binaries hold `/Users/runner/...`, and the
-  three Linux ones the same path under `/home/runner` (a note, since the
-  check allows CI's Linux home). The path is lint's source-tree fallback
+  the two macOS `kdality` binaries hold the runner's macOS home path, and
+  the three Linux ones the same path under the Linux runner's home (a
+  note, since the check allows CI's Linux home). The path is lint's source-tree fallback
   for the standard library (`KDALITY_STDLIB_SOURCE`, the build machine's
   `lang/stdlib`), meaningless on a user's machine. No draft was made, so
   K2 does not hold yet. **Fix**: option `KDALITY_SOURCE_STDLIB` (on by
   default, as before), set off in the `release-matrix` preset; checked on
   the Mac: a `release-matrix` `kdality` has no source path, a default
   build still has it.
+- **Run 4** (run 45250312798, `4176345`): every build passes and the
+  SDK binaries are clean (no failure or note from them); the name check
+  fails once, on this record in the source tarball: run 3's entry quoted
+  the macOS runner's home path literally. My error; the entry now
+  describes the path instead. No draft.
