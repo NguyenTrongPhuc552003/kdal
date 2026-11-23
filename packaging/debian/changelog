@@ -1,3 +1,13 @@
+kdal (0.2.0-1) unstable; urgency=medium
+
+  * Devices report their resource demand (debugfs kdal/demand, JSON).
+  * KUnit suites can be built into kdal.ko (KDAL_KUNIT=y).
+  * Builds and loads against Linux v6.18; registry and init fixes.
+  * kdality: init, lint and simulate fixes; paths validated.
+  * The language, compiler and editor plugins are frozen.
+
+ -- Phuc Nguyen <trong552003@gmail.com>  Tue, 24 Nov 2026 12:00:00 +0000
+
 kdal (0.1.0-1) unstable; urgency=medium
 
   * Initial release.
