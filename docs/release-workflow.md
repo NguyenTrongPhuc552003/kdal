@@ -90,3 +90,26 @@ Publishing (which makes the tag) and the Marketplace stay the owner's.
   fails once, on this record in the source tarball: run 3's entry quoted
   the macOS runner's home path literally. My error; the entry now
   describes the path instead. No draft.
+- **Run 5** (run 45253065422, `8596442`): every job passes after two
+  reruns of macOS jobs that no runner picked up (`The job was not
+  acquired by Runner`). The first rerun's test was abandoned the same
+  way, and the mark step titled the draft `[FAILED: do not publish]`, as
+  designed; the second passed and the title became `v0.2.0`.
+  - **K2, the count does not hold as written; the rest holds.** 13
+    assets and `SHA256SUMS`, not ten: the rpm build also makes `-devel`,
+    `-debuginfo` and `-debugsource` packages, and the deb build `kdal-dev`
+    (my count left them out). Every hash matches; every tar entry is uid
+    0, gid 0, no user or group name (all six tarballs, 565 entries); the
+    name check has 0 failures; the deb, rpm and vsix contents (134 files)
+    hold no macOS home path and neither the Mac's login nor its host
+    name (checked on the Mac).
+  - **K3 holds**: `draft: true`, target `8596442`, no Git tag
+    `v0.2.0` on the remote.
+  - **K4 holds**: on linux-x86_64 and darwin-aarch64 the hash matches,
+    the layout checks pass and `kdalc -h` says `KDAL compiler 0.2.0`.
+  - **K5 holds**: title `v0.2.0`.
+  - **K6 holds**: the only trigger is `workflow_dispatch`; no publish
+    step; `vsce` only packages; no Marketplace token.
+  - The notes carry two result lines for the same run (`abandoned`,
+    then `success`): the mark step only removes text after a marker the
+    first mark already removed.
