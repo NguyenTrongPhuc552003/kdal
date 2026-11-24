@@ -19,6 +19,9 @@ jobs:
   deep:
     name: deep tier (Coccinelle, sanitizers; fails on new findings)
     runs-on: ubuntu-24.04
+    # normal runs take 2 to 15 minutes; a hung step (apt-get update hung
+    # for six hours in elmos's run 45159999227) fails within the hour
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
       - name: The pinned kernel tree (for sparse and Coccinelle)
