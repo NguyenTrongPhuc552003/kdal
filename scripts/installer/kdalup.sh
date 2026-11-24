@@ -261,11 +261,20 @@ detect_profile() {
 	esac
 }
 
+# KDAL_HOME/bin as the profile line writes it: under $HOME, relative
+# to $HOME; anywhere else, as given.
+path_bin() {
+	case "$KDAL_HOME" in
+	"$HOME"/*) echo "\$HOME/${KDAL_HOME#"$HOME"/}/bin" ;;
+	*) echo "$KDAL_HOME/bin" ;;
+	esac
+}
+
 # Add KDAL_HOME/bin to PATH in shell profile.
 configure_path() {
 	_profile="$(detect_profile)"
 	_marker='# Added by kdalup'
-	_export_line="export PATH=\"\$HOME/.kdal/bin:\$PATH\" $_marker"
+	_export_line="export PATH=\"$(path_bin):\$PATH\" $_marker"
 
 	if [ -f "$_profile" ] && grep -qF "$_marker" "$_profile"; then
 		return 0 # Already configured
@@ -429,7 +438,7 @@ cmd_install() {
 	echo ""
 	echo "  To get started, restart your shell or run:"
 	echo ""
-	echo "    export PATH=\"\$HOME/.kdal/bin:\$PATH\""
+	echo "    export PATH=\"$(path_bin):\$PATH\""
 	echo ""
 }
 
