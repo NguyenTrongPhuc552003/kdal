@@ -5,6 +5,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/).
 
 ## [Unreleased]
 
+### Fixed
+
+- `kdalup install` puts `KDAL_HOME`'s `bin` on the PATH it writes into the
+  shell profile; it wrote `$HOME/.kdal/bin` whatever `KDAL_HOME` said.
+
 ## [0.2.0] - 2026-11-24
 
 Changes since v0.1.0. The language, compiler and editor plugins (`lang/`,
