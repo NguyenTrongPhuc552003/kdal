@@ -113,3 +113,19 @@ Publishing (which makes the tag) and the Marketplace stay the owner's.
   - The notes carry two result lines for the same run (`abandoned`,
     then `success`): the mark step only removes text after a marker the
     first mark already removed.
+
+## Published (2026-11-24) [F]
+
+Owner's yes on 2026-11-24. Before publishing, the notes lost run 5's
+`abandoned` line (the name check passed on the new notes). Publishing
+with only `draft=false` left the release `untagged-...` for about a
+minute although the draft named `v0.2.0`; a second edit with
+`tag_name=v0.2.0` and the target `8596442` made the tag. The published
+release has its 14 assets and every hash in `SHA256SUMS` matches; the
+installer (`kdalup install`, under a stand-in HOME on the Mac) resolves
+the latest release to v0.2.0, checks the hash, and its `kdalc` prints
+0.2.0.
+
+**Next time:** publish in one edit with the tag and the target:
+`gh api -X PATCH repos/OWNER/kdal/releases/ID -F draft=false -f
+tag_name=vX.Y.Z -f target_commitish=SHA`.
