@@ -111,39 +111,26 @@ The decision to target C for KDAL 0.x is pragmatic:
 
 ## 5. Compiler Architecture
 
+```mermaid
+flowchart LR
+  SRC[/".kdc driver<br/>importing .kdh headers"/]
+  READ["Read<br/>source.c"]
+  LEX["Lexer<br/>lexer.c<br/>characters to tokens"]
+  PARSE["Parser<br/>parser.c<br/>recursive descent, tokens to AST"]
+  SEMA["Semantic analysis<br/>sema.c<br/>types, register access,<br/>scopes, backends"]
+  GEN["Codegen<br/>codegen.c<br/>AST to C"]
+  OUT[/".c and Makefile.kbuild"/]
+  KO[/"kbuild: .ko<br/>fails today: open finding O7"/]
+  SRC --> READ --> LEX --> PARSE --> SEMA --> GEN --> OUT --> KO
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  class READ,LEX,PARSE,SEMA,GEN observed
 ```
-.kdc file
-       │
-       ▼
-┌─────────────┐
-│   Lexer     │  characters → token stream
-│ (lexer.c)   │
-└──────┬──────┘
-       │ token stream
-       ▼
-┌─────────────┐
-│   Parser    │  tokens → AST
-│ (parser.c)  │  recursive descent, no external parser generator
-└──────┬──────┘
-       │ AST
-       ▼
-┌─────────────┐
-│  Semantic   │  type checking, register access verification,
-│  Analysis   │  scope resolution, backend validation
-│  (sema.c)   │
-└──────┬──────┘
-       │ annotated AST
-       ▼
-┌─────────────┐
-│   Codegen   │  AST → .c source + Makefile.kbuild
-│ (codegen.c) │
-└──────┬──────┘
-       │
-   .c  +  Makefile.kbuild
-       │
-       ▼
-   kbuild  →  .ko
-```
+
+The five phases are observed: `kdality compile` succeeds on every example
+(the on-demand workflow `codegen-check.yml`, and the end-to-end suites in
+CI). The last step is not: the generated module does not build yet,
+starting with `linux/kdal.h` not found (finding O7 in
+[`docs/open-findings-20261121.md`](../docs/open-findings-20261121.md)).
 
 Each phase is a separate `.c` file. The phases communicate via the `kdal_ast_t` struct hierarchy
 defined in `compiler/include/ast.h`.
