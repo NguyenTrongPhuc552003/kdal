@@ -54,25 +54,30 @@ insmod /mnt/shared/kdal.ko
 
 ## Architecture
 
+```mermaid
+flowchart TB
+  US["User space<br/>kdality (CLI), testapp and benchmark (tests/userspace),<br/>kdaltest (tests/integration)<br/>(implemented)"]
+  CP["Control plane: src/core/<br/>chardev.c: /dev/kdal, ioctl dispatch<br/>debugfs.c: introspection and the demand report"]
+  CORE["Core runtime: src/core/<br/>registry, event, power, demand, kdal, module"]
+  DRV["Example drivers: src/drivers/example/<br/>uart, i2c, spi, gpu (accelerator ops)"]
+  BE["Backends: src/backends/<br/>generic: devicetree, platdev, socglue<br/>qemu: qemubackend, virtioio, virtioaccel, mmio"]
+  HW["Devices: MMIO, platform devices,<br/>device tree nodes, virtio"]
+  US -->|ioctl, read, write| CP
+  CP --> CORE
+  CORE --> DRV
+  DRV --> BE
+  BE --> HW
+  classDef observed stroke:#0ca30c,stroke-width:2px
+  classDef implemented stroke:#fab219,stroke-width:2px
+  class CP,CORE,DRV,BE observed
+  class US implemented
 ```
- ┌───────────────────────────────────────────────┐
- │                  Userspace                    │
- │  kdality · testapp · benchmark · kdaltest     │
- ├──────────────────── /dev/kdal ────────────────┤
- │               Control Plane                   │
- │         chardev (ioctl dispatch)              │
- │         debugfs (introspection)               │
- ├───────────────────────────────────────────────┤
- │                Core Runtime                   │
- │    registry · events · power · lifecycle      │
- ├───────────────────────────────────────────────┤
- │              Driver Layer                     │
- │    uart · i2c · spi · gpu (+ accel ops)       │
- ├───────────────────────────────────────────────┤
- │             Backend Layer                     │
- │   QEMU ring · virtio · MMIO · platdev · DT    │
- └───────────────────────────────────────────────┘
-```
+
+Green: built into `kdal.ko`, which CI loads and tests with its KUnit suites
+(and which loads inside HAVEN's partition A on HAVEN's pull requests). Amber: the user-space
+programs build, but CI does not run them against the module (it runs
+`kdality` only to compile the examples). Key: [Reading the
+diagrams](https://docs-haven.vercel.app/start/diagrams/).
 
 See the [architecture page](https://docs-haven.vercel.app/kdal/kernel/architecture/) for full details.
 
